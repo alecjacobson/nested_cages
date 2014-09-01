@@ -1,0 +1,74 @@
+\documentclass{acmtog}
+
+\usepackage[usenames]{xcolor}
+
+\newcommand{\leo}[1]{{\bf\textcolor[rgb]{0.9,0.0,0.0}{Leo: #1}}}
+
+\acmVolume{VV}
+\acmNumber{N}
+\acmYear{YYYY}
+\acmMonth{Month}
+\acmArticleNum{XXX}  
+\acmdoi{10.1145/XXXXXXX.YYYYYYY}
+
+%\acmVolume{28}
+%\acmNumber{4}
+%\acmYear{2009}
+%\acmMonth{August}
+%\acmArticleNum{106}  
+%\acmdoi{10.1145/1559755.1559763}
+
+\begin{document}
+
+\markboth{L. Sacht, A. Jacobson and E. Vouga}{Nested Exterior Cages via Reverse Flow with Collision Response}
+
+\title{Nested Exterior Cages via Reverse Flow \\ with Collision Response} % title
+
+\author{LEONARDO SACHT
+\affil{Universidade Federal de Santa Catarina {\upshape and} Instituto Nacional de Matematica Pura e Aplicada}
+ALEC JACOBSON
+\affil{\leo{please put names of universities}}
+\and 
+ETIENNE VOUGA
+\affil{\leo{please put names of universities}}}
+
+\category{\leo{Select these correctly} I.3.7}{Computer Graphics}{Three-Dimensional Graphics and Realism}[Animation]
+\category{I.3.5}{Computer Graphics}{Computational Geometry and Object Modeling}[Physically based modeling]
+
+\terms{\leo{Select these correctly} Experimentation, Human Factors}
+
+\keywords{\leo{Select these correctly} Face animation, image-based modelling, iris animation, photorealism, physiologically-based modelling}
+
+%\acmformat{Pamplona, V. F., Oliveira, M. M., and Baranoski, G. V. G. 2009. Photorealistic models for pupil light
+%reflex and iridal pattern deformation.  {ACM Trans. Graph.} 28, 4, Article 106 (August 2009), 11 pages.\newline  DOI $=$
+%10.1145/1559755.1559763\newline http://doi.acm.org/10.1145/1559755.1559763}
+
+\maketitle
+
+%\begin{bottomstuff} 
+%Manuel M. Oliveira acknowledges a CNPq-Brazil fellowship (305613/2007-3). Gladimir V. G. Baranoski %acknowledges a
+%NSERC-Canada grant (238337). Microsoft Brazil provided additional support.
+
+%Authors' addresses: land and/or email addresses.
+%\end{bottomstuff}
+
+
+\begin{abstract} 
+Many tasks in geometry processing and physical simulation benefit from multiresolution hierarchies. The benefits are particularly striking for tasks that require solving Eulerian PDEs over the volume of an object, where downsampling the object cubically reduces the size of the problem. The coarse discretization must satisfy several desiderata, in order for the multiresolution algorithm to be efficient and accurate: the coarsened object should respect the topology of the original, it should \emph{enclose} the original object, yet should fit the original as tightly as possible, i.e. include a minimal amount of extraneous volume. Existing techniques for building a multiresolution hierarchy, such as fitting a regular grid around the object, voxelizing the object, or meshing the object followed by decimation, violate one or more of these desiderata. We propose a solution that satisfies all three requirements: we first mesh the object and decimate its surface to get a sequence of (possibly non-nesting) coarsened surfaces. We then move the surface of the second coarsest layer along a flow designed to place it inside coarsest layer. We repeat this until the original surface is inside all coarser layers. Finally, we inflate the original surface back to its original shape, responding to any collisions that occur with the coarser layers that might occur during inflation. From coarse to fine, each layer then fully encloses the next while retaining a snug fit and respecting the original surface topology. We show how these hierarchies are useful for fast PDE solving, low-frequency data upsampling, and geometric modeling.
+\end{abstract}
+
+
+
+\section{Introduction}
+
+
+\begin{acks}
+\end{acks}
+
+\bibliographystyle{acmtog}
+\bibliography{nested}
+
+
+\received{September 2008}{March 2009}
+
+\end{document}
