@@ -61,6 +61,8 @@ Many tasks in geometry processing and physical simulation benefit from multireso
 
 
 \section{Introduction}
+\label{sec:introduction}
+
 As the complexity and size of objects we try to simulate and model continues to grow, acceleration algorithms for handling these large meshes are becoming increasingly important. One powerful technique is to decompose the high-resolution mesh into a hierarchy of coarser approximations or \emph{cages}: for example, Eulerian PDEs can be solved efficiently on the fine mesh using any of several successful multiresolution FEM techniques, which first solve for a coarse approximate solution on the coarsest levels of the hierarchy, and then polishing that solution on successively finer levels. Coarse cages also find heavy use in animation, where artist adjustments of the coarse cage is propagated to the fine model, and in collision detection, where a coarse cage can be used to efficiently but conservatively exclude pairs of objects from having collided. For all these applications, the key to good performance is the ability to generate a good-quality multiresolution hierarchy.
 
 \noindent \textbf{Desiderata} Although different applications place different emphases on what makes for a desirable multiresolution hierarchy, an ideal coarse cage possesses three properties that are particularly important across a wide spectrum of applications:
@@ -77,6 +79,21 @@ Existing popular approaches to building a coarse cage satisfy some, but not all,
 \end{itemize}
 
 \noindent\textbf{Our Contribution} We propose an algorithm for computing a multiresolution hierarchy of cages that unlike previous approaches is \emph{guaranteed} to satisfy all three of the desired properties. Given the mesh $M_i$ for level $i$ of the hierarchy, we compute the next-coarsest level $M_{i+1}$ using three steps (see figure XXX): first, we perform topology-preserving decimation to get a coarse, but not enclosing, cage $C_{i+1}$. We then shrink $M_i$, using a mixture of area- and distance-minimizing flow (see section XXX) until $M_i$ is completely enclosed by $C_{i+1}$. Finally, we linearly expand the vertices of $M_i$ back towards their original positions. We perform this expansion as a physical simulation (see section XXX), where the motion of $M_i$ is prescribed, contact response guarantees that $C_{i+1}$ remains an enclosing cage, and a fairness energy maximizes the tightness of the fit. The final position of $C_{i+1}$ after this simulation becomes the next cage $M_{i+1}$.
+
+\section{Related work}
+\label{sec:related}
+
+\section{Method}
+\label{sec:method}
+
+\section{Implementation}
+\label{sec:implementation}
+
+\section{Results and applications}
+\label{sec:results}
+
+\section{Conclusion}
+\label{sec:colnclusion}
 
 \begin{acks}
 \end{acks}
