@@ -1,6 +1,8 @@
 \documentclass{acmtog}
 
 \usepackage[usenames]{xcolor}
+\usepackage{amssymb}
+\usepackage{enumerate}
 
 \newcommand{\leo}[1]{{\bf\textcolor[rgb]{0.9,0.0,0.0}{Leo: #1}}}
 \newcommand{\todo}[1]{{\bf\textcolor[rgb]{0.9,0.0,0.0}{TODO: #1}}}
@@ -85,6 +87,17 @@ Existing popular approaches to building a coarse cage satisfy some, but not all,
 
 \section{Method}
 \label{sec:method}
+
+The input of our method is a closed orientable triangle mesh in $\mathbb{R}^3$:
+a set of $n$ vertices $\mathbf{V}_0= \{ \mathbf{v}_1, \ldots, \mathbf{v}_n \} \subset \mathbb{R}^3$
+and a set of $m$ facets $\mathbf{F}_0 = \{ f_1, \ldots, f_m \} \subset \{ 1, \ldots, n \}^3$. 
+Following the desiderata discussed section \ref{sec:introduction}, we want the output of our method to be a set of meshes $(\mathbf{V}_1,\mathbf{F}_1)$,  $(\mathbf{V}_2,\mathbf{F}_2)$, $\ldots$, $(\mathbf{V}_N,\mathbf{F}_N)$
+such that 
+
+\begin{enumerate}[(i)]
+\item $(\mathbf{V}_i,\mathbf{F}_i)$ is completely interior to and \emph{tightly} enclosed by $(\mathbf{V}_{i+1},\mathbf{F}_{i+1})$
+for all $i = 0, 1, \ldots, N-1$.
+\end{enumerate}
 
 \section{Implementation}
 \label{sec:implementation}
