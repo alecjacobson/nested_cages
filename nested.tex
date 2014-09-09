@@ -91,13 +91,28 @@ Existing popular approaches to building a coarse cage satisfy some, but not all,
 The input of our method is a closed orientable triangle mesh in $\mathbb{R}^3$:
 a set of $n$ vertices $\mathbf{V}_0= \{ \mathbf{v}_1, \ldots, \mathbf{v}_n \} \subset \mathbb{R}^3$
 and a set of $m$ facets $\mathbf{F}_0 = \{ f_1, \ldots, f_m \} \subset \{ 1, \ldots, n \}^3$. 
-Following the desiderata discussed section \ref{sec:introduction}, we want the output of our method to be a set of meshes $(\mathbf{V}_1,\mathbf{F}_1)$,  $(\mathbf{V}_2,\mathbf{F}_2)$, $\ldots$, $(\mathbf{V}_N,\mathbf{F}_N)$
+Following the desiderata discussed in section \ref{sec:introduction}, we want the output of our method to be a set of meshes $(\mathbf{V}_1,\mathbf{F}_1)$,  $(\mathbf{V}_2,\mathbf{F}_2)$, $\ldots$, $(\mathbf{V}_N,\mathbf{F}_N)$
 such that 
 
 \begin{enumerate}[(i)]
-\item $(\mathbf{V}_i,\mathbf{F}_i)$ is completely interior to and \emph{tightly} enclosed by $(\mathbf{V}_{i+1},\mathbf{F}_{i+1})$
-for all $i = 0, 1, \ldots, N-1$.
+\item $(\mathbf{V}_{i},\mathbf{F}_{i})$ completely encloses $(\mathbf{V}_j,\mathbf{F}_j)$, for all $i = 1, \ldots, N$ and $j = 0, \ldots, i-1$.
+\item $(\mathbf{V}_{i},\mathbf{F}_{i})$ is topologically equivalent and geometrically similar to $(\mathbf{V}_{0},\mathbf{F}_{0})$, for all $i = 1, \ldots, N$.
+\item $(\mathbf{V}_{i},\mathbf{F}_{i})$ tightly fits $(\mathbf{V}_{i-1},\mathbf{F}_{i-1})$, for all $i = 1, \ldots, N$.
 \end{enumerate}
+
+Let $(\mathbf{V}_i,\mathbf{F}_i)$ be a level already computed. To compute the next level $(\mathbf{V}_{i+1},\mathbf{F}_{i+1})$ we first perform \emph{topology-aware decimation} on $(\mathbf{V}_i,\mathbf{F}_i)$ (figure XXX), then move $(\mathbf{V}_i,\mathbf{F}_i)$ towards inside this decimated mesh using a \emph{geometric flow} specific for the task of shrinking one mesh towards inside another (figure XXX). 
+
+Once the finer mesh is completely inside the coarser one, we expand it back to its original positions (given by $\mathbf{V_i}$) while performing collision-aware energy \emph{minimization over the coarse mesh} in a way it ends up enclosing $(\mathbf{V}_i,\mathbf{F}_i)$ (figure XXX). The expansion of the fine mesh defines constraints that impose the coarser mesh to be exterior to it, while the energy measures similarity and tight fit between both meshes.
+
+After all the nested layers are generated in this pairwise manner, we perform collision-aware \emph{global  minimization} over all meshes, in order to improve tight fit and similarity of the set of meshes as a whole. \\
+\\
+\textbf{Topology-aware decimation:} \leo{Problem - Qslim is not topology-aware, according to design goals in section 3.1 of Garland's thesis.} Mention number of faces of the output meshes... \\
+\\
+\textbf{Geometric flow:} \\
+\\
+\textbf{Minimization over the coarse mesh:}\\
+\\
+\textbf{Global minimization:}
 
 \section{Implementation}
 \label{sec:implementation}
