@@ -3,6 +3,7 @@
 \usepackage[usenames]{xcolor}
 \usepackage{amssymb}
 \usepackage{enumerate}
+\usepackage{amsmath}
 
 \newcommand{\leo}[1]{{\bf\textcolor[rgb]{0.9,0.0,0.0}{Leo: #1}}}
 \newcommand{\todo}[1]{{\bf\textcolor[rgb]{0.9,0.0,0.0}{TODO: #1}}}
@@ -108,8 +109,20 @@ After all the nested layers are generated in this pairwise manner, we perform co
 \\
 \textbf{Topology-aware decimation:} \leo{Problem - Qslim is not topology-aware, according to design goals in section 3.1 of Garland's thesis.} Mention number of faces of the output meshes... \\
 \\
-\textbf{Geometric flow:} \\
-\\
+\textbf{Geometric flow:} After computing an initial decimation $(\mathbf{U}_{i+1},\mathbf{G}_{i+1})$ for an already computed level $(\mathbf{V}_{i},\mathbf{F}_{i})$, we now want to shrink $(\mathbf{V}_{i},\mathbf{F}_{i})$ completely inside $(\mathbf{U}_{i+1},\mathbf{G}_{i+1})$ (figure XXX). When this is achieved, fine and coarse layers no longer intersect and we will be able to inflate the fine level to its original positions $\mathbf{V}_{i}$ while pushing the coarse level away via a physical simulation (figure XXX). The coarse mesh resulting from this process will be a cage for $(\mathbf{V}_{i},\mathbf{F}_{i})$. 
+
+Instead of pursuing a single mesh that is totally inside $(\mathbf{U}_{i+1},\mathbf{G}_{i+1})$, we opt for defining a path of meshes $(\Phi_{t_k},\mathbf{F}_{i})$ that move inwards the coarse mesh since reversing the path stepwise will give the physical simulation a more tractable set of constraints per step. There are many geometric flows in the literature with shrinking properties (\leo{cite MCF, cMCF, Willmore}), but they present some drawbacks for our task. First of all, there is no guarantee that they end up completely inside the coarse mesh. Second, these flows smooth the surface's geometry, leading to a loss of features along their way. This can impose excessive constraints for the physical simulation since more collisions will happen when trying to inflate the mesh to its original positions. The simpler solution of finding a point completely inside $(\mathbf{U}_{i+1},\mathbf{G}_{i+1})$ and shrinking $(\mathbf{V}_i,\mathbf{F}_{i})$ linearly towards it would present this last drawback. \leo{Would it be nice to put a (maybe 2D) figure illustrating all these claims?} 
+
+The flow that most closely reaches our goals of shrinking one mesh inside the other following geometric features is \leo{Tagliasachhi's}. But this flow has two additional drawbacks: first, it heavily relies on remeshing. We need the meshes $(\Phi_{t_k},\mathbf{F}_{i})$ to have the same connectivity to be able to use them on the physical simulation. Moreover, \leo{Tagliasachhi's} moves the fine mesh towards inside its own medial axes and this is not guaranteed to end up totally inside the coarse mesh \leo{Figure illustrating this last point would also be cool.} 
+
+Ideally we would like the fine mesh to be totally inside the coarse at some point. Since none of the options above fulfil this requirement, we define a proper flow for doing this. In the continuous setting, we seek a flow that contracts a given surface $M$ inside a closed orientable surface $S$ with a fixed embedding $\Psi: S \to \mathbb{R}^3$. Let $D: \mathbb{R}^3 \to \mathbb{R}$ be the signed distance field induced by $\Psi(S)$: 
+\begin{align}
+D(x,y,z) = \left\{ \begin{array}{rcl} 
+\mathrm{dist}()
+\end{array}
+\right.
+\end{align}
+
 \textbf{Minimization over the coarse mesh:}\\
 \\
 \textbf{Global minimization:}
