@@ -115,13 +115,19 @@ Instead of pursuing a single mesh that is totally inside $(\mathbf{U}_{i+1},\mat
 
 The flow that most closely reaches our goals of shrinking one mesh inside the other following geometric features is \leo{Tagliasachhi's}. But this flow has two additional drawbacks: first, it heavily relies on remeshing. We need the meshes $(\Phi_{t_k},\mathbf{F}_{i})$ to have the same connectivity to be able to use them on the physical simulation. Moreover, \leo{Tagliasachhi's} moves the fine mesh towards inside its own medial axes and this is not guaranteed to end up totally inside the coarse mesh \leo{Figure illustrating this last point would also be cool.} 
 
-Ideally we would like the fine mesh to be totally inside the coarse at some point. Since none of the options above fulfil this requirement, we define a proper flow for doing this. In the continuous setting, we seek a flow that contracts a given surface $M$ inside a closed orientable surface $S$ with a fixed embedding $\Psi: S \to \mathbb{R}^3$. Let $D: \mathbb{R}^3 \to \mathbb{R}$ be the signed distance field induced by $\Psi(S)$: 
+Ideally we would like the fine mesh to be totally inside the coarse at some point. Since none of the options above fulfil this requirement, we define a proper flow for doing this. In the continuous setting, we seek a flow that contracts a given surface $M$ inside a closed orientable surface $S$ with a fixed embedding $\Psi: S \to \mathbb{R}^3$. Let $D: \mathbb{R}^3 \to \mathbb{R}$ be the signed distance field induced by $\Psi(S)$
 \begin{align}
-D(x,y,z) = \left\{ \begin{array}{rcl} 
-\mathrm{dist}()
+D(\mathbf{p}) = \left\{ \begin{array}{rl} 
+\mathrm{dist}(\mathbf{p},\Psi(S)), & \mbox{if } \mathbf{p} \mbox{ is outside } \Psi(S) \\
+-\mathrm{dist}(\mathbf{p},\Psi(S)), & \mbox{if } \mathbf{p} \mbox{ is inside } \Psi(S)
 \end{array}
-\right.
+\right. ,
 \end{align}
+where $\mathrm{dist}$ is the point-set Euclidean distance. We can contract $M$ inwards $\Psi(S)$ by finding an embedding $\Phi(M)$ that minimizes
+\begin{align}
+E(\Phi) = \int_M D(\Phi(\mathbf{p}))\ d \mu_0,
+\end{align} 
+where $d \mu_0$ is a \emph{fixed} metric on $M$.
 
 \textbf{Minimization over the coarse mesh:}\\
 \\
