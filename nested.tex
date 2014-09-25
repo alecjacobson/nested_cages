@@ -126,8 +126,11 @@ D(\mathbf{p}) = \left\{ \begin{array}{rl}
 where $\mathrm{dist}$ is the point-set Euclidean distance. We can contract $M$ inwards $\Psi(S)$ by finding an embedding $\Phi(M)$ that minimizes
 \begin{align}
 E(\Phi) = \int_M D(\Phi(\mathbf{p}))\ d \mu_0,
+\label{eq:distance_energy}
 \end{align} 
-where $d \mu_0$ is a \emph{fixed} metric on $M$.
+where $d \mu_0$ is a \emph{fixed} metric on $M$. We fix the metric in (\ref{eq:distance_energy}) because otherwise the minimization would focus on minimising both the distance field and the surface meteoric, while our goal is to only minimize the distance filed. \leo{Figure of a 2d example to illustrate the importance of fixing the metric.}
+
+There are no constraints for the embedding $\Phi(M)$, so minimizing $E$ in (\ref{eq:distance_energy}) is an unconstrained minimization problem that can be minimized using the gradient method with line search respecting Armijo's criterium (\leo{reference needed?}). Let $(\mathbf{V}, \mathbf{F})$ be a triangle mesh that represents $\Phi(M)$ and consider the following quadrature discretization of  (\ref{eq:distance_energy}):
 
 \textbf{Minimization over the coarse mesh:}\\
 \\
