@@ -1,0 +1,85 @@
+% Comments
+\newcommand{\leo}[1]{{\bf\textcolor[rgb]{0.9,0.0,0.0}{Leo: #1}}}
+\newcommand{\todo}[1]{{\bf\textcolor{red}{TODO: #1}}}
+\newcommand{\alec}[1]{{\bf\textcolor[rgb]{0.2,0.8,0.2}{Alec: #1}}}
+\newcommand{\etienne}[1]{{\bf\textcolor[rgb]{0.9,0.5,0.0}{Ladi: #1}}}
+\newcommand{\cheatvspace}[1]{}
+\newcommand{\newhl}[1]{#1}
+\newcommand{\newnewhl}[1]{#1}
+
+%% To use cached, low resolution figures (for a smaller output pdf)
+%% Run:
+%%   mogrify -path lowresfig/ -compress jpeg -density 150 fig/*.pdf
+%% And uncomment this:
+%\newcommand{\fig}{lowresfig}
+%\usepackage{background}
+%\backgroundsetup{%
+%  scale=1,       %% change accordingly
+%  angle=0,       %% change accordingly
+%  opacity=.2,    %% change accordingly
+%  color =red,  %% change accordingly
+%  contents={{\fontsize{50}{60}\selectfont LOW RES FIGURES}}
+%}
+% And comment this:
+\newcommand{\fig}{fig}
+
+\let\vc = \mathbf
+\let\mat = \mathbf
+
+
+\newcommand{\refequ}[1] {Equation~(\ref{equ:#1})} 
+\newcommand{\reffig}[1] {Figure~\ref{fig:#1}} 
+\newcommand{\refoutsidefig}[1] {Figure~#1} 
+\newcommand{\reftab}[1] {Table~\ref{tab:#1}} 
+\newcommand{\reflem}[1] {Lemma~\ref{lem:#1}} 
+\newcommand{\refsec}[1] {Section~\ref{sec:#1}} 
+\newcommand{\refapp}[1] {Appedix~\ref{app:#1}} 
+
+
+% Notation
+
+\newcommand{\R}{\mathds{R}}   % Real numbers
+\newcommand{\n}{\vc{x}} 			% Coordinates of the nodes
+\newcommand{\N}{\mat{X}} 			% Set of node positions
+\newcommand{\s}{s} 			% length of bone incident on node i
+\renewcommand{\S}{\mat{S}} 			% Set of lengths
+\newcommand{\p}{\vc{p}} 			% Parent of a node
+\newcommand{\vv}{\vc{v}} 			% Normalized edge vector
+\newcommand{\RR}{\mat{R}} 		% Relative rotation at joint
+\renewcommand{\u}{\vc{u}}			% User-provided positional constraints
+\renewcommand{\a}{\vc{a}}     % Extra origins, for non spherical splitters
+\newcommand{\user}{\text{user}} % subscript for user energy and weight
+\newcommand{\lap}{\text{reg}} % subscript for laplacian energy and weight
+\newcommand{\drag}{\text{drag}} % subscript for Inertia energy and weight
+\newcommand{\q}{\vc{q}} % quaternion
+\newcommand{\Q}{\mat{Q}} % absolute orientation of device node
+\newcommand{\Qroot}{\Q_{0}} % Absolute orienation of device root
+\newcommand{\W}{\mat{W}} % rotation matching device to existing bone
+\newcommand{\hr}{\noindent\rule[0.5ex]{\linewidth}{1pt}}
+\newcommand{\argmin}{\mathop{\text{argmin }}}
+\newcommand{\ig}[2][]{\includegraphics[#1]{#2}}
+
+
+
+% scientific notation
+% http://tex.stackexchange.com/a/70532/13600
+\usepackage{siunitx}
+\sisetup{output-exponent-marker=\text{e}, bracket-negative-numbers,
+open-bracket={\text{-}}, close-bracket={}}
+
+\usepackage[mathletters]{ucs}
+\usepackage[utf8x]{inputenc}
+% μ
+\usepackage{upgreek}
+\usepackage{dblfloatfix}
+\newcommand{\microsec}{\upmu{}\text{s}}
+
+\newcommand{\transpose}{{\mathsf T}}
+
+
+
+%  bold paragraph header without space after
+\newcommand{\nospaceparagraph}[1]{{\sffamily\textbf{#1}}}
+\renewcommand{\Re}{\operatorname{Re}}
+
+\usepackage{enumerate}

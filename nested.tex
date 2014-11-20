@@ -1,157 +1,222 @@
-\documentclass{acmtog}
+%%% The ``\documentclass'' command has one parameter, based on the kind of
+%%% document you are preparing.
+%%%
+%%% [annual] - Technical paper accepted for presentation at the ACM SIGGRAPH 
+%%%   or SIGGRAPH Asia annual conference.
+%%% [sponsored] - Short or full-length technical paper accepted for 
+%%%   presentation at an event sponsored by ACM SIGGRAPH
+%%%   (but not the annual conference Technical Papers program).
+%%% [abstract] - A one-page abstract of your accepted content
+%%%   (Technical Sketches, Posters, Emerging Technologies, etc.). 
+%%%   Content greater than one page in length should use the "[sponsored]"
+%%%   parameter.
+%%% [preprint] - A preprint version of your final content.
+%%% [review] - A technical paper submitted for review. Includes line
+%%%   numbers and anonymization of author and affiliation information.
 
-\usepackage[usenames]{xcolor}
-\usepackage{amssymb}
-\usepackage{enumerate}
-\usepackage{amsmath}
+\documentclass[review]{acmsiggraph}
 
-\newcommand{\leo}[1]{{\bf\textcolor[rgb]{0.9,0.0,0.0}{Leo: #1}}}
-\newcommand{\todo}[1]{{\bf\textcolor[rgb]{0.9,0.0,0.0}{TODO: #1}}}
+\usepackage{graphicx}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage{amsmath}    % need for subequations
+\usepackage{amssymb}    % need for things like varnothing
+\usepackage{dsfont}
+\usepackage{mathrsfs}
+\usepackage{placeins}
+\usepackage{microtype}
+\usepackage{wrapfig}
+\usepackage{soul}
 
-\acmVolume{VV}
-\acmNumber{N}
-\acmYear{YYYY}
-\acmMonth{Month}
-\acmArticleNum{XXX}  
-\acmdoi{10.1145/XXXXXXX.YYYYYYY}
+% fix spacing before \paragraph
+\usepackage{titlesec}
+\titlespacing{\paragraph}{%
+  0pt}{%              left margin
+  0.2\baselineskip}{% space before (vertical)
+  1em}%
 
-%\acmVolume{28}
-%\acmNumber{4}
-%\acmYear{2009}
-%\acmMonth{August}
-%\acmArticleNum{106}  
-%\acmdoi{10.1145/1559755.1559763}
+%%% If you are submitting your paper to one of our annual conferences - the 
+%%% ACM SIGGRAPH conference held in North America, or the SIGGRAPH Asia 
+%%% conference held in Southeast Asia - there are several commands you should 
+%%% consider using in the preparation of your document.
 
-\begin{document}
+%%% 1. ``\TOGonlineID''
+%%% When you submit your paper for review, please use the ``\TOGonlineID''
+%%% command to include the online ID value assigned to your paper by the
+%%% submission management system. Replace '45678' with the value you were
+%%% assigned.
 
-\markboth{L. Sacht, A. Jacobson and E. Vouga}{Nested Exterior Cages via Reverse Flow with Collision Response}
+\TOGonlineid{}
+
+%%% 2. ``\TOGvolume'' and ``\TOGnumber''
+%%% If you are preparing a preprint of your accepted paper, and your paper
+%%% will be published in an issue of the ACM ``Transactions on Graphics''
+%%% journal, replace the ``0'' values in the commands below with the correct
+%%% volume and number values for that issue - you'll get them before your
+%%% final paper is due.
+
+\TOGvolume{}
+\TOGnumber{}
+
+%%% 3. ``TOGarticleDOI''
+%%% The ``TOGarticleDOI'' command accepts the DOI information provided to you
+%%% during production, and which makes up the URLs which identifies the ACM
+%%% article page and direct PDF link in the ACM Digital Library.
+%%% Replace ``1111111.2222222'' with the values you are given.
+
+\TOGarticleDOI{1111111.2222222}
+
+%%% 4. ``\TOGprojectURL'', ``\TOGvideoURL'', ``\TOGdataURL'', ``\TOGcodeURL''
+%%% If you would like to include links to personal repositories for auxiliary
+%%% material related your research contribution, you may use one or more of
+%%% these commands to define an appropriate URL. The ``\TOGlinkslist'' command
+%%% found just before the first section of your document will add hyperlinked
+%%% icons to your document, in addition to hyperlinked icons which point to
+%%% the ACM Digital Library article page and the ACM Digital Library-held PDF.
+
+\TOGprojectURL{}
+\TOGvideoURL{}
+\TOGdataURL{}
+\TOGcodeURL{}
+
+%%% Replace ``PAPER TEMPLATE TITLE'' with the title of your paper or abstract.
 
 \title{Nested Exterior Cages via Reverse Flow \\ with Collision Response} % title
 
-\author{LEONARDO SACHT
-\affil{Universidade Federal de Santa Catarina {\upshape and} Instituto Nacional de Matematica Pura e Aplicada}
-ALEC JACOBSON
-\affil{\leo{please put names of universities}}
-\and 
-ETIENNE VOUGA
-\affil{\leo{please put names of universities}}}
+%%% The ``\author{}'' command takes the names and affiliations of each of the
+%%% authors of your paper or abstract. The ``\thanks{}'' command takes the
+%%% contact information for each author.
+%%% For multiple authors, separate each author's information by the ``\and''
+%%% command.
 
-\category{\leo{Select these correctly} I.3.7}{Computer Graphics}{Three-Dimensional Graphics and Realism}[Animation]
-\category{I.3.5}{Computer Graphics}{Computational Geometry and Object Modeling}[Physically based modeling]
+\author{}
 
-\terms{\leo{Select these correctly} Experimentation, Human Factors}
+%%% The ``pdfauthor'' command accepts the authors of the work,
+%%% comma-delimited, and adds this information to the PDF metadata.
 
-\keywords{\leo{Select these correctly} Face animation, image-based modelling, iris animation, photorealism, physiologically-based modelling}
+\pdfauthor{}
 
-%\acmformat{Pamplona, V. F., Oliveira, M. M., and Baranoski, G. V. G. 2009. Photorealistic models for pupil light
-%reflex and iridal pattern deformation.  {ACM Trans. Graph.} 28, 4, Article 106 (August 2009), 11 pages.\newline  DOI $=$
-%10.1145/1559755.1559763\newline http://doi.acm.org/10.1145/1559755.1559763}
+%%% Keywords that describe your work. The ``\keywordlist'' command will print
+%%% them out.
+
+\keywords{}
+
+%%% The ``\begin{document}'' command is the start of the document.
+
+%%% If you have user-defined macros, you may include them here.
+\input{pre.tex}
+
+% FIX LINE NUMBERS AFTER EQUATION
+% http://changilkim.wordpress.com/2013/05/13/siggraph-latex-template-line-number-correction-hack/
+\newcommand*\patchAmsMathEnvironmentForLineno[1]{%
+\expandafter\let\csname old#1\expandafter\endcsname\csname #1\endcsname
+\expandafter\let\csname oldend#1\expandafter\endcsname\csname end#1\endcsname
+\renewenvironment{#1}%
+{\linenomath\csname old#1\endcsname}%
+{\csname oldend#1\endcsname\endlinenomath}}%
+\newcommand*\patchBothAmsMathEnvironmentsForLineno[1]{%
+\patchAmsMathEnvironmentForLineno{#1}%
+\patchAmsMathEnvironmentForLineno{#1*}}%
+\AtBeginDocument{%
+\patchBothAmsMathEnvironmentsForLineno{equation}%
+\patchBothAmsMathEnvironmentsForLineno{align}%
+\patchBothAmsMathEnvironmentsForLineno{flalign}%
+\patchBothAmsMathEnvironmentsForLineno{alignat}%
+\patchBothAmsMathEnvironmentsForLineno{gather}%
+\patchBothAmsMathEnvironmentsForLineno{multline}%
+\patchBothAmsMathEnvironmentsForLineno{eqnarray}%
+}
+
+%------------------------------------------------------------------------
+% Alter some LaTeX defaults for better treatment of figures:
+    % See p.105 of "TeX Unbound" for suggested values.
+    % See pp. 199-200 of Lamport's "LaTeX" book for details.
+    %   General parameters, for ALL pages:
+    \renewcommand{\topfraction}{0.9}	% max fraction of floats at top
+    \renewcommand{\bottomfraction}{0.8}	% max fraction of floats at bottom
+    %   Parameters for TEXT pages (not float pages):
+    \setcounter{topnumber}{4}
+    \setcounter{bottomnumber}{4}
+    \setcounter{totalnumber}{8}     % 2 may work better
+    \setcounter{dbltopnumber}{4}    % for 2-column pages
+    \renewcommand{\dbltopfraction}{0.9}	% fit big float above 2-col. text
+    \renewcommand{\textfraction}{0.07}	% allow minimal text w. figs
+    %   Parameters for FLOAT pages (not text pages):
+    \renewcommand{\floatpagefraction}{0.7}	% require fuller float pages
+	% N.B.: floatpagefraction MUST be less than topfraction !!
+    \renewcommand{\dblfloatpagefraction}{0.7}	% require fuller float pages
+%------------------------------------------------------------------------
+
+
+\begin{document}
+
+%%% A ``teaser'' image appears under the title and affiliation information,
+%%% horizontally centered, and above the two columns of text. This is OPTIONAL.
+%%% If you choose to have a ``teaser'' image, it needs to be placed between
+%%% ``\begin{document}'' and ``\maketitle.''
+
+\teaser{
+  \label{fig:teaser}  
+}
+
+%%% The ``\maketitle'' command must appear after ``\begin{document}'' and,
+%%% if you have one, after the definition of your ``teaser'' image, and
+%%% before the first ``\section'' command.
 
 \maketitle
 
-%\begin{bottomstuff} 
-%Manuel M. Oliveira acknowledges a CNPq-Brazil fellowship (305613/2007-3). Gladimir V. G. Baranoski %acknowledges a
-%NSERC-Canada grant (238337). Microsoft Brazil provided additional support.
+%%% Your paper's abstract goes in its own section.
 
-%Authors' addresses: land and/or email addresses.
-%\end{bottomstuff}
+\input{abstract}
 
 
-\begin{abstract} 
-Many tasks in geometry processing and physical simulation benefit from multiresolution hierarchies. The benefits are particularly striking for tasks that require solving Eulerian PDEs over the volume of an object, where downsampling the object cubically reduces the size of the problem. The coarse discretization must satisfy several desiderata, in order for the multiresolution algorithm to be efficient and accurate: the coarsened object should respect the topology of the original, it should \emph{enclose} the original object, yet should fit the original as tightly as possible, i.e. include a minimal amount of extraneous volume. Existing techniques for building a multiresolution hierarchy, such as fitting a regular grid around the object, voxelizing the object, or meshing the object followed by decimation, violate one or more of these desiderata. We propose a solution that satisfies all three requirements: we first mesh the object and decimate its surface to get a sequence of (possibly non-nesting) coarsened surfaces. We then move the surface of the second coarsest layer along a flow designed to place it inside coarsest layer. We repeat this until the original surface is inside all coarser layers. Finally, we inflate the original surface back to its original shape, responding to any collisions that occur with the coarser layers that might occur during inflation. From coarse to fine, each layer then fully encloses the next while retaining a snug fit and respecting the original surface topology. We show how these hierarchies are useful for fast PDE solving, low-frequency data upsampling, and geometric modeling.
-\end{abstract}
+%%% ACM Computing Review (CR) categories.
+%%% See <http://www.acm.org/class/1998/> for details.
+%%% The ``\CRcat'' command takes four arguments.
 
+\begin{CRcatlist}
+  \CRcat{}{}{}{}
+\end{CRcatlist}
 
+%%% The ``\keywordlist'' command prints out the keywords.
 
-\section{Introduction}
-\label{sec:introduction}
+\keywordlist
 
-As the complexity and size of objects we try to simulate and model continues to grow, acceleration algorithms for handling these large meshes are becoming increasingly important. One powerful technique is to decompose the high-resolution mesh into a hierarchy of coarser approximations or \emph{cages}: for example, Eulerian PDEs can be solved efficiently on the fine mesh using any of several successful multiresolution FEM techniques, which first solve for a coarse approximate solution on the coarsest levels of the hierarchy, and then polishing that solution on successively finer levels. Coarse cages also find heavy use in animation, where artist adjustments of the coarse cage is propagated to the fine model, and in collision detection, where a coarse cage can be used to efficiently but conservatively exclude pairs of objects from having collided. For all these applications, the key to good performance is the ability to generate a good-quality multiresolution hierarchy.
+%%% The ``\TOGlinkslist'' command will insert hyperlinked icon(s) to your
+%%% paper. This includes, at a minimum, hyperlinked icons to the ACM article
+%%% page and the ACM Digital Library-held PDF. If you added URLs to
+%%% ``\TOGprojectURL'' or the other, similar commands, they will be added to
+%%% the list of icons.
+%%% Note: this functionality only works for annual-conference papers.
 
-\noindent \textbf{Desiderata} Although different applications place different emphases on what makes for a desirable multiresolution hierarchy, an ideal coarse cage possesses three properties that are particularly important across a wide spectrum of applications:
-\begin{itemize}
-\item It completely \emph{encloses} the fine mesh as well as any of the finer levels of the multiresolution hierarchy. Most algorithms for transferring the pose of a cage to a detailed object only guarantee small distortion of the object and lack of artifacts like element inversion if the object is entirely contained withing the cage, for instances. And if the cage is to be used to accelerate collision detection, it is essential that the cage conservatively enclose the object. \todo{Some plausible FEM motivation for this item}
-\item It respects the \emph{topology} of the fine mesh and does not introduce any large global errors in the object geometry. It is important to differentiate between two types of distances when building the hierarchy: \emph{embedded distance} in ambient space, and \emph{intrinsic distance} between two points, the distance of the shortest path through the material connecting the two points. It is possible for two points that are nearby in embedded distance to be very far apart in intrinsic distance: consider, for instance, a model of a human leaning over and nearly touching her toes: the fingertips and toes are near in ambient space but intrinsically are meters apart. It is critical for many applications that the coarsening process does not fuse together these parts of an object. In the case of the human model, it is unacceptable if trying to animate the model's arm causes the leg to move as well. As another example, consider calculating the vibration modes of a broken ring; if the coarsening process fuses the ring together, the modes computed will be totally incorrect.
-\item It fits \emph{tightly} around the next-coarser level of the hierarchy. Formally, tightness can be quantified using a user-specified energy that minimizes Hausdorff distance between the cage and the fine mesh, or minimizes the volume enclosed by the two meshes, etc. A tight fit minimizes the error incurred by simplifying the input mesh.
-\end{itemize}
-Existing popular approaches to building a coarse cage satisfy some, but not all, of these three properties. For instance,
-\begin{itemize}
-\item Simple decimation of the original surface mesh yields cages that fit very tightly and preserve a high amount of detail for a given coarsened resolution, and can preserve the topology of the original mesh, but there is no guarantee that the decimated mesh will enclose the original.
-\item Voxellizing the object to a regular grid is guaranteed to produce an enclosing cage, but the fit will not be tight and intrinsically distant features can be fused together if the grid is too coarse. Using an adaptive grid or octree can improve the fit and topological fidelity, but unless the object contains mostly axis-aligned features the resulting cage will not efficiently fit the object.
-\item Level-set methods can find a well-fitting cage that encloses the object, but can fuse spatially proximate features, changing the object topology.
-\end{itemize}
+\TOGlinkslist
 
-\noindent\textbf{Our Contribution} We propose an algorithm for computing a multiresolution hierarchy of cages that unlike previous approaches is \emph{guaranteed} to satisfy all three of the desired properties. Given the mesh $M_i$ for level $i$ of the hierarchy, we compute the next-coarsest level $M_{i+1}$ using three steps (see figure XXX): first, we perform topology-preserving decimation to get a coarse, but not enclosing, cage $C_{i+1}$. We then shrink $M_i$, using a mixture of area- and distance-minimizing flow (see section XXX) until $M_i$ is completely enclosed by $C_{i+1}$. Finally, we linearly expand the vertices of $M_i$ back towards their original positions. We perform this expansion as a physical simulation (see section XXX), where the motion of $M_i$ is prescribed, contact response guarantees that $C_{i+1}$ remains an enclosing cage, and a fairness energy maximizes the tightness of the fit. The final position of $C_{i+1}$ after this simulation becomes the next cage $M_{i+1}$.
+%%% The ``\copyrightspace'' command 
+%%% Do not remove this command.
 
-\section{Related work}
-\label{sec:related}
+\copyrightspace
 
-\section{Method}
-\label{sec:method}
+%%% This is the first section of the body of your paper.
 
-The input of our method is a closed orientable triangle mesh in $\mathbb{R}^3$:
-a set of $n$ vertices $\mathbf{V}_0= \{ \mathbf{v}_1, \ldots, \mathbf{v}_n \} \subset \mathbb{R}^3$
-and a set of $m$ facets $\mathbf{F}_0 = \{ f_1, \ldots, f_m \} \subset \{ 1, \ldots, n \}^3$. 
-Following the desiderata discussed in section \ref{sec:introduction}, we want the output of our method to be a set of meshes $(\mathbf{V}_1,\mathbf{F}_1)$,  $(\mathbf{V}_2,\mathbf{F}_2)$, $\ldots$, $(\mathbf{V}_N,\mathbf{F}_N)$
-such that 
+%
+%%textwidth: \printinunitsof{in}\prntlen{\textwidth}
+%%%textwidth: 7.00137in
+%%
+%%linewidth: \printinunitsof{in}\prntlen{\linewidth}
+%%%linewidth: 3.33461in
+%%
+%%\makeatletter
+%%orig: \f@size pt \f@family 
+%%%orig: 9pt ptm
+%%\makeatother
+%%\rmfamily
 
-\begin{enumerate}[(i)]
-\item $(\mathbf{V}_{i},\mathbf{F}_{i})$ completely encloses $(\mathbf{V}_j,\mathbf{F}_j)$, for all $i = 1, \ldots, N$ and $j = 0, \ldots, i-1$.
-\item $(\mathbf{V}_{i},\mathbf{F}_{i})$ is topologically equivalent and geometrically similar to $(\mathbf{V}_{0},\mathbf{F}_{0})$, for all $i = 1, \ldots, N$.
-\item $(\mathbf{V}_{i},\mathbf{F}_{i})$ tightly fits $(\mathbf{V}_{i-1},\mathbf{F}_{i-1})$, for all $i = 1, \ldots, N$.
-\end{enumerate}
+\input{intro}
+\input{related}
+\input{method}
+\input{results}
+\input{conclusion}
 
-Let $(\mathbf{V}_i,\mathbf{F}_i)$ be a level already computed. To compute the next level $(\mathbf{V}_{i+1},\mathbf{F}_{i+1})$ we first perform \emph{topology-aware decimation} on $(\mathbf{V}_i,\mathbf{F}_i)$ (figure XXX), then move $(\mathbf{V}_i,\mathbf{F}_i)$ towards inside this decimated mesh using a \emph{geometric flow} specific for the task of shrinking one mesh towards inside another (figure XXX). 
-
-Once the finer mesh is completely inside the coarser one, we expand it back to its original positions (given by $\mathbf{V_i}$) while performing collision-aware energy \emph{minimization over the coarse mesh} in a way it ends up enclosing $(\mathbf{V}_i,\mathbf{F}_i)$ (figure XXX). The expansion of the fine mesh defines constraints that impose the coarser mesh to be exterior to it, while the energy measures similarity and tight fit between both meshes.
-
-After all the nested layers are generated in this pairwise manner, we perform collision-aware \emph{global  minimization} over all meshes, in order to improve tight fit and similarity of the set of meshes as a whole. \\
-\\
-\textbf{Topology-aware decimation:} \leo{Problem - Qslim is not topology-aware, according to design goals in section 3.1 of Garland's thesis.} Mention number of faces of the output meshes... \\
-\\
-\textbf{Geometric flow:} After computing an initial decimation $(\mathbf{U}_{i+1},\mathbf{G}_{i+1})$ for an already computed level $(\mathbf{V}_{i},\mathbf{F}_{i})$, we now want to shrink $(\mathbf{V}_{i},\mathbf{F}_{i})$ completely inside $(\mathbf{U}_{i+1},\mathbf{G}_{i+1})$ (figure XXX). When this is achieved, fine and coarse layers no longer intersect and we will be able to inflate the fine level to its original positions $\mathbf{V}_{i}$ while pushing the coarse level away via a physical simulation (figure XXX). The coarse mesh resulting from this process will be a cage for $(\mathbf{V}_{i},\mathbf{F}_{i})$. 
-
-Instead of pursuing a single mesh that is totally inside $(\mathbf{U}_{i+1},\mathbf{G}_{i+1})$, we opt for defining a path of meshes $(\Phi_{t_k},\mathbf{F}_{i})$ that move inwards the coarse mesh since reversing the path stepwise will give the physical simulation a more tractable set of constraints per step. There are many geometric flows in the literature with shrinking properties (\leo{cite MCF, cMCF, Willmore}), but they present some drawbacks for our task. First of all, there is no guarantee that they end up completely inside the coarse mesh. Second, these flows smooth the surface's geometry, leading to a loss of features along their way. This can impose excessive constraints for the physical simulation since more collisions will happen when trying to inflate the mesh to its original positions. The simpler solution of finding a point completely inside $(\mathbf{U}_{i+1},\mathbf{G}_{i+1})$ and shrinking $(\mathbf{V}_i,\mathbf{F}_{i})$ linearly towards it would present this last drawback. \leo{Would it be nice to put a (maybe 2D) figure illustrating all these claims?} 
-
-The flow that most closely reaches our goals of shrinking one mesh inside the other following geometric features is \leo{Tagliasachhi's}. But this flow has two additional drawbacks: first, it heavily relies on remeshing. We need the meshes $(\Phi_{t_k},\mathbf{F}_{i})$ to have the same connectivity to be able to use them on the physical simulation. Moreover, \leo{Tagliasachhi's} moves the fine mesh towards inside its own medial axes and this is not guaranteed to end up totally inside the coarse mesh \leo{Figure illustrating this last point would also be cool.} 
-
-Ideally we would like the fine mesh to be totally inside the coarse at some point. Since none of the options above fulfil this requirement, we define a proper flow for doing this. In the continuous setting, we seek a flow that contracts a given surface $M$ inside a closed orientable surface $S$ with a fixed embedding $\Psi: S \to \mathbb{R}^3$. Let $D: \mathbb{R}^3 \to \mathbb{R}$ be the signed distance field induced by $\Psi(S)$
-\begin{align}
-D(\mathbf{p}) = \left\{ \begin{array}{rl} 
-\mathrm{dist}(\mathbf{p},\Psi(S)), & \mbox{if } \mathbf{p} \mbox{ is outside } \Psi(S) \\
--\mathrm{dist}(\mathbf{p},\Psi(S)), & \mbox{if } \mathbf{p} \mbox{ is inside } \Psi(S)
-\end{array}
-\right. ,
-\end{align}
-where $\mathrm{dist}$ is the point-set Euclidean distance. We can contract $M$ inwards $\Psi(S)$ by finding an embedding $\Phi(M)$ that minimizes
-\begin{align}
-E(\Phi) = \int_M D(\Phi(\mathbf{p}))\ d \mu_0,
-\label{eq:distance_energy}
-\end{align} 
-where $d \mu_0$ is a \emph{fixed} metric on $M$. We fix the metric in (\ref{eq:distance_energy}) because otherwise the minimization would focus on minimising both the distance field and the surface meteoric, while our goal is to only minimize the distance filed. \leo{Figure of a 2d example to illustrate the importance of fixing the metric.}
-
-There are no constraints for the embedding $\Phi(M)$, so minimizing $E$ in (\ref{eq:distance_energy}) is an unconstrained minimization problem that can be minimized using the gradient method with line search respecting Armijo's criterium (\leo{reference needed?}). Let $(\mathbf{V}, \mathbf{F})$ be a triangle mesh that represents $\Phi(M)$ and consider the following quadrature discretization of  (\ref{eq:distance_energy}):
-
-\textbf{Minimization over the coarse mesh:}\\
-\\
-\textbf{Global minimization:}
-
-\section{Implementation}
-\label{sec:implementation}
-
-\section{Results and applications}
-\label{sec:results}
-
-\section{Conclusion}
-\label{sec:colnclusion}
-
-\begin{acks}
-\end{acks}
-
-\bibliographystyle{acmtog}
-\bibliography{nested}
-
-
-\received{September 2008}{March 2009}
+\bibliographystyle{acmsiggraph}
+\bibliography{references}
 
 \end{document}
