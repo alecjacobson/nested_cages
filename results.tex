@@ -2,3 +2,30 @@
 \section{Results and applications}
 \label{sec:results}
 
+Multigrid Poisson equation. Show that naive non-nested meshes will have
+poor/no convergence: alligator teeth, etc.
+
+Multi-res ARAP deformation. 
+
+Literally design and 3D-print a matryoshka doll. Admittedly there's an extra
+constraint we're not considering which is that the nested halves need to be
+removable from each other.
+
+Collision detection, penetration depth estimation. Unlike AABB or KDOP, cages
+are isometry invariant (although so are OABB).
+
+Multigrid fluid simulation. Topology is important.
+
+Multires automatic skinning weights (i.e. QP solve). See Baohua Wu's thesis.
+
+Conservative design with contacts in mind: if I'm designing a mechanical object
+I want to be sure that two parts don't interpenetrate each other. Suppose the
+shapes were super high-res, then design could be slow, so swap in our nested
+meshes as a sort of Level-of-detail hierarchy. I guess this only makes sense
+for the static (or at least rigid) objects in the design.
+
+Dynamic update: how much work is it to deform the fine mesh and have the coarse
+meshes follow? No need for the flow since we already have a feasible initial
+position. Just ``simulation'' at this point?
+
+Zoo of results: at least 20 models.
