@@ -4,8 +4,12 @@
 
 Multigrid Poisson equation. Show that naive non-nested meshes will have
 poor/no convergence: alligator teeth, etc.
+  - generic poisson equation in 2d and in 3d
+    - compare to level set decimation
+    - compare to qslim
+  - geodesics in heat 
 
-Multi-res ARAP deformation. 
+Multi-res ARAP deformation/physical elastics
 
 Literally design and 3D-print a matryoshka doll. Admittedly there's an extra
 constraint we're not considering which is that the nested halves need to be
@@ -13,8 +17,13 @@ removable from each other.
 
 Collision detection, penetration depth estimation. Unlike AABB or KDOP, cages
 are isometry invariant (although so are OABB).
+  - cache distance to fine mesh on coarse mesh, then approximate distance to
+    fine mesh by finding closest point on coarse mesh and adding fine mesh
+    distance. Why need nested then?
 
 Multigrid fluid simulation. Topology is important.
+  - medical example: e.g. heart, naive multires combined two unrelated veins
+  - ask fang.
 
 Multires automatic skinning weights (i.e. QP solve). See Baohua Wu's thesis.
 
@@ -29,3 +38,8 @@ meshes follow? No need for the flow since we already have a feasible initial
 position. Just ``simulation'' at this point?
 
 Zoo of results: at least 20 models.
+
+Automatic cages for deformation. Symmetry preservation.
+
+Bijective mapping (Locally injective mapping of tet mesh conforming to all
+layers): maintains nesting.
