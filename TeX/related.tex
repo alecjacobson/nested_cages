@@ -1,4 +1,60 @@
 \section{Related work}
 \label{sec:related}
 
-Non-nested multi-res: Adams, Feng, Fish.
+Decimation
+
+Non-nested decimation \cite{Garland:1997:SSU}
+
+Planar decimation avoiding flips (and therefor also self-intersections) in
+output \cite{AnderssonGL09}.  \cite{gumhold2003intersection} new coarse mesh
+won't contain self-intersections, but not trying to avoid intersections with
+original fine mesh.
+
+Cage generation
+
+\cite{Deng:2011vr,Xian:2012tv}
+
+Offset surfaces 
+
+\cite{Campen:2010} Exact offset surface of triangle mesh is a curved surface
+and only approximated by a fine mesh.  Could generalized 2d offset method
+\cite{chen2005polygon} to 3D \cite{Jacobson:WN:2013}.  Or just mesh signed
+distance field directions (e.g.\ using \cite{cgal}). Can be made robust to
+nasty input with \cite{Xu:2014:SDF} and used for creating low res tet mesh for
+simulation.
+%
+But offsets are bad idea for creating coarse mesh: too fine OR lose nesting
+guarantee OR too far away (and start to combine features)
+
+Multi-grid 
+
+\cite{McAdams:2011} Finite difference multigrid on voxelized input. Why not
+voxelize? Glue geodesically distant parts together: voxel size determined by
+min feature size and min void size. What about duplicated cells? Is there a
+citation for this? Boundary handling overwhelms advantages of regular grid. Is
+this even always well-defined? Nice if we had a counterexample.
+\cite{Sykora09} replicates lattice cells in 2d, not sure how this affects his
+shape-matching-style ARAP optimization.
+
+\cite{wojtan2011liquid} fluid sims often couple Eulerian (finite difference)
+grids with tracked surfaces. Seems that Wojtan et.\ al will identify grid cells
+containing more than one distant surfaces and perform \emph{surgery on the
+surface} rather than duplicate grid cells.
+
+\cite{Adams:1999:PMS} Ritz-Galerkin multigrid, actually this is a mesh
+decimation paper for creating ``node-nested'' tet meshes, building on
+\cite{guillard1993}. Select subset of nodes, try to connect in a reasonable,
+Delaunay-ish way. Simple linear restriction operator.
+
+\cite{fish1995efficient} just an example of a (nonlinear) multigrid solver
+which expects the user to provide (nested?) tetrahedral meshes as input.
+
+\cite{feng1997non} more complicated restriction operator for Galerkin multigrid
+on non-nested meshes, though it seems it's expected that the surfaces of each
+mesh coincide: user provides meshes. I'm not sure how much better this
+restriction would really be compared to simple barycentric one.
+
+\cite{Debunne:2001:DRD} 
+Adaptive simulations for visco-elastic solids. Computes a hierarchy of
+non-nested decimations (QSlim \cite{Garland:1997:SSU}), tethers fine mesh
+points to \emph{closest} coarse vertex.
