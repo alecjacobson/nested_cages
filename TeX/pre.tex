@@ -9,9 +9,9 @@
 
 %% To use cached, low resolution figures (for a smaller output pdf)
 %% Run:
-%%   mogrify -path lowresfig/ -compress jpeg -density 150 fig/*.pdf
+%%   mogrify -path lowresfigs/ -compress jpeg -density 150 fig/*.pdf
 %% And uncomment this:
-%\newcommand{\fig}{lowresfig}
+%\newcommand{\figs}{lowresfigs}
 %\usepackage{background}
 %\backgroundsetup{%
 %  scale=1,       %% change accordingly
@@ -21,7 +21,7 @@
 %  contents={{\fontsize{50}{60}\selectfont LOW RES FIGURES}}
 %}
 % And comment this:
-\newcommand{\fig}{fig}
+\newcommand{\figs}{figs}
 
 \let\vc = \mathbf
 \let\mat = \mathbf

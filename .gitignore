@@ -2,7 +2,7 @@
 *.bbl
 *.blg
 *.log
-*.pdf
+TeX/nested.pdf
 *.gz
 *.un~
 TeX/multigrid-notes.txt
