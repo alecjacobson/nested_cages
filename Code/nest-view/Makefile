@@ -5,9 +5,11 @@ all: obj nest_view
 
 .PHONY: nest_view
 
+#CXX=clang++ -D__ASSERT_MACROS_DEFINE_VERSIONS_WITHOUT_UNDERSCORES=0
+CXX=g++
 CFLAGS+=-DIGL_STATIC_LIBRARY -fopenmp
-#CFLAGS+=-g -O3 -DNDEBUG
-CFLAGS+=-g -O0 
+CFLAGS+=-g -O3 -DNDEBUG
+#CFLAGS+=-g -O0 
 
 LIBIGL=/usr/local/igl/libigl/
 LIBIGL_INC=-I$(LIBIGL)/include
@@ -51,16 +53,16 @@ OBJ_FILES=$(addprefix obj/,$(notdir $(CPP_FILES:.cpp=.o)))
 CFLAGS+=-std=c++11
 
 nest_view: obj $(OBJ_FILES)
-	g++ $(OPENMP) $(AFLAGS) $(CFLAGS) -o nest_view $(OBJ_FILES) $(LIB)
+	${CXX} $(OPENMP) $(AFLAGS) $(CFLAGS) -o nest_view $(OBJ_FILES) $(LIB)
 
 obj:
 	mkdir -p obj
 
 obj/%.o: %.cpp
-	g++ $(OPENMP) $(AFLAGS) $(CFLAGS) -c $< -o $@ $(INC)
+	${CXX} $(OPENMP) $(AFLAGS) $(CFLAGS) -c $< -o $@ $(INC)
 
 obj/%.o: %.cpp %.h
-	g++ $(OPENMP) $(AFLAGS) $(CFLAGS) -c $< -o $@ $(INC)
+	${CXX} $(OPENMP) $(AFLAGS) $(CFLAGS) -c $< -o $@ $(INC)
 
 clean:
 	rm -f $(OBJ_FILES)
