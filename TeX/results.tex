@@ -2,9 +2,30 @@
 \section{Results and applications}
 \label{sec:results}
 
+\subsection{Can try right now:}
+
+Always take timings!
+
 Stress tests
   1) Very large number of layers: 100!
+    - xyz dragon
   2) Insanely complex fractal-like shape with very close features and many holes
+    - buddha
+    - stanford "dragon"
+    - tangled porcupine-like shape (ask changxi for spiky ball)
+
+Literally design and 3D-print a matryoshka doll. Admittedly there's an extra
+constraint we're not considering which is that the nested halves need to be
+removable from each other.
+  - six or seven layers on the max planck head, thickness in between layers
+
+Automatic cages for deformation. Symmetry preservation, planar quads
+
+Zoo of results: at least 20 models.
+
+\subsection{Needs coding:}
+
+Basic component needed: multires poisson solver
 
 Multigrid Poisson equation. Show that naive non-nested meshes will have
 poor/no convergence: alligator teeth, etc.
@@ -15,23 +36,28 @@ poor/no convergence: alligator teeth, etc.
 
 Multi-res ARAP deformation/physical elastics
 
-Literally design and 3D-print a matryoshka doll. Admittedly there's an extra
-constraint we're not considering which is that the nested halves need to be
-removable from each other.
+Multires automatic skinning weights (i.e. QP solve). See Baohua Wu's thesis.
 
 Collision detection, penetration depth estimation. Unlike AABB or KDOP, cages
 are isometry invariant (although so are OABB).
   - cache distance to fine mesh on coarse mesh, then approximate distance to
     fine mesh by finding closest point on coarse mesh and adding fine mesh
     distance. Why need nested then?
-
-Multigrid fluid simulation. Topology is important.
-  - medical example: e.g. heart, naive multires combined two unrelated veins
-  - ask fang.
-
-Multires automatic skinning weights (i.e. QP solve). See Baohua Wu's thesis.
+  - build interactive demo: bouncing beach balls around rigidly moving object
 
 Adaptive simulation \cite{Debunne:2001:DRD}
+
+Flow application: shrink one mesh inside another. Use our new flow to put a 
+character inside a T-shirt for example. Use generalized winding number to 
+determine the ?sign?, shrink character towards inside the T-shirt, 
+expand character back to its initial position using physical simulation. 
+
+Dynamic update: how much work is it to deform the fine mesh and have the coarse
+meshes follow? No need for the flow since we already have a feasible initial
+position. Just ``simulation'' at this point?
+  - need animation sequence of the fine mesh: alec send frames
+
+\subsection{Would be nice:}
 
 Conservative design with contacts in mind: if I'm designing a mechanical object
 I want to be sure that two parts don't interpenetrate each other. Suppose the
@@ -39,18 +65,9 @@ shapes were super high-res, then design could be slow, so swap in our nested
 meshes as a sort of Level-of-detail hierarchy. I guess this only makes sense
 for the static (or at least rigid) objects in the design.
 
-Dynamic update: how much work is it to deform the fine mesh and have the coarse
-meshes follow? No need for the flow since we already have a feasible initial
-position. Just ``simulation'' at this point?
-
-Zoo of results: at least 20 models.
-
-Automatic cages for deformation. Symmetry preservation.
+Multigrid fluid simulation. Topology is important.
+  - medical example: e.g. heart, naive multires combined two unrelated veins
+  - ask fang.
 
 Bijective mapping (Locally injective mapping of tet mesh conforming to all
 layers): maintains nesting.
-
-Flow application: shrink one mesh inside another. Use our new flow to put a 
-character inside a T-shirt for example. Use generalized winding number to 
-determine the ?sign?, shrink character towards inside the T-shirt, 
-expand character back to its initial position using physical simulation. 
