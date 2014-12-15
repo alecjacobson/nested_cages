@@ -36,7 +36,7 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse] = multires_per_layer(V0,F0,lev
   
   flow_type = 'signed_distance_direction';
   simulation_steps = 1;
-  energy = 'displacement_initial_and_volume';
+  energy = 'volume';
   quadrature_order = 1;
   V_coarse = [];
   F_coarse = [];
@@ -138,7 +138,7 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse] = multires_per_layer(V0,F0,lev
 
             % push coarse mesh with physical simulation to obtain the cages
             [V_coarse_new,~,~] = eltopo_step_project(Pall,F_refined,...
-                V_coarse{k-1},F_coarse{k-1},'simulation_steps',simulation_steps,'energy',energy);
+                V_coarse{k-1},F_coarse{k-1},'simulation_steps',simulation_steps,'energy','displacement_initial');
 
             % The input for the next level is the output of this level
             V_coarse{k-1} = V_coarse_new;
@@ -291,7 +291,7 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse] = multires_per_layer(V0,F0,lev
               
               % push coarse mesh with physical simulation to obtain the cages
               [V_coarse_new,~,~] = eltopo_step_project(Pall,F_shrink,...
-                Pall_coarse(:,:,end),F_exp,'simulation_steps',simulation_steps,'energy',energy);
+                Pall_coarse(:,:,end),F_exp,'simulation_steps',simulation_steps,'energy','displacement_initial');
               
               % output level
               cages_F{k} = F_exp;
@@ -303,6 +303,31 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse] = multires_per_layer(V0,F0,lev
           
           Pall = Pall_all_times;
           
+  end
+  
+  % global energy minimization
+  V_coarse_all = [];
+  F_coarse_all = [];
+  total_num_vertices = 0;
+  % Treat all coarse layers as single big mesh
+  for k=1:num_levels
+      V_coarse_all = [V_coarse_all;cages_V{k}];
+      F_coarse_all = [F_coarse_all;total_num_vertices+cages_F{k}];
+      total_num_vertices = size(V_coarse_all,1);
+  end
+  clear Pall;
+  Pall(:,:,1) = V0;
+  Pall(:,:,2) = V0;
+  [V_coarse_new_all,~,~] = eltopo_step_project(Pall,F0,...
+      V_coarse_all,F_coarse_all,'simulation_steps',simulation_steps,'energy',energy);
+  
+  % output final layers
+  total_num_vertices = 0;
+  for k=1:num_levels
+      
+      V_coarse{k} = V_coarse_new_all(total_num_vertices+1:total_num_vertices+size(V_coarse{k},1),:);
+      total_num_vertices = total_num_vertices+size(V_coarse{k},1);
+      
   end
   
 end
