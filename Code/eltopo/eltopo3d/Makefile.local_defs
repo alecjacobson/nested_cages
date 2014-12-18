@@ -4,7 +4,15 @@
 # NOTE: Rename this file to "Makefile.local_defs" after specifying your machine settings
 #
 
-INCLUDE_PATH = -I. -I../common -I../common/newsparse -I../common/meshes -I../common/tunicate -I/Users/Leo/PHD_Work/Cage_Generation_2013/code/starlab-mcfskel/core/external/cholmod-4.0.0/include -I/opt/local/include/eigen3 -I/opt/local/include/eigen3/unsupported -I/Users/Leo/PHD_Work/Volume_Meshing_2012/libigl/include/igl
+#/Users/Leo/PHD_Work/Volume_Meshing_2012/libigl/include/igl
+LIBIGL=/usr/local/igl/libigl
+EIGEN=/opt/local/include/eigen3
+# /Users/Leo/PHD_Work/Cage_Generation_2013/code/starlab-mcfskel/core/external/cholmod-4.0.0/include \
+# use:
+#     sudo port install suitesparse
+CHOLMOD=/opt/local/
+INCLUDE_PATH = -I. -I../common -I../common/newsparse -I../common/meshes -I../common/tunicate \
+  -I$(EIGEN) -I$(EIGEN)/unsupported -I$(LIBIGL)/include -I$(CHOLMOD)/include
 
 # local machine settings
 
@@ -24,5 +32,6 @@ CC = g++ -Wall -DNO_GUI -fPIC
 RELEASE_FLAGS = -O3 -funroll-loops
 DEBUG_FLAGS = -g
 LINK = g++
-LINK_LIBS = -framework OpenGL -framework GLUT -framework vecLib -l/Users/Leo/PHD_Work/Cage_Generation_2013/code/starlab-mcfskel/core/external/cholmod-4.0.0/lib/osx64/libcholmod.a
+LINK_LIBS = -framework OpenGL -framework GLUT -framework vecLib \
+  -L$(CHOLMOD)/lib -lcholmod
 
