@@ -192,7 +192,7 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse] = multires_per_layer(V0,F0,lev
                   Pall(:,:,1) = V0;
                   Pall(:,:,2) = V0;
                   % minimize energy on the coarse mesh
-                  [V_coarse_new,~,F_to_refine] = velocityfilter_step_project(Pall,F0,...
+                  [V_coarse_new,~,F_to_refine] = eltopo_step_project(Pall,F0,...
                       V_coarse_,F_coarse_,'simulation_steps',simulation_steps,'energy',energy,'min_progress',1e-3,'method','shrink_coarse_refining');
                                     
                   % claer Pall so we can overwrite Pall(:,:,1) and Pall(:,:,2)
