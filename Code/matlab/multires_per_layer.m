@@ -125,7 +125,7 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse] = multires_per_layer(V0,F0,lev
               % CGAL + meshfix
               if ~strcmp(energy,'symmetry_x')
                 [V_coarse{k-1},F_coarse{k-1}] = cgal_simplification(V_coarse{k},F_coarse{k},levels(k-1));
-                [V_coarse{k-1},F_coarse{k-1}] = meshfix_matlab(V_coarse{k-1},F_coarse{k-1});
+                [V_coarse{k-1},F_coarse{k-1}] = meshfix(V_coarse{k-1},F_coarse{k-1});
               end
 
             if (isempty(Pall) || size(Pall,2)~=num_levels)
@@ -244,7 +244,7 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse] = multires_per_layer(V0,F0,lev
           for k=num_levels:-1:1
               
               [V_coarse{k},F_coarse{k}] = cgal_simplification(V_coarse{k+1},F_coarse{k+1},levels(k));
-              [V_coarse{k},F_coarse{k}] = meshfix_matlab(V_coarse{k},F_coarse{k});
+              [V_coarse{k},F_coarse{k}] = meshfix(V_coarse{k},F_coarse{k});
               
               % expand coarse mesh
               Pall = expand_coarse_to_outside_fine_3D(V_coarse{k},F_coarse{k},...
@@ -275,7 +275,7 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse] = multires_per_layer(V0,F0,lev
           for k=num_levels:-1:1
               
               [V_coarse{k},F_coarse{k}] = cgal_simplification(cages_V{k+1},cages_F{k+1},levels(k));
-              [V_coarse{k},F_coarse{k}] = meshfix_matlab(V_coarse{k},F_coarse{k});
+              [V_coarse{k},F_coarse{k}] = meshfix(V_coarse{k},F_coarse{k});
               
               % save partial result
               save('partial.mat','Pall','V_coarse','F_coarse','V0','F0');
