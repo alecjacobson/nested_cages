@@ -13,7 +13,7 @@ CFLAGS+=-g -O3 -DNDEBUG
 
 LIBIGL=/usr/local/igl/libigl/
 LIBIGL_INC=-I$(LIBIGL)/include
-LIBIGL_LIB=-L$(LIBIGL)/lib -ligl -liglmatlab -liglembree -liglcgal -liglboolean
+LIBIGL_LIB=-L$(LIBIGL)/lib -ligl -liglmatlab -liglcgal -liglboolean
 
 CORK=$(LIBIGL)/external/cork/
 CORK_INC=-I$(CORK)/include/
