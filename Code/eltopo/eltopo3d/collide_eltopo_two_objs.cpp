@@ -8,9 +8,23 @@
 //  a new OBJ file.
 //
 //  To compile:
-// gcc collide_eltopo_two_objs.cpp robustleastsquares.cpp -I../common -I../eltopo3d -I../talpa -I../talpa/drivers -I../common/tunicate -llapack -lblas -lstdc++ /Users/Leo/PHD_Work/Cage_Generation_2013/code/starlab-mcfskel/core/external/cholmod-4.0.0/lib/osx64/libcholmod.a /Users/Leo/PHD_Work/Cage_Generation_2013/code/starlab-mcfskel/core/external/cholmod-4.0.0/lib/osx64/libamd.a /Users/Leo/PHD_Work/Cage_Generation_2013/code/starlab-mcfskel/core/external/cholmod-4.0.0/lib/osx64/libcolamd.a libeltopo_release.a ../talpa/obj/bfstream.o ../talpa/obj/iomesh.o -I/opt/local/include/eigen3 -I/Users/Leo/PHD_Work/Volume_Meshing_2012/libigl/include/igl /opt/local/lib/gcc47/libgomp.a /Users/Leo/PHD_Work/Volume_Meshing_2012/libigl/lib/libigl.a /opt/local/lib/libSuiteSparse.dylib -o collide_eltopo_two_objs
+//     gcc collide_eltopo_two_objs.cpp robustleastsquares.cpp -I../common \
+//       -I../eltopo3d -I../talpa -I../talpa/drivers -I../common/tunicate \
+//       -llapack -lblas -lstdc++ \
+//       /Users/Leo/PHD_Work/Cage_Generation_2013/code/starlab-mcfskel/core/external/cholmod-4.0.0/lib/osx64/libcholmod.a /Users/Leo/PHD_Work/Cage_Generation_2013/code/starlab-mcfskel/core/external/cholmod-4.0.0/lib/osx64/libamd.a /Users/Leo/PHD_Work/Cage_Generation_2013/code/starlab-mcfskel/core/external/cholmod-4.0.0/lib/osx64/libcolamd.a libeltopo_release.a ../talpa/obj/bfstream.o ../talpa/obj/iomesh.o -I/opt/local/include/eigen3 -I/Users/Leo/PHD_Work/Volume_Meshing_2012/libigl/include/igl /opt/local/lib/gcc47/libgomp.a /Users/Leo/PHD_Work/Volume_Meshing_2012/libigl/lib/libigl.a /opt/local/lib/libSuiteSparse.dylib -o collide_eltopo_two_objs
+// 
+//     g++ collide_eltopo_two_objs.cpp robustleastsquares.cpp \
+//       ../common/bfstream.cpp ../talpa/iomesh.cpp -I../common \
+//       -I../eltopo3d -I../talpa -I../talpa/drivers -I../common/tunicate
+//       -llapack -lblas -lstdc++ -I/opt/local/include/eigen3 -lcholmod -L. \
+//       -leltopo_release -L/opt/local/lib -lSuiteSparse -DNO_GUI -o \
+//       collide_eltopo_two_objs
+// 
+//
 // Example usage:
 // ./collide_eltopo_two_objs V0.obj V1.obj 100 V_out.obj
+//
+//
 
 // std
 #include <cstdio>

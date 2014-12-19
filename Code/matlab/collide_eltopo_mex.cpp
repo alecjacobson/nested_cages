@@ -17,9 +17,12 @@
 //
 //      mex LDFLAGS="\$LDFLAGS -framework Accelerate"  ...
 //        collide_eltopo_mex.cpp -I../eltopo/common -I../eltopo/eltopo3d ...
+//        -I/usr/local/igl/libigl/include ...
 //        -I../eltopo/talpa -I../eltopo/talpa/drivers ...
 //        -I../eltopo/common/tunicate -L../eltopo/eltopo3d/ ...
 //        -leltopo_release -o collide_eltopo_mex
+
+#include <igl/matlab/MexStream.h>
 
 // std
 #include <cstdio>
@@ -143,6 +146,8 @@ void mexFunction(
          const mxArray *prhs[]
          )
 {
+  igl::MexStream mout;        
+  std::streambuf *outbuf = cout.rdbuf(&mout);
 
   V_eltopo.clear();
 
@@ -167,7 +172,7 @@ void mexFunction(
   eps_prox = *mxGetPr(prhs[4]);
   tol_dt = *mxGetPr(prhs[5]);
 
-  os = new ofstream("/Users/Leo/log.txt");
+  os = new ofstream("./collide_eltopo_mex-log.txt");
 
   vector<vector<double> > V0_ = readMatrix<double>(V0_mx);
   vector<vector<double> > V1_ = readMatrix<double>(V1_mx);
@@ -234,17 +239,21 @@ void mexFunction(
   double* V_final;
   double out_dt = 0.0;
   el_topo_integrate(&eltopo_time0, V1, &sim_general_options, &sim_integration_options, &V_final, &out_dt);
-  double rest_dt = 1.0;
-  int attempts = 0;
-  while (rest_dt > tol_dt){
+  double rest_dt = 1.0-out_dt;
+  eltopo_time0.vertex_locations = V_final;
+
+  int attempts = 1;
+  while (rest_dt > tol_dt)
+  {
       el_topo_integrate(&eltopo_time0, V1, &sim_general_options, &sim_integration_options, &V_final, &out_dt);
       eltopo_time0.vertex_locations = V_final;
-      mexPrintf("out_dt = %.4f\n", out_dt);
       rest_dt = (1-out_dt)*rest_dt;
-      mexPrintf("rest_dt = %.4f\n", rest_dt);
+      mexPrintf("current out_dt = %.4f\n", out_dt);
+      mexPrintf("running rest_dt = %.4f\n", rest_dt);
       attempts = attempts+1;
 
       if (out_dt<tol_dt){
+        mexPrintf("failed.\n");
         // return something as output
         plhs[0] = writeMatrix(V0_);
         // it didn't find a time step, back to Matlab prompt
@@ -276,6 +285,8 @@ void mexFunction(
 
   V_eltopo.clear();
 
+  // Restore the std stream buffer Important!
+  std::cout.rdbuf(outbuf);
   return;
 }
 
