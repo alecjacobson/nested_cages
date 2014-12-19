@@ -36,7 +36,7 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse] = multires_per_layer(V0,F0,lev
   
   flow_type = 'signed_distance_direction';
   simulation_steps = 1;
-  energy = 'volume';
+  energy = 'displacement_step_and_volume';
   quadrature_order = 1;
   V_coarse = [];
   F_coarse = [];
@@ -137,8 +137,8 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse] = multires_per_layer(V0,F0,lev
             end
 
             % push coarse mesh with physical simulation to obtain the cages
-            [V_coarse_new,~,~] = eltopo_step_project(Pall,F_refined,...
-                V_coarse{k-1},F_coarse{k-1},'simulation_steps',simulation_steps,'energy','displacement_initial');
+            [V_coarse_new,~,~] = combined_step_project(Pall,F_refined,...
+                V_coarse{k-1},F_coarse{k-1},'simulation_steps',simulation_steps,'energy',energy);
 
             % The input for the next level is the output of this level
             V_coarse{k-1} = V_coarse_new;
@@ -192,7 +192,7 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse] = multires_per_layer(V0,F0,lev
                   Pall(:,:,1) = V0;
                   Pall(:,:,2) = V0;
                   % minimize energy on the coarse mesh
-                  [V_coarse_new,~,F_to_refine] = eltopo_step_project(Pall,F0,...
+                  [V_coarse_new,~,F_to_refine] = combined_step_project(Pall,F0,...
                       V_coarse_,F_coarse_,'simulation_steps',simulation_steps,'energy',energy,'min_progress',1e-3,'method','shrink_coarse_refining');
                                     
                   % claer Pall so we can overwrite Pall(:,:,1) and Pall(:,:,2)
@@ -290,8 +290,8 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse] = multires_per_layer(V0,F0,lev
               save('partial.mat','Pall','Pall_coarse','V_coarse','F_coarse','V0','F0');
               
               % push coarse mesh with physical simulation to obtain the cages
-              [V_coarse_new,~,~] = eltopo_step_project(Pall,F_shrink,...
-                  Pall_coarse(:,:,end),F_exp,'simulation_steps',simulation_steps,'energy','displacement_initial');
+              [V_coarse_new,~,~] = combined_step_project(Pall,F_shrink,...
+                  Pall_coarse(:,:,end),F_exp,'simulation_steps',simulation_steps,'energy',energy);
               
               % output level
               cages_F{k} = F_exp;
@@ -305,83 +305,85 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse] = multires_per_layer(V0,F0,lev
           
   end
   
-  %   tic
-  %   % global energy minimization
-  %   V_coarse_all = [];
-  %   F_coarse_all = [];
-  %   total_num_vertices = 0;
-  %   % Treat all coarse layers as single big mesh
-  %   for k=1:num_levels
-  %       V_coarse_all = [V_coarse_all;cages_V{k}];
-  %       F_coarse_all = [F_coarse_all;total_num_vertices+cages_F{k}];
-  %       total_num_vertices = size(V_coarse_all,1);
-  %   end
-  %   clear Pall;
-  %   Pall(:,:,1) = V0;
-  %   Pall(:,:,2) = V0;
-  %   [V_coarse_new_all,~,~] = eltopo_step_project(Pall,F0,...
-  %       V_coarse_all,F_coarse_all,'simulation_steps',simulation_steps,'energy',energy);
-  %
-  %   % output final layers
-  %   total_num_vertices = 0;
-  %   for k=1:num_levels
-  %
-  %       V_coarse{k} = V_coarse_new_all(total_num_vertices+1:total_num_vertices+size(V_coarse{k},1),:);
-  %       total_num_vertices = total_num_vertices+size(V_coarse{k},1);
-  %
-  %   end
-  %   disp('time spent for global minimization over all layers simultenously')
-  %   toc
-  
-  tic
-  for pass=1:5
-      
-      for k=num_levels:-1:1
-          
-          progress_msg = sprintf('\n \n \n pass = %d, layer = %d \n \n \n', pass, k);
-          disp(progress_msg);
-          
-          if (k==num_levels)
-              
-              clear Pall;
-              Pall(:,:,1) = [V0;V_coarse{num_levels-1}];
-              Pall(:,:,2) = [V0;V_coarse{num_levels-1}];
-              F_layers = [F0;size(V0,1)+F_coarse{num_levels-1}];
-              
-          elseif (k==1)
-              
-              clear Pall;
-              Pall(:,:,1) = V_coarse{2};
-              Pall(:,:,2) = V_coarse{2};
-              F_layers = F_coarse{2};
-              
-          else
-              
-              clear Pall;
-              Pall(:,:,1) = [V_coarse{k+1};V_coarse{k-1}];
-              Pall(:,:,2) = [V_coarse{k+1};V_coarse{k-1}];
-              F_layers = [F_coarse{k+1};size(V_coarse{k+1},1)+F_coarse{k-1}];
-              
-          end
-              
-          [V_coarse_layers,~,~] = eltopo_step_project(Pall,F_layers,...
-                V_coarse{k},F_coarse{k},'simulation_steps',simulation_steps,'energy',energy);
-            
-          V_coarse{k} = V_coarse_layers;
-            
-      end
-      
-  end
-  disp('time spent for global minimization alternating over layers')
-  toc
-  
-  % output layers
-  for k=1:num_levels
-      
-      cages_V{k} = V_coarse{k};
-      cages_F{k} = F_coarse{k};
-      
-  end
+%     tic
+%     % global energy minimization
+%     V_coarse_all = [];
+%     F_coarse_all = [];
+%     total_num_vertices = 0;
+%     % Treat all coarse layers as single big mesh
+%     for k=1:num_levels
+%         V_coarse_all = [V_coarse_all;cages_V{k}];
+%         F_coarse_all = [F_coarse_all;total_num_vertices+cages_F{k}];
+%         total_num_vertices = size(V_coarse_all,1);
+%     end
+%     meshplot(V_coarse_all,F_coarse_all);
+%     input('');
+%     clear Pall;
+%     Pall(:,:,1) = V0;
+%     Pall(:,:,2) = V0;
+%     [V_coarse_new_all,~,~] = combined_step_project(Pall,F0,...
+%         V_coarse_all,F_coarse_all,'simulation_steps',simulation_steps,'energy',energy);
+%   
+%     % output final layers
+%     total_num_vertices = 0;
+%     for k=1:num_levels
+%   
+%         V_coarse{k} = V_coarse_new_all(total_num_vertices+1:total_num_vertices+size(V_coarse{k},1),:);
+%         total_num_vertices = total_num_vertices+size(V_coarse{k},1);
+%   
+%     end
+%     disp('time spent for global minimization over all layers simultenously')
+%     toc
+%   
+%   tic
+%   for pass=1:5
+%       
+%       for k=num_levels:-1:1
+%           
+%           progress_msg = sprintf('\n \n \n pass = %d, layer = %d \n \n \n', pass, k);
+%           disp(progress_msg);
+%           
+%           if (k==num_levels)
+%               
+%               clear Pall;
+%               Pall(:,:,1) = [V0;V_coarse{num_levels-1}];
+%               Pall(:,:,2) = [V0;V_coarse{num_levels-1}];
+%               F_layers = [F0;size(V0,1)+F_coarse{num_levels-1}];
+%               
+%           elseif (k==1)
+%               
+%               clear Pall;
+%               Pall(:,:,1) = V_coarse{2};
+%               Pall(:,:,2) = V_coarse{2};
+%               F_layers = F_coarse{2};
+%               
+%           else
+%               
+%               clear Pall;
+%               Pall(:,:,1) = [V_coarse{k+1};V_coarse{k-1}];
+%               Pall(:,:,2) = [V_coarse{k+1};V_coarse{k-1}];
+%               F_layers = [F_coarse{k+1};size(V_coarse{k+1},1)+F_coarse{k-1}];
+%               
+%           end
+%               
+%           [V_coarse_layers,~,~] = combined_step_project(Pall,F_layers,...
+%                 V_coarse{k},F_coarse{k},'simulation_steps',simulation_steps,'energy',energy);
+%             
+%           V_coarse{k} = V_coarse_layers;
+%             
+%       end
+%       
+%   end
+%   disp('time spent for global minimization alternating over layers')
+%   toc
+%   
+%   % output layers
+%   for k=1:num_levels
+%       
+%       cages_V{k} = V_coarse{k};
+%       cages_F{k} = F_coarse{k};
+%       
+%   end
   
   
 end
