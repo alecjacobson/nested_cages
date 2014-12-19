@@ -233,7 +233,6 @@ void mexFunction(
   // run simulation (cut time step if it does not satisfy constraints)
   double* V_final;
   double out_dt = 0.0;
-  el_topo_integrate(&eltopo_time0, V1, &sim_general_options, &sim_integration_options, &V_final, &out_dt);
   double rest_dt = 1.0;
   int attempts = 0;
   while (rest_dt > tol_dt){

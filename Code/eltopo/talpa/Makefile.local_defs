@@ -4,7 +4,7 @@
 # NOTE: Rename this file to "Makefile.local_defs" after specifying your machine settings
 #
 
-INCLUDE_PATH = -I. -I../eltopo3d -I../common -I../common/newsparse -I../common/sparse -I../common/meshes -I../common/tunicate -Icurlnoise -Idrivers 
+INCLUDE_PATH = -I. -I../eltopo3d -I../common -I../common/newsparse -I../common/sparse -I../common/meshes -I../common/tunicate -Icurlnoise -Idrivers
 ELTOPO_PATH = ../eltopo3d
 
 RELEASE_FLAGS = -O3 -funroll-loops
