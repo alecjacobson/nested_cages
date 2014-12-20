@@ -10,6 +10,10 @@ output \cite{AnderssonGL09}.  \cite{gumhold2003intersection} new coarse mesh
 won't contain self-intersections, but not trying to avoid intersections with
 original fine mesh.
 
+Rather than work against the mountain of advances in shape decimation we
+complement them. Our method takes as input an arbitrary decimation and works as
+a post process to nest each layer.
+
 Cage generation
 
 \cite{Deng:2011vr,Xian:2012tv}
@@ -25,6 +29,12 @@ simulation.
 %
 But offsets are bad idea for creating coarse mesh: too fine OR lose nesting
 guarantee OR too far away (and start to combine features)
+
+\cite{Shen:2004:IAI}, as an application, iteratively refine a MLS surface to
+enclose an existing model: search for global parameter to minimize distance
+indirectly. Presented algorithm determines if level-set is outside, but
+contouring could still "slice" into original surface.  Further, topological
+control is lost and close features are still quickly merged. 
 
 Multi-grid 
 
@@ -58,3 +68,12 @@ restriction would really be compared to simple barycentric one.
 Adaptive simulations for visco-elastic solids. Computes a hierarchy of
 non-nested decimations (QSlim \cite{Garland:1997:SSU}), tethers fine mesh
 points to \emph{closest} coarse vertex.
+
+Flows
+\cite{Kazhdan2012} remove singularities, also self-intersections
+\cite{Sacht:SIV:2013}, in general, will not move inside original surface
+
+Alternating global scaling and attraction, attempts to move inside. No
+guarantees, requires parameter tuning \cite{Wang:2008}
+
+\cite{Tagliasacchi:2012:MCS} coerces flow toward the medial axis
