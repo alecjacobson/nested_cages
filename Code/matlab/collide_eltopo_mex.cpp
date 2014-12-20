@@ -11,7 +11,7 @@
 // infinite mass.
 //
 //  To compile:
-//  mex collide_eltopo_mex.cpp -I../common -I../eltopo3d -I../talpa -I../talpa/drivers -I../common/tunicate -llapack -lblas -lstdc++ /Users/Leo/PHD_Work/Cage_Generation_2013/code/starlab-mcfskel/core/external/cholmod-4.0.0/lib/osx64/libcholmod.a /Users/Leo/PHD_Work/Cage_Generation_2013/code/starlab-mcfskel/core/external/cholmod-4.0.0/lib/osx64/libamd.a /Users/Leo/PHD_Work/Cage_Generation_2013/code/starlab-mcfskel/core/external/cholmod-4.0.0/lib/osx64/libcolamd.a libeltopo_release.a -I/Users/Leo/PHD_Work/Volume_Meshing_2012/libigl/include/igl /opt/local/lib/gcc47/libgomp.a /Users/Leo/PHD_Work/Volume_Meshing_2012/libigl/lib/libigl.a /opt/local/lib/libSuiteSparse.dylib ../talpa/obj/bfstream.o ../talpa/obj/iomesh.o
+//  mex collide_eltopo_mex.cpp -I../eltopo/common -I../eltopo/eltopo3d -I../eltopo/talpa -I../eltopo/talpa/drivers -I../eltopo/common/tunicate -llapack -lblas -lstdc++ /Users/Leo/PHD_Work/Cage_Generation_2013/code/starlab-mcfskel/core/external/cholmod-4.0.0/lib/osx64/libcholmod.a /Users/Leo/PHD_Work/Cage_Generation_2013/code/starlab-mcfskel/core/external/cholmod-4.0.0/lib/osx64/libamd.a /Users/Leo/PHD_Work/Cage_Generation_2013/code/starlab-mcfskel/core/external/cholmod-4.0.0/lib/osx64/libcolamd.a ../eltopo/eltopo3d/libeltopo_release.a -I/Users/Leo/PHD_Work/Volume_Meshing_2012/libigl/include /opt/local/lib/gcc47/libgomp.a /Users/Leo/PHD_Work/Volume_Meshing_2012/libigl/lib/libigl.a /opt/local/lib/libSuiteSparse.dylib
 //
 //  or rather:
 //
