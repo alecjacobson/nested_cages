@@ -275,7 +275,7 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse] = multires_per_layer(V0,F0,lev
           for k=num_levels:-1:1
               
               [V_coarse{k},F_coarse{k}] = cgal_simplification(cages_V{k+1},cages_F{k+1},levels(k));
-%               [V_coarse{k},F_coarse{k}] = meshfix(V_coarse{k},F_coarse{k});
+              [V_coarse{k},F_coarse{k}] = meshfix(V_coarse{k},F_coarse{k});
               
               % save partial result
               save('partial.mat','Pall','V_coarse','F_coarse','V0','F0');
