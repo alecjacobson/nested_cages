@@ -4,29 +4,49 @@
 
 \subsection{Can try right now:}
 
+Compare differences of decimators:
+  - CGAL
+  - QSlim
+  - OpenFlipper
+
+
 Zoo of results: at least 20 models.
+  + armadillo
+  + bunny
+  + gargo
+  + horse
+  + Model1 (human)
+  + octopus
+  - pelvis (subdivide initial to 100K or 50K, more layers)
+  - Model3 (with more layers and double-check volume minimization)
+  - Model4 (more layers)
+  - Model6 (more layers, better decimation)
+  - Model7 (more layers)
+  - Model9 (more layers)
+  - anchor (needs more layers)
   - human (have meshes)
   - animals
   - mechanical
     - microscope
-    - coupledown
     - iwires
   - engineering
     - space shuttle
     - airplane
   - medical
-    - heart
-    - pelvis
+    - heart (MRI heart, try just one piece)
+    - cartoon heart
+  - coupledown retry QSlim, more layers
 
 Always take timings!
 
 Stress tests
   1) Very large number of layers: 100!
     - xyz dragon
-  2) Insanely complex fractal-like shape with very close features and many holes
+  2) Small number of layers: 2,3
+  3) Insanely complex fractal-like shape with very close features and many holes
     - buddha
     - stanford "dragon"
-    - tangled porcupine-like shape (ask changxi for spiky ball)
+    - tangled porcupine-like shape (+ask changxi for spiky ball)
 
 Literally design and 3D-print a matryoshka doll. Admittedly there's an extra
 constraint we're not considering which is that the nested halves need to be
@@ -36,6 +56,8 @@ removable from each other.
 Automatic cages for deformation. Symmetry preservation, planar quads
   - "cage transfer": fit dash cage or horse cage to another humanoid (or
     animal)
+
+- draft of paper
 
 \subsection{Needs coding:}
 
@@ -70,6 +92,13 @@ Dynamic update: how much work is it to deform the fine mesh and have the coarse
 meshes follow? No need for the flow since we already have a feasible initial
 position. Just ``simulation'' at this point?
   - need animation sequence of the fine mesh: alec send frames
+
+Retry horse example with ICP energy instead of volume (to try to reduce
+"pancakes")
+
+iWires Alien: try expansion 
+
+neuron negative space: subdivide?
 
 \subsection{Would be nice:}
 
