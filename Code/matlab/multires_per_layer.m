@@ -44,10 +44,11 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = multires_per_layer(V0
   F_coarse = [];
   Pall = [];
   method = 'shrink_fine_and_expand_coarse';
-  eps_distance = 1e-4;
+  % below parameter only used for ElTopo
+  eps_distance = 1e-3;
   
   % save timings
-  timing.decim = 0.0;
+  timing.decimation = 0.0;
   timing.flow = 0.0;
   timing.simulation = 0.0;
   
@@ -140,7 +141,7 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = multires_per_layer(V0
                 tic
                 [V_coarse{k-1},F_coarse{k-1}] = cgal_simplification(V_coarse{k},F_coarse{k},levels(k-1));
                 [V_coarse{k-1},F_coarse{k-1}] = meshfix(V_coarse{k-1},F_coarse{k-1});
-                timing.decim = timing.decim + toc; 
+                timing.decimation = timing.decimation + toc; 
               end
 
             if (isempty(Pall) || size(Pall,2)~=num_levels)
@@ -296,7 +297,7 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = multires_per_layer(V0
               tic
               [V_coarse{k},F_coarse{k}] = cgal_simplification(cages_V{k+1},cages_F{k+1},levels(k));
               [V_coarse{k},F_coarse{k}] = meshfix(V_coarse{k},F_coarse{k});
-              timing.decim = timing.decim + toc;
+              timing.decimation = timing.decimation + toc;
               
               % save partial result
               save('partial.mat','Pall','V_coarse','F_coarse','V0','F0');
@@ -314,8 +315,8 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = multires_per_layer(V0
               
               % push coarse mesh with physical simulation to obtain the cages
               tic
-              [V_coarse_new,~,~] = velocityfilter_step_project(Pall,F_shrink,...
-                  Pall_coarse(:,:,end),F_exp,'simulation_steps',simulation_steps,'energy',energy);
+              [V_coarse_new,~,~] = combined_step_project(Pall,F_shrink,...
+                  Pall_coarse(:,:,end),F_exp,'simulation_steps',simulation_steps,'energy',energy,'eps_distance',eps_distance);
               timing.simulation = timing.simulation + toc;
               
               % output level
