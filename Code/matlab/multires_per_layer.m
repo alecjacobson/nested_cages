@@ -1,4 +1,4 @@
-function [cages_V,cages_F,Pall,V_coarse,F_coarse] = multires_per_layer(V0,F0,levels,varargin)
+function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = multires_per_layer(V0,F0,levels,varargin)
   % MULTIRES_PER_LAYER
   % [cages_V,cages_F,Pall,V_coarse,F_coarse] = multires_per_layer(V0,F0,levels,varargin)
   %
@@ -33,6 +33,8 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse] = multires_per_layer(V0,F0,lev
   %   Pall      sequence of meshes from the flow
   %   V_coarse  initial coarse mesh for each level
   %   F_coarse  initial coarse mesh for each level
+  %   timing:   struct with timing.decim, timing.flow and 
+  %             timing.simulation
   
   flow_type = 'signed_distance_direction';
   simulation_steps = 1;
@@ -42,6 +44,13 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse] = multires_per_layer(V0,F0,lev
   F_coarse = [];
   Pall = [];
   method = 'shrink_fine_and_expand_coarse';
+  eps_distance = 1e-4;
+  
+  % save timings
+  timing.decim = 0.0;
+  timing.flow = 0.0;
+  timing.simulation = 0.0;
+  
   % Parsing arguments
   ii = 1;
   while ii < numel(varargin)
@@ -78,6 +87,10 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse] = multires_per_layer(V0,F0,lev
               assert(ii+1<=numel(varargin));
               ii = ii+1;
               method = varargin{ii};
+          case 'eps_distance'
+              assert(ii+1<=numel(varargin));
+              ii = ii+1;
+              eps_distance = varargin{ii};
           otherwise
               error('Unsupported parameter: %s',varargin{ii});
       end
@@ -124,21 +137,27 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse] = multires_per_layer(V0,F0,lev
               % for all other energies but 'symmetry_x', decimate with 
               % CGAL + meshfix
               if ~strcmp(energy,'symmetry_x')
+                tic
                 [V_coarse{k-1},F_coarse{k-1}] = cgal_simplification(V_coarse{k},F_coarse{k},levels(k-1));
                 [V_coarse{k-1},F_coarse{k-1}] = meshfix(V_coarse{k-1},F_coarse{k-1});
+                timing.decim = timing.decim + toc; 
               end
 
             if (isempty(Pall) || size(Pall,2)~=num_levels)
+                tic
                 [Pall,F_refined] = shrink_fine_to_inside_coarse_3D(V_coarse{k},F_coarse{k},...
                     V_coarse{k-1},F_coarse{k-1},'flow_type',flow_type,...
                     'V_to_intersect',V_coarse{k-1},'F_to_intersect',F_coarse{k-1},...
                     'quadrature_order',quadrature_order);
                 Pall_all_times{k-1} = Pall;
+                timing.flow = timing.flow + toc; 
             end
 
             % push coarse mesh with physical simulation to obtain the cages
+            tic
             [V_coarse_new,~,~] = combined_step_project(Pall,F_refined,...
                 V_coarse{k-1},F_coarse{k-1},'simulation_steps',simulation_steps,'energy',energy);
+            timing.simulation = timing.simulation + toc;
 
             % The input for the next level is the output of this level
             V_coarse{k-1} = V_coarse_new;
@@ -274,15 +293,19 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse] = multires_per_layer(V0,F0,lev
           % loop over different levels
           for k=num_levels:-1:1
               
+              tic
               [V_coarse{k},F_coarse{k}] = cgal_simplification(cages_V{k+1},cages_F{k+1},levels(k));
               [V_coarse{k},F_coarse{k}] = meshfix(V_coarse{k},F_coarse{k});
+              timing.decim = timing.decim + toc;
               
               % save partial result
               save('partial.mat','Pall','V_coarse','F_coarse','V0','F0');
               
               % shirnk fine mesh, expand coarse mesh
+              tic
               [Pall,Pall_coarse,F_exp,F_shrink] = shrink_fine_expand_coarse_3D(cages_V{k+1},cages_F{k+1},...
-                  V_coarse{k},F_coarse{k},'quadrature_order',quadrature_order);
+                  V_coarse{k},F_coarse{k},'quadrature_order',quadrature_order,'eps_distance',eps_distance);
+              timing.flow = timing.flow + toc;
               
               Pall_all_times{k} = Pall;
               
@@ -290,8 +313,10 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse] = multires_per_layer(V0,F0,lev
               save('partial.mat','Pall','Pall_coarse','V_coarse','F_coarse','V0','F0');
               
               % push coarse mesh with physical simulation to obtain the cages
-              [V_coarse_new,~,~] = combined_step_project(Pall,F_shrink,...
+              tic
+              [V_coarse_new,~,~] = velocityfilter_step_project(Pall,F_shrink,...
                   Pall_coarse(:,:,end),F_exp,'simulation_steps',simulation_steps,'energy',energy);
+              timing.simulation = timing.simulation + toc;
               
               % output level
               cages_F{k} = F_exp;
