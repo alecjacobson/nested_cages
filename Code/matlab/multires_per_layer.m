@@ -16,7 +16,7 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = multires_per_layer(V0
   %    been using only this one
   %     'energy': followed by either 'displacement_step' or
   %       'displacement_initial' or 'symmetry_x' or 
-  %       'displacement_initial_and_volume' (default)
+  %       'volume' (default)
   %     'quadrature_order': 1, 2 or 3 (default=1)
   %     'simulation_steps': quantity of (linear) simulation steps for each
   %     flow step. Default = 1
@@ -38,7 +38,7 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = multires_per_layer(V0
   
   flow_type = 'signed_distance_direction';
   simulation_steps = 1;
-  energy = 'displacement_step_and_volume';
+  energy = 'volume';
   quadrature_order = 1;
   V_coarse = [];
   F_coarse = [];
@@ -313,10 +313,24 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = multires_per_layer(V0
               % save partial result
               save('partial.mat','Pall','Pall_coarse','V_coarse','F_coarse','V0','F0');
               
-              % push coarse mesh with physical simulation to obtain the cages
+%               % push coarse mesh with physical simulation to obtain the cages
+%               tic
+%               [V_coarse_new,~,~] = combined_step_project(Pall,F_shrink,...
+%                   Pall_coarse(:,:,end),F_exp,'simulation_steps',simulation_steps,'energy',energy,'eps_distance',eps_distance);
+%               timing.simulation = timing.simulation + toc;
+
+              % First concatenate all fine meshes
+              Pall_single_matrix = zeros(size(Pall,1)*size(Pall,3),size(Pall,2));
+              for a=1:size(Pall,3)
+                Pall_single_matrix((a-1)*size(Pall,1)+1:a*size(Pall,1),:) = Pall(:,:,a);
+              end
               tic
-              [V_coarse_new,~,~] = combined_step_project(Pall,F_shrink,...
-                  Pall_coarse(:,:,end),F_exp,'simulation_steps',simulation_steps,'energy',energy,'eps_distance',eps_distance);
+              % inflate
+              V_coarse_new = testNewSequence_mex(Pall_coarse(:,:,end),F_exp,Pall_single_matrix,F_shrink,max(max(F_shrink)),1e-4,1e-6);
+              % save partial result
+              save('partial.mat','Pall','Pall_coarse','V_coarse','F_coarse','V0','F0','V_coarse_new');
+              % step + project
+              V_coarse_new = final_velocityfilter_step_project(Pall(:,:,1),F_shrink,V_coarse_new,F_exp,'energy','volume','beta',1e-4);
               timing.simulation = timing.simulation + toc;
               
               % output level
@@ -330,86 +344,6 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = multires_per_layer(V0
           Pall = Pall_all_times;
           
   end
-  
-%     tic
-%     % global energy minimization
-%     V_coarse_all = [];
-%     F_coarse_all = [];
-%     total_num_vertices = 0;
-%     % Treat all coarse layers as single big mesh
-%     for k=1:num_levels
-%         V_coarse_all = [V_coarse_all;cages_V{k}];
-%         F_coarse_all = [F_coarse_all;total_num_vertices+cages_F{k}];
-%         total_num_vertices = size(V_coarse_all,1);
-%     end
-%     meshplot(V_coarse_all,F_coarse_all);
-%     input('');
-%     clear Pall;
-%     Pall(:,:,1) = V0;
-%     Pall(:,:,2) = V0;
-%     [V_coarse_new_all,~,~] = combined_step_project(Pall,F0,...
-%         V_coarse_all,F_coarse_all,'simulation_steps',simulation_steps,'energy',energy);
-%   
-%     % output final layers
-%     total_num_vertices = 0;
-%     for k=1:num_levels
-%   
-%         V_coarse{k} = V_coarse_new_all(total_num_vertices+1:total_num_vertices+size(V_coarse{k},1),:);
-%         total_num_vertices = total_num_vertices+size(V_coarse{k},1);
-%   
-%     end
-%     disp('time spent for global minimization over all layers simultenously')
-%     toc
-%   
-%   tic
-%   for pass=1:5
-%       
-%       for k=num_levels:-1:1
-%           
-%           progress_msg = sprintf('\n \n \n pass = %d, layer = %d \n \n \n', pass, k);
-%           disp(progress_msg);
-%           
-%           if (k==num_levels)
-%               
-%               clear Pall;
-%               Pall(:,:,1) = [V0;V_coarse{num_levels-1}];
-%               Pall(:,:,2) = [V0;V_coarse{num_levels-1}];
-%               F_layers = [F0;size(V0,1)+F_coarse{num_levels-1}];
-%               
-%           elseif (k==1)
-%               
-%               clear Pall;
-%               Pall(:,:,1) = V_coarse{2};
-%               Pall(:,:,2) = V_coarse{2};
-%               F_layers = F_coarse{2};
-%               
-%           else
-%               
-%               clear Pall;
-%               Pall(:,:,1) = [V_coarse{k+1};V_coarse{k-1}];
-%               Pall(:,:,2) = [V_coarse{k+1};V_coarse{k-1}];
-%               F_layers = [F_coarse{k+1};size(V_coarse{k+1},1)+F_coarse{k-1}];
-%               
-%           end
-%               
-%           [V_coarse_layers,~,~] = combined_step_project(Pall,F_layers,...
-%                 V_coarse{k},F_coarse{k},'simulation_steps',simulation_steps,'energy',energy);
-%             
-%           V_coarse{k} = V_coarse_layers;
-%             
-%       end
-%       
-%   end
-%   disp('time spent for global minimization alternating over layers')
-%   toc
-%   
-%   % output layers
-%   for k=1:num_levels
-%       
-%       cages_V{k} = V_coarse{k};
-%       cages_F{k} = F_coarse{k};
-%       
-%   end
   
   
 end
