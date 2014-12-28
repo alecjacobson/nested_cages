@@ -1,4 +1,3 @@
-
 #include <iostream>
 #include <math.h>
 #include "mex.h"
@@ -6,6 +5,7 @@
 #include <fstream>
 
 #include <VelocityFilter.h>
+#include <Distance.h>
 #include <igl/matlab/MexStream.h>
 
 #define MATLAB_LINK
@@ -115,35 +115,35 @@ void parse_rhs(
 
 
 void mexFunction(
-		 int          nlhs,
-		 mxArray      *plhs[],
-		 int          nrhs,
-		 const mxArray *prhs[]
-		 )
+         int          nlhs,
+         mxArray      *plhs[],
+         int          nrhs,
+         const mxArray *prhs[]
+         )
 {
 
-    igl::MexStream mout;
-    std::streambuf *outbuf = cout.rdbuf(&mout);
+  igl::MexStream mout;
+  std::streambuf *outbuf = cout.rdbuf(&mout);
 
   /* Check for proper number of arguments */
 
-  if (nrhs != 6) {
-    mexErrMsgIdAndTxt("MATLAB:mexcpp:nargin", 
-            "velocity_filter requires six input arguments.");
-  } 
+  if (nrhs != 4) {
+    mexErrMsgIdAndTxt("MATLAB:mexcpp:nargin",
+            "velocity_filter requires four input arguments.");
+  }
   else if (nlhs != 1) {
     mexErrMsgIdAndTxt("MATLAB:mexcpp:nargout",
             "velocity_filter generates one output argument.");
   }
 
-  os = new ofstream("./velocity_filter_mex-log.txt");
+  os = new ofstream("./inflate_mex-log.txt");
 
-  MatrixXd V0, V1;
+  MatrixXd V0;
   MatrixXi F0;
-  int numinfinite;
-  parse_rhs(nrhs,prhs,V0,V1,F0,&numinfinite);
-  double outer = *mxGetPr(prhs[4]);
-  double inner = *mxGetPr(prhs[4]);
+  parse_rhs(nrhs,prhs,V0,F0);
+  int numinfinite = *mxGetPr(prhs[2]);
+  double eps_distance = *mxGetPr(prhs[3]);
+
   Matrix3Xi F0_t(3,F0.rows());
   for (int k=0; k<F0.rows();k++){
       F0_t(0,k) = F0(k,0);
@@ -151,17 +151,11 @@ void mexFunction(
       F0_t(2,k) = F0(k,2);
   }
 
-  VectorXd qstart(3*V0.rows());
-  VectorXd qend(3*V0.rows());
+  VectorXd q(3*V0.rows());
   for (int k=0; k<V0.rows();k++){
-      qstart(3*k) = V0(k,0);
-      qstart(3*k+1) = V0(k,1);
-      qstart(3*k+2) = V0(k,2);
-  }
-  for (int k=0; k<V0.rows();k++){
-      qend(3*k) = V1(k,0);
-      qend(3*k+1) = V1(k,1);
-      qend(3*k+2) = V1(k,2);
+      q(3*k) = V0(k,0);
+      q(3*k+1) = V0(k,1);
+      q(3*k+2) = V0(k,2);
   }
   VectorXd invmasses(3*V0.rows());
   for (int k=0; k<3*numinfinite; k++){
@@ -171,21 +165,33 @@ void mexFunction(
       invmasses(k) = 1.0;
   }
 
-  int sim_status = VelocityFilter::velocityFilter(qstart, qend, F0_t, invmasses, outer, inner);
-  mexPrintf("simulation_status = %d \n", sim_status);
+  set<int> fixedVerts;
+  for(int i=0; i<numinfinite; i++)
+      fixedVerts.insert(i);
 
-  for (int k=0; k<V0.rows(); k++){
-      V1(k,0) = qend(3*k);
-      V1(k,1) = qend(3*k+1);
-      V1(k,2) = qend(3*k+2);
+  double distance = Distance::meshSelfDistance(q, F0_t, fixedVerts);
+  while(distance < eps_distance)
+  {
+      mexPrintf("Distance is %.16f. Inflating ... \n", distance);
+      VectorXd qnew = q;
+      VelocityFilter::velocityFilter(q, qnew, F0_t, invmasses, 2.0*distance, 0.5*distance);
+      q = qnew;
+      distance = Distance::meshSelfDistance(q, F0_t, fixedVerts);
   }
-
   // Restore the std stream buffer Important!
   std::cout.rdbuf(outbuf);
 
-  plhs[0] = mxCreateDoubleMatrix(V1.rows(),V1.cols(), mxREAL);
+  // overwrite V0
+  for (int k=0; k<V0.rows(); k++){
+      V0(k,0) = q(3*k);
+      V0(k,1) = q(3*k+1);
+      V0(k,2) = q(3*k+2);
+  }
+
+  // and output it
+  plhs[0] = mxCreateDoubleMatrix(V0.rows(),V0.cols(), mxREAL);
   double * Vp = mxGetPr(plhs[0]);
-  copy(&V1.data()[0],&V1.data()[0]+V1.size(),Vp);
+  copy(&V0.data()[0],&V0.data()[0]+V0.size(),Vp);
 
   return;
 }
