@@ -34,7 +34,7 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = multires_per_layer(V0
   %   V_coarse  initial coarse mesh for each level
   %   F_coarse  initial coarse mesh for each level
   %   timing:   struct with timing.decim, timing.flow and 
-  %             timing.simulation
+  %             timing.simulation, timing.etienne
   
   flow_type = 'signed_distance_direction';
   simulation_steps = 1;
@@ -52,6 +52,7 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = multires_per_layer(V0
   timing.decimation = 0.0;
   timing.flow = 0.0;
   timing.simulation = 0.0;
+  timing.etienne = 0; % not exactly timing, but let's put in this struct
   
   % Parsing arguments
   ii = 1;
@@ -320,10 +321,12 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = multires_per_layer(V0
               
               % push coarse mesh with physical simulation to obtain the cages
               tic
-              [V_coarse_new,~,~] = combined_step_project(Pall,F_shrink,...
+              [V_coarse_new,~,~,etienne_called] = combined_step_project(Pall,F_shrink,...
                   Pall_coarse(:,:,end),F_exp,'simulation_steps',simulation_steps,...
                   'energy',energy,'eps_distance',eps_distance,'beta_init',beta_init);
               timing.simulation = timing.simulation + toc;
+              
+              timing.etienne = timing.etienne+etienne_called;
               
               % output level
               cages_F{k} = F_exp;
