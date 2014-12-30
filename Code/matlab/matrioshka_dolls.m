@@ -81,7 +81,7 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = matrioshka_dolls(V0,F
       % shirnk fine mesh
       tic
       [Pall,~,F_exp,~] = shrink_fine_expand_coarse_3D(cages_V{2*k+1},cages_F{2*k+1},...
-          V_coarse{2*k},F_coarse{2*k},'quadrature_order',quadrature_order);
+          V_coarse{2*k},F_coarse{2*k},'quadrature_order',quadrature_order,'step_size',1e-1);
       timing.flow = timing.flow + toc;
       Pall_all_times{2*k} = Pall;
       
@@ -225,7 +225,7 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = matrioshka_dolls(V0,F
       cla;
       tic
       [Pall,~,F_exp,~] = shrink_fine_expand_coarse_3D(cages_V{2*k},cages_F{2*k},...
-          V_coarse{2*k-1}+1e-6*randn(size(V_coarse{2*k-1})),F_coarse{2*k-1},'quadrature_order',quadrature_order);
+          V_coarse{2*k-1}+1e-6*randn(size(V_coarse{2*k-1})),F_coarse{2*k-1},'quadrature_order',quadrature_order,'step_size',1e-1);
       timing.flow = timing.flow + toc;
       Pall_all_times{2*k-1} = Pall;
       timing.flow = timing.flow + toc;
