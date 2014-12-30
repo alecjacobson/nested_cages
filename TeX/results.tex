@@ -19,7 +19,7 @@
 
 Must:
   + Alec: write to Kenshi about coarse quad mesh for cage defo.
-  - Alec: set up nest view to output camera params, meshes, colors for Etienne
+  + Alec: set up nest view to output camera params, meshes, colors for Etienne
   - spend less than one day on setting up Linux machine
   - max planck 3d print layers
   - create figures for current results
@@ -61,6 +61,9 @@ Must:
   - left atrium
   - large number layers (100), rampant
   - write the paper
+  - didactic 2D figures:
+    - flow
+    - expansion
   - Alec: method
   - Etienne: intro
   - Leo: pass on method
@@ -69,6 +72,8 @@ Must:
   - Alec: pass on intro
 
 Should:
+  - failure case for simpler flows: mean curvature flow on fine mesh does not
+    go inside coarse mesh, may even intersect itself
   - large number of layers on high-res mesh xyz dragon
   - high genus: buddha
   - Automatic cages for deformation. Symmetry preservation, planar quads
@@ -89,9 +94,9 @@ Nice:
 
 
 Coding (Alec):
- - cage deformation example (with symmetry result)
+ - Basic component needed: multires poisson solver in 3D
 
- - Basic component needed: multires poisson solver
+ - cage deformation example (with symmetry result)
 
  - Multigrid Poisson equation. Show that naive non-nested meshes will have
    poor/no convergence: alligator teeth, etc.
