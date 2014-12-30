@@ -2,101 +2,130 @@
 \section{Results and applications}
 \label{sec:results}
 
-\subsection{Can try right now:}
-
-Compare differences of decimators:
-  - CGAL Decimator
-  - CGAL isosurface mesher
-  - QSlim
-  - OpenFlipper
-  - OpenMesh
-  - Meshlab
-
-
-Zoo of results: at least 20 models.
+\subsection{Have meshes for:}
   + armadillo
   + bunny
   + gargo
   + horse
   + Model1 (human)
   + octopus
-  - pelvis (subdivide initial to 100K or 50K, more layers)
-  - Model3 (with more layers and double-check volume minimization)
-  - Model4 (more layers)
-  - Model6 (more layers, better decimation)
-  - Model7 (more layers)
-  - Model9 (more layers)
-  - anchor (needs more layers)
-  - human (have meshes)
-  - animals
-  - mechanical
-    - microscope
-    - iwires
-  - engineering
-    - space shuttle
-    - airplane
-  - medical
-    - heart (MRI heart, try just one piece)
-    - cartoon heart
-  - coupledown retry QSlim, more layers
+  + pelvis (subdivide initial to 100K or 50K, more layers)
+  + Model3 (with more layers and double-check volume minimization)
+  + Model7 (more layers)
+  + Model9 (more layers)
+  + anchor (needs more layers)
+  + coupledown retry QSlim, more layers
+  + rampant (small number of layers stress test)
 
-Always take timings!
+Must:
+  + Alec: write to Kenshi about coarse quad mesh for cage defo.
+  - spend less than one day on setting up Linux machine
+  - max planck 3d print layers
+  - create figures for current results
+  - remove writing/reading to files (debug mode only)
+  - on medium size example run the matlab profiler:
+    - all the time is spent inside el topo mex (or etienne's exe), maybe in
+      intersection tests
+    - don't have to run until completion
+  - rampant: try CGAL signed distance isosurface: smallest iso-value such that
+    resolution is close to ours and mesh is fully outside input
+    Using `signed\_distance\_isosurface`:
+    - 'AngleBound',28 
+    - 'SignedDistanceType','pseudonormal'
+    - play with 'RadiusBound' and 'DistanceBound' (set to same value) to set the
+      resolution (start with something like 0.2)
+    - 'Level',as small as possible (positive)
+    - Try to create the same layers as the rampart: check if *\_2 intersects the
+      *\_1 and *\_1 intersects original (if so then increase level)
+  
+    while intersecting
+      binary search on 'Level'
+      while resolution not close to ours
+        binary search on 'RadiusBound' and 'DistanceBound'
+      end
+    end
+  - Model4
+    - If Mesh from el topo is not well separated, try to separate using a few
+      iterations of inflation, then adjust the outer and inner params to run
+      Etienne's code.
+    - Isosurface for the same number of \_levels\_ minimal number of facets per
+      level (probably always greater than ours). Similar binary search this
+      time the primary loop over the Angle and Distance bound. The point is
+      that CGAL isosurface will have to use very fine meshes to fit in small
+      space between knees.
+  - couplingdown compare CGAL (done) to OpenFlipper, try to match face count per
+    layer
+  - create timings table
+  - cartoon heart 
+  - left atrium
+  - large number layers (100), rampant
+  - write the paper
+  - Alec: method
+  - Etienne: intro
+  - Leo: pass on method
+  - Alec: related
+  - Etienne: pass on related, method
+  - Alec: pass on intro
 
-Stress tests
-  1) Very large number of layers: 100!
-    - xyz dragon
-  2) Small number of layers: 2,3
-  3) Insanely complex fractal-like shape with very close features and many holes
-    - buddha
-    - stanford "dragon"
-    - tangled porcupine-like shape (+ask changxi for spiky ball)
-  4) Compare running Flow on very nicely tessellated model and poorly
+Should:
+  - large number of layers on high-res mesh xyz dragon
+  - high genus: buddha
+  - Automatic cages for deformation. Symmetry preservation, planar quads
+    - "cage transfer": fit dash cage or horse cage to another humanoid (or
+      animal)
+  - Compare running Flow on very nicely tessellated model and poorly
   tessellated and "noisy" model
 
-Literally design and 3D-print a matryoshka doll. Admittedly there's an extra
-constraint we're not considering which is that the nested halves need to be
-removable from each other.
-  - six or seven layers on the max planck head, thickness in between layers
-
-Automatic cages for deformation. Symmetry preservation, planar quads
-  - "cage transfer": fit dash cage or horse cage to another humanoid (or
-    animal)
+Nice:
+  - Model6 (more layers, better decimation)
+  - stanford "dragon"
+  - tangled porcupine-like shape (+ask changxi for spiky ball)
 
 - draft of paper
 
-\subsection{Needs coding:}
+- pelvis (one or two more layers)
 
-Basic component needed: multires poisson solver
 
-Multigrid Poisson equation. Show that naive non-nested meshes will have
-poor/no convergence: alligator teeth, etc.
-  - generic poisson equation in 2d and in 3d
-    - compare to level set decimation
-    - compare to qslim
-  - geodesics in heat 
 
-Multi-res ARAP deformation/physical elastics
+Coding (Alec):
+ - cage deformation example (with symmetry result)
 
-Multires automatic skinning weights (i.e. QP solve). See Baohua Wu's thesis.
+ - Basic component needed: multires poisson solver
 
-Collision detection, penetration depth estimation. Unlike AABB or KDOP, cages
-are isometry invariant (although so are OABB).
-  - cache distance to fine mesh on coarse mesh, then approximate distance to
-    fine mesh by finding closest point on coarse mesh and adding fine mesh
-    distance. Why need nested then?
-  - build interactive demo: bouncing beach balls around rigidly moving object
+ - Multigrid Poisson equation. Show that naive non-nested meshes will have
+   poor/no convergence: alligator teeth, etc.
+     - generic poisson equation in 2d and in 3d
+       - compare to level set decimation
+       - compare to qslim
+     - geodesics in heat 
+
+ - Collision detection, penetration depth estimation. Unlike AABB or KDOP, cages
+   are isometry invariant (although so are OABB).
+     - cache distance to fine mesh on coarse mesh, then approximate distance to
+       fine mesh by finding closest point on coarse mesh and adding fine mesh
+       distance. Why need nested then?
+     - build interactive demo: bouncing beach balls around rigidly moving object
+   
+ - Multires automatic skinning weights (i.e. QP solve). See Baohua Wu's thesis.
+   
+ - Multi-res ARAP deformation/physical elastics
+
+ - Bijective mapping (Locally injective mapping of tet mesh conforming to all
+   layers): maintains nesting.
+
+ - Flow application: shrink one mesh inside another. Use our new flow to put a 
+  character inside a T-shirt for example. Use generalized winding number to 
+  determine the ?sign?, shrink character towards inside the T-shirt, 
+  expand character back to its initial position using physical simulation. 
+    - Armour: Model4 over human: Model3
 
 Adaptive simulation \cite{Debunne:2001:DRD}
-
-Flow application: shrink one mesh inside another. Use our new flow to put a 
-character inside a T-shirt for example. Use generalized winding number to 
-determine the ?sign?, shrink character towards inside the T-shirt, 
-expand character back to its initial position using physical simulation. 
 
 Dynamic update: how much work is it to deform the fine mesh and have the coarse
 meshes follow? No need for the flow since we already have a feasible initial
 position. Just ``simulation'' at this point?
   - need animation sequence of the fine mesh: alec send frames
+
 
 Retry horse example with ICP energy instead of volume (to try to reduce
 "pancakes")
@@ -117,5 +146,11 @@ Multigrid fluid simulation. Topology is important.
   - medical example: e.g. heart, naive multires combined two unrelated veins
   - ask fang.
 
-Bijective mapping (Locally injective mapping of tet mesh conforming to all
-layers): maintains nesting.
+More along the lines of:
+  - engineering
+    - space shuttle
+    - airplane
+  - animals
+  - mechanical
+    - microscope
+    - iwires
