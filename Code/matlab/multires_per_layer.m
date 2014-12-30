@@ -300,10 +300,13 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = multires_per_layer(V0
           % loop over different levels
           for k=num_levels:-1:1
               
-              tic
-              [V_coarse{k},F_coarse{k}] = cgal_simplification(cages_V{k+1},cages_F{k+1},levels(k));
-              [V_coarse{k},F_coarse{k}] = meshfix(V_coarse{k},F_coarse{k});
-              timing.decimation = timing.decimation + toc;
+%               % only generate coarse layers if they were not prescribed
+%               if (isempty(V_coarse) && isempty(F_coarse))
+                  tic
+                  [V_coarse{k},F_coarse{k}] = cgal_simplification(cages_V{k+1},cages_F{k+1},levels(k));
+                  [V_coarse{k},F_coarse{k}] = meshfix(V_coarse{k},F_coarse{k});
+                  timing.decimation = timing.decimation + toc;
+%               end
               
               % save partial result
               save('partial.mat','Pall','V_coarse','F_coarse','V0','F0');

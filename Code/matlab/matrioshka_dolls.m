@@ -156,7 +156,7 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = matrioshka_dolls(V0,F
           if (rest_dt>0.0)
               disp('ElTopo could not handle it, switching to velocityfilter')
               if (~inflated)
-                  V_all_prev = inflate_mex(V_all_prev,F_all,size(V,1),eps_proximity);
+                  V_all_prev = inflate_mex(V_all_prev,F_all,size(V,1),sep_thick);
                   % also has to re-calculate the step towards
                   % gradient direction
                   CV_inf = V_all_prev(size(V,1)+1:end,:);
@@ -198,7 +198,6 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = matrioshka_dolls(V0,F
               beta = 0.5*beta;
               fprintf('energy increased to energy = %g. Changing beta = %g\n', cur_energy, beta);
           end
-          
           % plot partial results
           hold on;
           delete(pc);
