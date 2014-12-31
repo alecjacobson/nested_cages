@@ -107,48 +107,6 @@ or\\
 %%% If you have user-defined macros, you may include them here.
 \input{pre.tex}
 
-% FIX LINE NUMBERS AFTER EQUATION
-% http://changilkim.wordpress.com/2013/05/13/siggraph-latex-template-line-number-correction-hack/
-\newcommand*\patchAmsMathEnvironmentForLineno[1]{%
-\expandafter\let\csname old#1\expandafter\endcsname\csname #1\endcsname
-\expandafter\let\csname oldend#1\expandafter\endcsname\csname end#1\endcsname
-\renewenvironment{#1}%
-{\linenomath\csname old#1\endcsname}%
-{\csname oldend#1\endcsname\endlinenomath}}%
-\newcommand*\patchBothAmsMathEnvironmentsForLineno[1]{%
-\patchAmsMathEnvironmentForLineno{#1}%
-\patchAmsMathEnvironmentForLineno{#1*}}%
-\AtBeginDocument{%
-\patchBothAmsMathEnvironmentsForLineno{equation}%
-\patchBothAmsMathEnvironmentsForLineno{align}%
-\patchBothAmsMathEnvironmentsForLineno{flalign}%
-\patchBothAmsMathEnvironmentsForLineno{alignat}%
-\patchBothAmsMathEnvironmentsForLineno{gather}%
-\patchBothAmsMathEnvironmentsForLineno{multline}%
-\patchBothAmsMathEnvironmentsForLineno{eqnarray}%
-}
-
-%------------------------------------------------------------------------
-% Alter some LaTeX defaults for better treatment of figures:
-    % See p.105 of "TeX Unbound" for suggested values.
-    % See pp. 199-200 of Lamport's "LaTeX" book for details.
-    %   General parameters, for ALL pages:
-    \renewcommand{\topfraction}{0.9}	% max fraction of floats at top
-    \renewcommand{\bottomfraction}{0.8}	% max fraction of floats at bottom
-    %   Parameters for TEXT pages (not float pages):
-    \setcounter{topnumber}{4}
-    \setcounter{bottomnumber}{4}
-    \setcounter{totalnumber}{8}     % 2 may work better
-    \setcounter{dbltopnumber}{4}    % for 2-column pages
-    \renewcommand{\dbltopfraction}{0.9}	% fit big float above 2-col. text
-    \renewcommand{\textfraction}{0.07}	% allow minimal text w. figs
-    %   Parameters for FLOAT pages (not text pages):
-    \renewcommand{\floatpagefraction}{0.7}	% require fuller float pages
-	% N.B.: floatpagefraction MUST be less than topfraction !!
-    \renewcommand{\dblfloatpagefraction}{0.7}	% require fuller float pages
-%------------------------------------------------------------------------
-
-
 \begin{document}
 
 %%% A ``teaser'' image appears under the title and affiliation information,
