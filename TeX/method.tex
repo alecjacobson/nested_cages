@@ -83,10 +83,20 @@ closest point $\q$ on the coarse mesh:
   -1 & \text{ if $\p$ is inside $(\V_1,\F_1)$},
 \end{cases}
 \end{align}
+
 where $u(\p)$ is the \emph{unsigned} distance from $\p$ to the coarse mesh and
 $s(\p)$ modulates by the appropriate sign.
 
+\leo{$dA$ has to be fixed, and we are using the one induced by the initial embedding.
+If we don't fix, we don't flow all the way towards the medial axis. I have an analytic example
+for a sphere, not sure how much details we should provide for this point.}
+
+\leo{I would prefer to use $d$ for distance, instead of $u$}.
+
 \alec{Are we actually using signed \emph{squared} distance?}
+
+\leo{We are using the one whose gradient is the vector connecting to the closest 
+point on the coarse mesh. I think it's not squared then.}
 
 It is important that $\p$ consider \emph{all points} on the fine mesh, not just
 vertices. Though \emph{all vertices} in $\widehat{\V}_0$ may lie inside
@@ -132,6 +142,11 @@ evaluation points $\p_i$ and corresponding weights $w_i$ for each triangle:
 \end{align}
 where $\lambda_a,\lambda_b,\lambda_c$ are the barycentric coordinates locating $\p_i$
 in the triangle $\{a,b,c\}$.
+
+\leo{If $w_i$ are per-triangle weights (area in the initial embedding), I think it would be more clear
+to put it outside the second summation and replace by $w_{\{a,b,c\}}$ (since it corresponds
+to the $\{a,b,c\}$ triangle, not quadrature point $p_i$).}
+
 %
 We use second-order quadrature rules and see diminishing returns with more
 exact schemes.
@@ -164,6 +179,10 @@ Without loss of generality, if we assume triangle indices ${a,b,c}$ are always
 \alec{whhhhhhaaat. My gradient has run amok. How come I'm not getting that we
 have a weighted sum of directions toward the closest points to each quadrature
 point?}
+
+\leo{It would be easier to call $s \cdot u$ as a single function, to avoid product rules.
+Also, you are forgetting a chain rule (since each quadrature points depends on the embedding).
+I have it all written down in a pptx, could share or simply write this derivation.}
 \begin{align}
 &=-
 ∑_{\forall \{a,b,c\} | a = j} ∑_i w_i s_i^* \g_i,\\
@@ -197,8 +216,15 @@ Rather than admit defeat, we propose a additional step which alleviates many
 occurrences of this problem. We reverse the picture and expand the coarse mesh,
 flowing it away from the current fine mesh along its signed distance field.
 
+\leo{I think it is too early to put this last paragraph here. I'd rather discuss it in a limitation section.
+Could be a bit harming here. It would be nicer to show working results here.}
+
 \alec{Might want to answer question: why not just expand the coarse mesh or
 always do both?}
+
+\leo{Expansion is more complicated because it is performed in a coarser mesh. Additionally,
+we have to run a physical simulation at every step to guarantee it does not tangle, which 
+is not needed for the fine mesh.}
 
 \alec{Relationship to David's penetration depth energy: needs intersection free
 state; and Untangling Cloths' volume minimization: might push coarse mesh
@@ -206,6 +232,8 @@ state; and Untangling Cloths' volume minimization: might push coarse mesh
 
 \alec{Should state that we 1) don't care if $(\widehat{\V}_0,\F_0)$ becomes
 self-intersection or 2) cannot become self-intersecting.}
+
+\leo{We don't care.}
 
 \subsection{Re-inflation}
 \label{sec:reinflation}
@@ -283,6 +311,10 @@ First, we adapt the ``velocity adjuster'', \alec{there's a better word than
 infinite masses. \alec{What did we have to change in El Topo? We decrease the
 time step and retry assuming linear motion?}
 
+\leo{We removed a phase called RIZ (Rigid Impact Zones), that allowed infinite mass 
+vertices to not reach final positions. We also changed Cholmod by IGL's min quad with
+fixed (it better handled difficult cases). Finally, we also decrease time step as you described.}
+
 In difficult cases, too many time step subdivisions are needed, suggesting
 failure to make progress in finite time. To handle these hard cases, we fall
 back on a second, more robust but slower method: speculative asynchronous
@@ -331,9 +363,16 @@ citation for this}.
 \alec{what other energies? Dirichlet? ARAP? symmetry? planarization? Do we
 really need to include definitions and gradients for all of these?}
 
+\leo{Symmetry, planarization and proximity are partially implemented, could be done.
+If we are going to have a supplemental PDF for other reasons, I would then add 
+derivations there.}
+
 \alec{Need to address: ``why not optimize while reinflating? why optimize only
 at the end?'' We prioritize feasibility and performance before
 quality...hmmm...that doesn't sound good.}
+
+\leo{Because we are not concerned about the quality of intermediate steps.
+We only care about the quality of the cage itself. And indeed it is faster.}
 
 \alec{Need to address: ``why not try avoid collisions during decimation?''}
 
