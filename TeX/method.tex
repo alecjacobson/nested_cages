@@ -200,7 +200,9 @@ average of incident triangle normals or triangle normal,
 respectively \cite{Baerentzen:2005:SDC}.
 
 We iterate this flow stepping with magnitude proportional to a small ``time
-step'': $∆t \approx XXXXXX$ \alec{what do we use?}. After each time step we
+step'': $∆t \approx XXXXXX$ \alec{what do we use?} \leo{Default is $10^{-3}$,
+which works well for models scaled between -1 and 1. Can be tuned as optional parameter}. 
+After each time step we
 recompute signs $s_i^*$ and closest points $\q_i^*$ all quadrature points. We
 terminate if all signs are negative \emph{and} no intersecting faces are found
 between $(\widehat{\V}_0,\F_0)$ and $(\V_1,\F_1)$.
@@ -312,7 +314,7 @@ infinite masses. \alec{What did we have to change in El Topo? We decrease the
 time step and retry assuming linear motion?}
 
 \leo{We removed a phase called RIZ (Rigid Impact Zones), that allowed infinite mass 
-vertices to not reach final positions. We also changed Cholmod by IGL's min quad with
+vertices to not reach final positions. We also replaced Cholmod by IGL's min quad with
 fixed (it better handled difficult cases). Finally, we also decrease time step as you described.}
 
 In difficult cases, too many time step subdivisions are needed, suggesting
@@ -344,7 +346,8 @@ $(\V'_1,\F_1)$ we set up the following ``simulation'', reminiscent of
 &(\V'_1+\U'_1,\F_1) \text{ does not intersect itself},\\
 &(\V'_1+\U'_1,\F_1) \text{ does not intersect } (\V'_0,\F_0).
 \end{align}
-where $δ \approx XXXXXX$\alec{what do we use?} is a small step size
+where $δ \approx XXXXXX$\alec{what do we use?} \leo{Default is starting with
+$δ = 10^{-1}$ and do a binary search to decrease energy while $δ > 10^{-3}$} is a small step size
 parameter and $\Grad E(\V'_1)$ is the gradient of the user supplied energy with
 respect to vertex positions. We solve this problem iteratively, setting $\V'_1
 \leftarrow \V'_1 + \U'_1$ after each step until convergence using the same
@@ -379,7 +382,14 @@ We only care about the quality of the cage itself. And indeed it is faster.}
 \alec{Might want to address: ``why accept pre-decimated meshes? Why not include
 decimation as part of pipeline''?}
 
+\leo{Default is to decimate while layers are generated. I.e., when we finish one layer, 
+this layer is decimated to be the coarse layer for the next round. Alternatively,
+all coarse layers may be prescribed as input.}
+
 \alec{Need to address: ``why not shrink wrap a mesh from well outside?''}
+
+\leo{The way we are doing now starts the final minimization at something close to what
+we want, so less risk of finding local minima.}
 
 \alec{We could handle energies which measure across layers. Minimize squared
 separation distance between adjacent layers: might pay to expand middle layer
