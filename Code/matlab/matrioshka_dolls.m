@@ -28,6 +28,22 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = matrioshka_dolls(V0,F
   %   timing:   struct with timing.decim, timing.flow and 
   %             timing.simulation
   
+  % Computes area-weighted (unnormalized) sum of face-normals incident on each
+% vertex:
+%
+% Inputs:
+%   CV  #CV by 3 list of mesh vertex positions
+%   CF  #CF by 3 list of mesh triangle indices into CV
+% Outputs:
+%   grad_vol  #CV by 3 area-weight normal sums
+function grad_vol = area_weighted_normal(CV,CF)
+  % "un-normalized" normals are in fact unit normals times twice the faces area
+  % (result of cross product) thus we just need to divide by 2 here
+  N = normals(CV,CF)/2;
+  grad_vol = full(sparse( ...
+    repmat(CF(:),1,3),repmat(1:3,numel(CF),1),repmat(N,3,1),size(CV,1),3));
+end
+  
   quadrature_order = 2;
   V_coarse = [];
   F_coarse = [];
@@ -81,7 +97,7 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = matrioshka_dolls(V0,F
       % shirnk fine mesh
       tic
       [Pall,~,F_exp,~] = shrink_fine_expand_coarse_3D(cages_V{2*k+1},cages_F{2*k+1},...
-          V_coarse{2*k},F_coarse{2*k},'quadrature_order',quadrature_order,'step_size',1e-1);
+          V_coarse{2*k},F_coarse{2*k},'quadrature_order',quadrature_order,'step_size',5e-1);
       timing.flow = timing.flow + toc;
       Pall_all_times{2*k} = Pall;
       
@@ -100,8 +116,8 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = matrioshka_dolls(V0,F
           V_all_prev = V_eltopo;
           V = Pall(:,:,end-j);
           fprintf('number of known vertices: %d\n',size(V,1));
-          disp('Eltopo using 10*sep_thick for inflation')
-          [V_eltopo,rest_dt] = collide_eltopo_mex(V_all_prev,F_all,[V;CV],size(V,1),10*sep_thick,1e-1);
+          disp('Eltopo expanding with 2*eps')
+          [V_eltopo,rest_dt] = collide_eltopo_mex(V_all_prev,F_all,[V;CV],size(V,1),2*sep_thick,1e-1);
           if (rest_dt>0.0)
               disp('ElTopo could not handle it, switching to velocityfilter')
               V_all_prev = inflate_mex(V_all_prev,F_all,size(V,1),eps_proximity);
@@ -110,10 +126,9 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = matrioshka_dolls(V0,F
           
           CV = V_eltopo(size(V,1)+1:end,:);
           % plot partial results
+          cla;
           hold on;
-          delete(pc);
           pc = trisurf(CF,CV(1:end,1),CV(1:end,2),CV(1:end,3),'FaceColor',[0.0 0.0 0.0],'FaceAlpha',0.1);
-          delete(pv);
           pv = trisurf(F,V(:,1,end),V(:,2,end),V(:,3,end),'FaceColor',[0.0 0.0 0.8],'FaceAlpha',0.2);
           title(sprintf(' flow step: %d/%d', ...
               j, size(Pall,3)-1));
@@ -137,16 +152,18 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = matrioshka_dolls(V0,F
       fprintf('initial energy = %g\n', min_energy);
       
       while(beta>0.01*beta_init)
+%       while(false)
           
           V_all_prev = V_eltopo;
           
-          areas = doublearea(CV,CF)/2;
-          N = normalizerow(normals(CV,CF));
-          grad_vol = zeros(size(CV));
-          for i=1:size(CV,1)
-              face_idx = mod(find(CF==i)-1,size(CF,1))+1;
-              grad_vol(i,:) = sum([areas(face_idx) areas(face_idx) areas(face_idx)].*N(face_idx,:));
-          end
+%           areas = doublearea(CV,CF)/2;
+%           N = normalizerow(normals(CV,CF));
+%           grad_vol = zeros(size(CV));
+%           for i=1:size(CV,1)
+%               face_idx = mod(find(CF==i)-1,size(CF,1))+1;
+%               grad_vol(i,:) = sum([areas(face_idx) areas(face_idx) areas(face_idx)].*N(face_idx,:));
+%           end
+          grad_vol = area_weighted_normal(CV,CF);
           
           fprintf('number of known vertices: %d\n',size(V,1));
           %                 fprintf('distance between meshes before simulation = %g\n', self_distance_mex(V_all_prev,F_all,size(V,1)));
@@ -199,10 +216,9 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = matrioshka_dolls(V0,F
               fprintf('energy increased to energy = %g. Changing beta = %g\n', cur_energy, beta);
           end
           % plot partial results
+          cla;
           hold on;
-          delete(pc);
           pc = trisurf(CF,CV(1:end,1),CV(1:end,2),CV(1:end,3),'FaceColor',[0.0 0.0 0.0],'FaceAlpha',0.1);
-          delete(pv);
           pv = trisurf(F,V(:,1,end),V(:,2,end),V(:,3,end),'FaceColor',[0.0 0.0 0.8],'FaceAlpha',0.2);
           title(sprintf('Volume minimization'));
           
@@ -217,6 +233,9 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = matrioshka_dolls(V0,F
       V_coarse{2*k} = cages_V{2*k};
       F_coarse{2*k} = cages_F{2*k};
       
+      % save partial
+      save('matrioshka_partial.mat','Pall','cages_V','cages_F');
+      
       fprintf('done generated layer. Now generation of the wall');
       % first copy layer
       V_coarse{2*k-1} = V_coarse{2*k};
@@ -225,7 +244,7 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = matrioshka_dolls(V0,F
       cla;
       tic
       [Pall,~,F_exp,~] = shrink_fine_expand_coarse_3D(cages_V{2*k},cages_F{2*k},...
-          V_coarse{2*k-1}+1e-6*randn(size(V_coarse{2*k-1})),F_coarse{2*k-1},'quadrature_order',quadrature_order,'step_size',1e-1);
+          V_coarse{2*k-1}+1e-6*randn(size(V_coarse{2*k-1})),F_coarse{2*k-1},'quadrature_order',quadrature_order,'step_size',5e-1);
       timing.flow = timing.flow + toc;
       Pall_all_times{2*k-1} = Pall;
       timing.flow = timing.flow + toc;
@@ -245,8 +264,8 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = matrioshka_dolls(V0,F
           V_all_prev = V_eltopo;
           V = Pall(:,:,end-j);
           fprintf('number of known vertices: %d\n',size(V,1));
-          disp('Eltopo using 10*sep_thick for inflation')
-          [V_eltopo,rest_dt] = collide_eltopo_mex(V_all_prev,F_all,[V;CV],size(V,1),10*wall_thick,1e-1);
+          disp('Eltopo expanding with 2*eps')
+          [V_eltopo,rest_dt] = collide_eltopo_mex(V_all_prev,F_all,[V;CV],size(V,1),2*wall_thick,1e-1);
           if (rest_dt>0.0)
               disp('ElTopo could not handle it, switching to velocityfilter')
               V_all_prev = inflate_mex(V_all_prev,F_all,size(V,1),wall_thick);
@@ -255,10 +274,9 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = matrioshka_dolls(V0,F
           
           CV = V_eltopo(size(V,1)+1:end,:);
           % plot partial results
+          cla;
           hold on;
-          delete(pc);
           pc = trisurf(CF,CV(1:end,1),CV(1:end,2),CV(1:end,3),'FaceColor',[0.0 0.0 0.0],'FaceAlpha',0.1);
-          delete(pv);
           pv = trisurf(F,V(:,1,end),V(:,2,end),V(:,3,end),'FaceColor',[0.0 0.0 0.8],'FaceAlpha',0.2);
           title(sprintf(' flow step: %d/%d', ...
               j, size(Pall,3)-1));
@@ -282,16 +300,18 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = matrioshka_dolls(V0,F
       fprintf('initial energy = %g\n', min_energy);
       
       while(beta>0.01*beta_init)
+%       while(false)
           
           V_all_prev = V_eltopo;
           
-          areas = doublearea(CV,CF)/2;
-          N = normalizerow(normals(CV,CF));
-          grad_vol = zeros(size(CV));
-          for i=1:size(CV,1)
-              face_idx = mod(find(CF==i)-1,size(CF,1))+1;
-              grad_vol(i,:) = sum([areas(face_idx) areas(face_idx) areas(face_idx)].*N(face_idx,:));
-          end
+%           areas = doublearea(CV,CF)/2;
+%           N = normalizerow(normals(CV,CF));
+%           grad_vol = zeros(size(CV));
+%           for i=1:size(CV,1)
+%               face_idx = mod(find(CF==i)-1,size(CF,1))+1;
+%               grad_vol(i,:) = sum([areas(face_idx) areas(face_idx) areas(face_idx)].*N(face_idx,:));
+%           end
+          grad_vol = area_weighted_normal(CV,CF);
           
           fprintf('number of known vertices: %d\n',size(V,1));
           %                 fprintf('distance between meshes before simulation = %g\n', self_distance_mex(V_all_prev,F_all,size(V,1)));
@@ -346,9 +366,8 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = matrioshka_dolls(V0,F
           
           % plot partial results
           hold on;
-          delete(pc);
+          cla;
           pc = trisurf(CF,CV(1:end,1),CV(1:end,2),CV(1:end,3),'FaceColor',[0.0 0.0 0.0],'FaceAlpha',0.1);
-          delete(pv);
           pv = trisurf(F,V(:,1,end),V(:,2,end),V(:,3,end),'FaceColor',[0.0 0.0 0.8],'FaceAlpha',0.2);
           title(sprintf('Volume minimization'));
           
@@ -362,6 +381,11 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = matrioshka_dolls(V0,F
       cages_V{2*k-1} = CV_opt;
       V_coarse{2*k-1} = cages_V{2*k-1};
       F_coarse{2*k-1} = cages_F{2*k-1};
+      
+      % save partial
+      save('matrioshka_partial.mat','Pall','cages_V','cages_F');
             
       
   end
+  
+end

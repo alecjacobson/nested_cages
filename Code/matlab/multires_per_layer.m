@@ -47,6 +47,7 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = multires_per_layer(V0
   % below parameter only used for ElTopo
   eps_distance = 1e-3; %( obs.: 1e-3 worked very well for bunny and pelvis)
   beta_init = 5e-3;
+  step_size = 1e-3;
   
   % save timings
   timing.decimation = 0.0;
@@ -99,10 +100,21 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = multires_per_layer(V0
               assert(ii+1<=numel(varargin));
               ii = ii+1;
               beta_init = varargin{ii};
+          case 'step_size'
+              assert(ii+1<=numel(varargin));
+              ii = ii+1;
+              step_size = varargin{ii};
           otherwise
               error('Unsupported parameter: %s',varargin{ii});
       end
       ii = ii+1;
+  end
+  
+    % check if layers were previously prescribed
+  if (isempty(V_coarse) && isempty(F_coarse))
+      decimation_given = 0;
+  else
+      decimation_given = 1;
   end
   
   % number of levels
@@ -302,12 +314,12 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = multires_per_layer(V0
           for k=num_levels:-1:1
               
 %               % only generate coarse layers if they were not prescribed
-%               if (isempty(V_coarse) && isempty(F_coarse))
+              if (~decimation_given)
                   tic
                   [V_coarse{k},F_coarse{k}] = cgal_simplification(cages_V{k+1},cages_F{k+1},levels(k));
                   [V_coarse{k},F_coarse{k}] = meshfix(V_coarse{k},F_coarse{k});
                   timing.decimation = timing.decimation + toc;
-%               end
+              end
               
               % save partial result
               save('partial.mat','Pall','V_coarse','F_coarse','V0','F0');
@@ -315,7 +327,7 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = multires_per_layer(V0
               % shirnk fine mesh, expand coarse mesh
               tic
               [Pall,Pall_coarse,F_exp,F_shrink] = shrink_fine_expand_coarse_3D(cages_V{k+1},cages_F{k+1},...
-                  V_coarse{k},F_coarse{k},'quadrature_order',quadrature_order,'eps_distance',eps_distance);
+                  V_coarse{k},F_coarse{k},'quadrature_order',quadrature_order,'eps_distance',10*eps_distance,'step_size',step_size);
               timing.flow = timing.flow + toc;
               
               Pall_all_times{k} = Pall;
