@@ -48,6 +48,7 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = multires_per_layer(V0
   eps_distance = 1e-3; %( obs.: 1e-3 worked very well for bunny and pelvis)
   beta_init = 5e-3;
   step_size = 1e-3;
+  expand_every = 0;
   
   % save timings
   timing.decimation = 0.0;
@@ -104,6 +105,10 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = multires_per_layer(V0
               assert(ii+1<=numel(varargin));
               ii = ii+1;
               step_size = varargin{ii};
+          case 'expand_every'
+              assert(ii+1<=numel(varargin));
+              ii = ii+1;
+              expand_every = varargin{ii};
           otherwise
               error('Unsupported parameter: %s',varargin{ii});
       end
@@ -327,7 +332,7 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = multires_per_layer(V0
               % shirnk fine mesh, expand coarse mesh
               tic
               [Pall,Pall_coarse,F_exp,F_shrink] = shrink_fine_expand_coarse_3D(cages_V{k+1},cages_F{k+1},...
-                  V_coarse{k},F_coarse{k},'quadrature_order',quadrature_order,'eps_distance',10*eps_distance,'step_size',step_size);
+                  V_coarse{k},F_coarse{k},'quadrature_order',quadrature_order,'step_size',step_size,'expand_every',expand_every);
               timing.flow = timing.flow + toc;
               
               Pall_all_times{k} = Pall;
