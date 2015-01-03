@@ -1,30 +1,19 @@
 \begin{abstract} 
 Many tasks in geometry processing and physical simulation benefit from
-multiresolution hierarchies. The benefits are particularly striking for tasks
-that require solving Eulerian PDEs over the volume of an object, where
-downsampling the object cubically reduces the size of the problem. The coarse
-discretization must satisfy several desiderata, in order for the
-multiresolution algorithm to be efficient and accurate: the coarsened object
+multiresolution hierarchies. The coarse
+approximations must satisfy several desiderata, in order for the
+multiresolution algorithms to be efficient and accurate: the coarsened object
 should respect the topology of the original, it should \emph{enclose} the
 original object, yet should fit the original as tightly as possible, i.e.
 include a minimal amount of extraneous volume. Existing techniques for building
-a multiresolution hierarchy, such as fitting a regular grid around the object,
+a multiresolution hierarchy, such as tracing distance level sets of the object,
 voxelizing the object, or meshing the object followed by decimation, violate
 one or more of these desiderata. We propose a solution that satisfies all three
-requirements: we first mesh the object and decimate its surface to get a
-sequence of (possibly non-nesting) coarsened surfaces. We then move the surface
-of the second coarsest layer along a flow designed to place it inside coarsest
-layer. We repeat this until the original surface is inside all coarser layers.
-Finally, we inflate the original surface back to its original shape, responding
-to any collisions that occur with the coarser layers that might occur during
-inflation. From coarse to fine, each layer then fully encloses the next while
-retaining a snug fit and respecting the original surface topology. We show how
-these hierarchies are useful for fast PDE solving, low-frequency data
-upsampling, and geometric modeling.
-
-\alec{We might need to be careful about the term ``nested''. It seems in the
-multigrid literature ``nested'', ``node-nested'', and ``non-nested'' have very
-specific meanings. Might be that the best option is to use ``nested'', but
-explicitly differentiate it with multigrid lit's use.}
+requirements by successively constructing each next-coarsest level of the hierarchy, 
+using a sequence of decimation, flow, and contact-aware physical simulation steps. 
+From coarse to fine, each layer then fully encloses the next while
+retaining a snug fit and respecting the original surface topology. We show that the method 
+is applicable to a wide variety of shapes of complex geometry and topology, and demonstrate
+applicability of the hierarchy to geometric modeling and multigrid simulation.
 \end{abstract}
 
