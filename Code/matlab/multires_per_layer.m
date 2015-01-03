@@ -143,8 +143,6 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = multires_per_layer(V0
       
   end
   
-  figure;
-  
   switch method
       
       case 'shrink_fine_and_expand'
