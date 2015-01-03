@@ -129,11 +129,11 @@ void mexFunction(
 
   if (nrhs != 4) {
     mexErrMsgIdAndTxt("MATLAB:mexcpp:nargin",
-            "velocity_filter requires four input arguments.");
+            "inflate_mex requires four input arguments.");
   }
-  else if (nlhs != 1) {
+  else if (nlhs != 2) {
     mexErrMsgIdAndTxt("MATLAB:mexcpp:nargout",
-            "velocity_filter generates one output argument.");
+            "inflate_mex generates two output arguments.");
   }
 
   os = new ofstream("./inflate_mex-log.txt");
@@ -170,6 +170,7 @@ void mexFunction(
       fixedVerts.insert(i);
 
   double distance = Distance::meshSelfDistance(q, F0_t, fixedVerts);
+  double prev_distance = distance;
   while(distance < eps_distance)
   {
       mexPrintf("Distance is %.16f. Inflating ... \n", distance);
@@ -177,6 +178,11 @@ void mexFunction(
       VelocityFilter::velocityFilter(q, qnew, F0_t, invmasses, 2.0*distance, 0.5*distance);
       q = qnew;
       distance = Distance::meshSelfDistance(q, F0_t, fixedVerts);
+      if (distance<prev_distance){
+          mexPrintf("Couldnt reach prescribed distance %.8f. Returned %.8f \n", eps_distance, prev_distance);
+          break;
+      }
+      prev_distance = distance;
   }
   // Restore the std stream buffer Important!
   std::cout.rdbuf(outbuf);
@@ -192,6 +198,14 @@ void mexFunction(
   plhs[0] = mxCreateDoubleMatrix(V0.rows(),V0.cols(), mxREAL);
   double * Vp = mxGetPr(plhs[0]);
   copy(&V0.data()[0],&V0.data()[0]+V0.size(),Vp);
+
+  plhs[1] = mxCreateDoubleMatrix(1,1, mxREAL);
+  double *out_ptr;
+  out_ptr = mxGetPr(plhs[1]);
+  if (distance>eps_distance)
+      *out_ptr = eps_distance;
+  else
+      *out_ptr = distance;
 
   return;
 }
