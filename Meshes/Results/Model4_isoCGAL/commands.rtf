@@ -17,4 +17,11 @@ writeOBJ('/Users/Leo/PHD_Work/Cage_Generation_2013/nested_cages/Meshes/Results/M
 [V,F] = signed_distance_isosurface(V0,F0,'Level',0.0089,'RadiusBound',0.0095,'DistanceBound',0.0095,'AngleBound',28,'SignedDistanceType','pseudonormal');\
 iso_V\{6\} = V;\
 iso_F\{6\} = F;\
-writeOBJ('/Users/Leo/PHD_Work/Cage_Generation_2013/nested_cages/Meshes/Results/Model4_isoCGAL/Model4_2.obj',iso_V\{6\},iso_F\{6\});}
+writeOBJ('/Users/Leo/PHD_Work/Cage_Generation_2013/nested_cages/Meshes/Results/Model4_isoCGAL/Model4_2.obj',iso_V\{6\},iso_F\{6\});\
+\
+% third cage\
+[V,F] = signed_distance_isosurface(V0,F0,'Level',0.015,'RadiusBound',0.012,'DistanceBound',0.012,'AngleBound',28,'SignedDistanceType','pseudonormal');\
+iso_V\{5\} = V;\
+iso_F\{5\} = F;\
+writeOBJ('/Users/Leo/PHD_Work/Cage_Generation_2013/nested_cages/Meshes/Results/Model4_isoCGAL/Model4_3.obj',iso_V\{5\},iso_F\{5\});\
+}
