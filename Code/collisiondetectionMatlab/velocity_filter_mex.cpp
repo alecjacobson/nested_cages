@@ -143,7 +143,7 @@ void mexFunction(
   int numinfinite;
   parse_rhs(nrhs,prhs,V0,V1,F0,&numinfinite);
   double outer = *mxGetPr(prhs[4]);
-  double inner = *mxGetPr(prhs[4]);
+  double inner = *mxGetPr(prhs[5]);
   Matrix3Xi F0_t(3,F0.rows());
   for (int k=0; k<F0.rows();k++){
       F0_t(0,k) = F0(k,0);

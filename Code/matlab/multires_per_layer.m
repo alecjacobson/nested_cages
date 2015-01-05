@@ -37,16 +37,16 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = multires_per_layer(V0
   %             timing.simulation, timing.etienne
   
   flow_type = 'signed_distance_direction';
-  simulation_steps = 1;
-  energy = 'displacement_step_and_volume';
+  energy_expansion = 'displacement_step';
+  energy_final = 'volume';
   quadrature_order = 1;
   V_coarse = [];
   F_coarse = [];
   Pall = [];
   method = 'shrink_fine_and_expand_coarse';
   % below parameter only used for ElTopo
-  eps_distance = 1e-3; %( obs.: 1e-3 worked very well for bunny and pelvis)
-  beta_init = 5e-3;
+  eps_distance = 1e-4; 
+  beta_init = 1e-1;
   step_size = 1e-3;
   expand_every = 0;
   
@@ -65,14 +65,10 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = multires_per_layer(V0
               assert(ii+1<=numel(varargin));
               ii = ii+1;
               flow_type = varargin{ii};
-          case 'simulation_steps'
+          case 'energy_expansion'
               assert(ii+1<=numel(varargin));
               ii = ii+1;
-              simulation_steps = varargin{ii};
-          case 'energy'
-              assert(ii+1<=numel(varargin));
-              ii = ii+1;
-              energy = varargin{ii};
+              energy_expansion = varargin{ii};
           case 'quadrature_order'
               assert(ii+1<=numel(varargin));
               ii = ii+1;
@@ -131,7 +127,7 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = multires_per_layer(V0
       for k=1:num_levels
           % if energy is symmetry_x, perform special decimation to produce
           % symmetric initial coarse meshes
-          if strcmp(energy,'symmetry_x')
+          if strcmp(energy_final,'symmetry_x')
 
               % I have migrated the symmetric decimation to a separate
               % function. Requires tests
@@ -340,9 +336,8 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = multires_per_layer(V0
               
               % push coarse mesh with physical simulation to obtain the cages
               tic
-              [V_coarse_new,~,~,etienne_called,timing_expansion,timing_volume] = combined_step_project(Pall,F_shrink,...
-                  Pall_coarse(:,:,end),F_exp,'simulation_steps',simulation_steps,...
-                  'energy',energy,'eps_distance',eps_distance,'beta_init',beta_init);
+              [V_coarse_new,etienne_called,timing_expansion,timing_volume] = combined_step_project(Pall,F_shrink,...
+                  Pall_coarse(:,:,end),F_exp,'energy_expansion',energy_expansion,'energy_final',energy_final,'eps_distance',eps_distance,'beta_init',beta_init);
               timing.expansion = timing.expansion + timing_expansion;
               
               timing.etienne = timing.etienne+etienne_called;

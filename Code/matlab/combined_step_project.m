@@ -1,7 +1,8 @@
-function [V_coarse_final,V_new,F_to_refine,etienne_called,time_expansion,time_final_energy]  ...
+function [V_coarse_final,etienne_called,time_expansion,time_final_energy]  ...
   = combined_step_project(P_all,F0,V_coarse,F_coarse,varargin)
   % COMBINED_STEP_PROJECT_3D
-  % [V_coarse_final,V_new] = combined_step_project(P_all,F0,V_coarse,F_coarse,delta_t,varargin)
+  % [V_coarse_final,etienne_called,time_expansion,time_final_energy]  ...
+  % = combined_step_project(P_all,F0,V_coarse,F_coarse,varargin)
   %
   % Given the evolution of a fine mesh V (the last is assumed to be
   % inside the coarse mesh), grow the fine mesh to its initial position
@@ -111,133 +112,39 @@ function [V_coarse_final,V_new,F_to_refine,etienne_called,time_expansion,time_fi
     % compute current energy of (TV,TT) w.r.t. (TV0,TT)
   end
 
-
-  disp('started combined_step_project');
-  etienne_called = 0;
-
-  simulation_steps = 1;
-  energy = 'displacement_initial_and_volume';
-  min_progress = 5e-4;
-  method = 'shrink_fine_and_expand';
-  % define target cage (many times initial mesh)
-  CV_0 = V_coarse;
-  eps_distance = 1e-4;
-  beta_init = 10;
-  % parsing arguments
-  ii = 1;
-  while ii < numel(varargin)
-      switch varargin{ii}
-          case 'simulation_steps'
-              ii = ii+1;
-              assert(ii<=numel(varargin));
-              simulation_steps = varargin{ii};
-          case 'energy'
-              ii = ii+1;
-              assert(ii<=numel(varargin));
-              energy = varargin{ii};
-          case 'min_progress'
-              ii = ii+1;
-              assert(ii<=numel(varargin));
-              min_progress = varargin{ii};
-          case 'method'
-              ii = ii+1;
-              assert(ii<=numel(varargin));
-              method = varargin{ii};
-          case 'CV_target'
-              ii = ii+1;
-              assert(ii<=numel(varargin));
-              CV_0 = varargin{ii};
-          case 'eps_distance'
-                assert(ii+1<=numel(varargin));
-                ii = ii+1;
-                eps_distance = varargin{ii};
-          case 'beta_init'
-                assert(ii+1<=numel(varargin));
-                ii = ii+1;
-                beta_init = varargin{ii};
-          otherwise
-              error('Unsupported parameter: %s',varargin{ii});
-      end
-      ii = ii+1;
-  end
-
-  % fine mesh
-  F = F0;
-  % coarse  mesh
-  CV = V_coarse;
-  CF = F_coarse;
-  % Shrunk fine mesh
-  V = P_all(:,:,end);
-  % start with no faces to refine (only needed for 
-  % method='shrink_coarse_refining')
-  F_to_refine = [];
-
-  % activates the camera toolbar in the figure and set principal rotation
-  % axis to none
-  cameratoolbar;
-  cameratoolbar('SetCoordSys','none');
-
-  axis equal;
-  pc = [];
-  pv = [];
-  set(gca,'xtick',[])
-  set(gca,'xticklabel',[])
-  set(gca,'ytick',[])
-  set(gca,'yticklabel',[])
-
-  % input('Ready. Set. ');
-  % fprintf('Go!\n');
-
-  cla;
-
-  % number of steps
-  k = size(P_all,3);
-  % faces for all vertices of both meshes (for collision detection)
-  F_all = [F;CF+size(V,1)];
-
-  % Volumetric ARAP not working, re-visit if needed
-  % if strcmp(energy,'volumetric_arap')
-  %     % if (volumetric_arap), tetrahedralize initial mesh (rest pose)
-  %     [SV_0,SF_0] = tetgen(CV_0,CF);
-  % end
-  % minimization parameters
-  beta = beta_init;
-  tol = min_progress;
-
-  % Eltopo parameters
-  eps_proximity = eps_distance;
-  tol_dt = 1e-1;
-  max_min_attempt = 3;
-  V_eltopo = [V;CV];
-  V_all_prev = V_eltopo;
-
-  if strcmp(energy,'symmetry_x')
-      % brute-force way of detecting pairs of points symmetric w.r.t.
-      % to x=0 plane
-      sym_pairs = [];
-      for i=1:size(CV,1)
-          p = CV(i,:);
-          for j=i:size(CV,1)
-              if (abs(p(1)+CV(j,1))<1e-4 && abs(p(2)-CV(j,2))<1e-4 && abs(p(3)-CV(j,3))<1e-24)
-                  sym_pairs = [sym_pairs; i j];
-              end
-          end
-      end
-  end
-
-  % Initial guess at filtered coarse mesh vertices
-  CV_filtered = CV;
-  CV_orig = CV;
-  % starting to time expansion reversing flow: we'll updated CV_filtered after
-  % each reverse flow time step.
-  tic;
-  for t = k-1:-1:1
-    % Previous positions of fine mesh
-    V_prev = P_all(:,:,t+1);
-    % Desired positions of fine mesh after step
-    V = P_all(:,:,t);
-
-      switch energy
+  function [CV_filtered, etienne_called,pc,pv] = one_step_project(V_prev,V,F,CV,CF,energy,...
+          beta,eps_proximity,tol_dt,etienne_called,t,CV_orig,sym_pairs,pc,pv)
+    % Given (V_prev,F) previous fine mesh, (V,F) new fine mesh and
+    % (CV,CF) current coarse mesh, step from (V_prev,F) to (V,F) and
+    % obtian energy minimizing (CV,CF).
+    % 
+    % Inputs:
+    %   (V_prev,F)  previous fine mesh
+    %   (V,F) next fine mesh
+    %   (CV,CF) coarse mesh in the begining of the time step
+    %   energy: 'displacement_step','displacement_step_and_volume', 
+    %     'displacement_initial','displacement_initial_and_volume',
+    %     'volume', 'symmetry_x', 'volumetric_arap'
+    %   beta: initial step size for the gradient method
+    %   eps_proximity: separation used for physical simulation
+    %   tol_dt: tolerance for Eltopo stop trying to cut the time step
+    %   etienne_called: how many times Etienne's code was called
+    %   t: current flow step (for plotting purposes only)
+    %   CV_orig: coarse mesh emebdding we minimize distance to 
+    %   (only used for 'displacement_initial')
+    %   sym_pairs: set of pairs that are symmetric w.r.t. x-axis
+    %   pc: plot handle for coarse mesh (only used in debug mode)
+    %   pv: plot handle for fine mesh (only used in debug mode)
+    % Output:
+    %   CV_filtered: new embedding for the coarse mesh
+    %   etienne_called: updated Etienne
+    %   pc: plot handle for coarse mesh (only used in debug mode)
+    %   pv: plot handle for fine mesh (only used in debug mode)
+    
+     % initialize CV_filtered
+     CV_filtered = CV;
+    
+     switch energy
       case {'displacement_step','displacement_step_and_volume'}
         energy_gradient = @(CV_prev) displacement_gradient(CV_prev,CV_filtered);
         energy_value    = @(CV_prev)   displacement_energy(CV_prev,CV_filtered);
@@ -275,10 +182,11 @@ function [V_coarse_final,V_new,F_to_refine,etienne_called,time_expansion,time_fi
       %   out_proximity  separation distance determined by etienne's inflation
       %
 
-
-      %% TODO: THIS SHOULD BE A SEPARATE FUNCTION CALL SO THAT FINAL OPTIMIZATION
-      %CAN ALSO USE IT
-
+      
+      % faces for all vertices of both meshes (for collision detection)
+      F_all = [F;CF+size(V,1)];
+      
+      % initialize energy as inf
       E_val = inf;
       % Stepping in energy gradient direction until converged
       bb_iter = 1;
@@ -291,11 +199,11 @@ function [V_coarse_final,V_new,F_to_refine,etienne_called,time_expansion,time_fi
         [CV_grad] = energy_gradient(CV_prev);
 
         % Try to take one step using el topo
-        assert(isempty(intersect_other(V_prev,F,CV_prev,CF,'FirstOnly',true)));
+%         assert(isempty(intersect_other(V_prev,F,CV_prev,CF,'FirstOnly',true)));
         [V_all_bb,rest_dt] = collide_eltopo_mex( ...
           [V_prev;CV_prev             ],F_all, ...
           [     V;CV_prev-beta*CV_grad], ...
-          size(V,1),10*eps_proximity,tol_dt);
+          size(V,1),eps_proximity,tol_dt);
         % Did el topo fail?
         if (rest_dt>0.0)
           disp('ElTopo could not handle it, switching to velocityfilter')
@@ -315,7 +223,7 @@ function [V_coarse_final,V_new,F_to_refine,etienne_called,time_expansion,time_fi
         % Extract new positions for coarse mesh
         CV_filtered = V_all_bb(size(V,1)+1:end,:);
         % (CV_filtered,CF) should not intersect (V,F)
-        assert(isempty(intersect_other(V,F,CV_filtered,CF,'FirstOnly',true)));
+%         assert(isempty(intersect_other(V,F,CV_filtered,CF,'FirstOnly',true)));
 
         % Stop if the change in positions is tiny
         d_CV = max(normrow(CV_filtered - CV_prev));
@@ -352,15 +260,18 @@ function [V_coarse_final,V_new,F_to_refine,etienne_called,time_expansion,time_fi
         end
 
         if debug
-          tsurf(F,V_prev,'FaceAlpha',0.2,'EdgeAlpha',0.2,'FaceColor','b');
           hold on;
-          tsurf(CF,CV_filtered,'FaceAlpha',0.5,'EdgeAlpha',0.5,'CData', ...
-            sum(abs(CV_prev-CV_filtered).^2,2));
-          hold off;
-          colorbar
           axis equal;
-          title(sprintf('t: %d',t),'FontSize',30);
+          delete(pc);
+          delete(pv);
+          % trisurf maintains previous axes, while tsuyrf doesn't
+          pv = trisurf(F,V_prev(:,1),V_prev(:,2),V_prev(:,3),...
+              'FaceColor',[0.0 0.0 0.8],'FaceAlpha',0.2);
+          pc = trisurf(CF,CV_filtered(:,1),CV_filtered(:,2),CV_filtered(:,3),...
+              'FaceColor',[0.5 0.0 0.0],'FaceAlpha',0.1);
+          title(sprintf('energy: %s, t: %d',energy,t),'FontSize',20);
           drawnow;
+          hold off;
         end
 
         % Updated previous positions for next iteration of loop
@@ -370,12 +281,119 @@ function [V_coarse_final,V_new,F_to_refine,etienne_called,time_expansion,time_fi
       end
       assert(bb_iter >= 1,'must take at least one step');
       beta = beta_orig;
+        
+  end
+
+
+  disp('started combined_step_project');
+  etienne_called = 0;
+
+  energy_expansion = 'displacement_step';
+  energy_final = 'volume';
+  % define target cage (many times initial mesh)
+  eps_distance = 1e-4;
+  beta_init = 1e-1;
+  % parsing arguments
+  ii = 1;
+  while ii < numel(varargin)
+      switch varargin{ii}
+          case 'energy_expansion'
+              ii = ii+1;
+              assert(ii<=numel(varargin));
+              energy_expansion = varargin{ii};
+          case 'energy_final'
+              ii = ii+1;
+              assert(ii<=numel(varargin));
+              energy_final = varargin{ii};
+          case 'eps_distance'
+                assert(ii+1<=numel(varargin));
+                ii = ii+1;
+                eps_distance = varargin{ii};
+          case 'beta_init'
+                assert(ii+1<=numel(varargin));
+                ii = ii+1;
+                beta_init = varargin{ii};
+          otherwise
+              error('Unsupported parameter: %s',varargin{ii});
+      end
+      ii = ii+1;
+  end
+
+  % fine mesh
+  F = F0;
+  % coarse  mesh
+  CV = V_coarse;
+  CF = F_coarse;
+  % Shrunk fine mesh
+  V = P_all(:,:,end);
+
+  % activates the camera toolbar in the figure and set principal rotation
+  % axis to none
+  cameratoolbar;
+  cameratoolbar('SetCoordSys','none');
+  
+  % initialize plot handles
+  pc = [];
+  pv = [];
+
+  axis equal;
+  set(gca,'xtick',[])
+  set(gca,'xticklabel',[])
+  set(gca,'ytick',[])
+  set(gca,'yticklabel',[])
+
+  cla;
+
+  % number of steps
+  k = size(P_all,3);
+
+  % initialize beta
+  beta = beta_init;
+
+  % Eltopo parameters
+  eps_proximity = eps_distance;
+  tol_dt = 1e-1;
+
+  sym_pairs = [];
+  if strcmp(energy_final,'symmetry_x')
+      % brute-force way of detecting pairs of points symmetric w.r.t.
+      % to x=0 plane
+      for i=1:size(CV,1)
+          p = CV(i,:);
+          for j=i:size(CV,1)
+              if (abs(p(1)+CV(j,1))<1e-4 && abs(p(2)-CV(j,2))<1e-4 && abs(p(3)-CV(j,3))<1e-24)
+                  sym_pairs = [sym_pairs; i j];
+              end
+          end
+      end
+  end
+
+  % Initial guess at filtered coarse mesh vertices
+  CV_orig = CV;
+  CV_filtered = CV;
+  % starting to time expansion reversing flow: we'll updated CV_filtered after
+  % each reverse flow time step.
+  tic;
+  for t = k-1:-1:1
+    % Previous positions of fine mesh
+    V_prev = P_all(:,:,t+1);
+    % Desired positions of fine mesh after step
+    V = P_all(:,:,t);
+
+    [CV_filtered,etienne_called,pc,pv] = one_step_project(V_prev,V,F,...
+        CV_filtered,CF,energy_expansion,beta,eps_proximity,...
+        tol_dt,etienne_called,t,CV_orig,sym_pairs,pc,pv);
   end
   time_expansion = toc;
 
-  % TODO: ADD BACK FINAL OPTIMIZATION PHASE?
-  time_final_energy = 0;
+  
+  % final optimization
+  tic
+  [CV_filtered,etienne_called] = one_step_project(V_prev,V,F,...
+        CV_filtered,CF,energy_final,beta,eps_proximity,...
+        tol_dt,etienne_called,1,CV_orig,sym_pairs,pc,pv);
+  time_final_energy = toc;
 
-  V_new = [V;CV_filtered];
   V_coarse_final = CV_filtered;
+  
 end 
