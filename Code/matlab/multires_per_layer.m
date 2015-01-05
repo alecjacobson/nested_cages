@@ -39,14 +39,14 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = multires_per_layer(V0
   flow_type = 'signed_distance_direction';
   energy_expansion = 'displacement_step';
   energy_final = 'volume';
-  quadrature_order = 1;
+  quadrature_order = 2;
   V_coarse = [];
   F_coarse = [];
   Pall = [];
   method = 'shrink_fine_and_expand_coarse';
   % below parameter only used for ElTopo
   eps_distance = 1e-4; 
-  beta_init = 1e-1;
+  beta_init = 1e-2;
   step_size = 1e-3;
   expand_every = 0;
   

@@ -191,7 +191,7 @@ function [V_coarse_final,etienne_called,time_expansion,time_final_energy]  ...
       % Stepping in energy gradient direction until converged
       bb_iter = 1;
       beta_orig = beta;
-      BETA_MIN = 1e-3;
+      BETA_MIN = 1e-4;
       D_CV_MIN = 1e-4;
       CV_prev = CV_filtered;
       while true
@@ -292,7 +292,7 @@ function [V_coarse_final,etienne_called,time_expansion,time_final_energy]  ...
   energy_final = 'volume';
   % define target cage (many times initial mesh)
   eps_distance = 1e-4;
-  beta_init = 1e-1;
+  beta_init = 1e-2;
   % parsing arguments
   ii = 1;
   while ii < numel(varargin)
