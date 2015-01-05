@@ -2,8 +2,6 @@ function [Pall_fine,Pall_coarse,F_exp,F_shrink] = shrink_fine_expand_coarse_3D(V
   % SHRINK_FINE_EXPAND_COARSE_3D
   % [Pall_fine,Pall_coarse] = shrink_fine_expand_coarse_3D(V0,F0,V_coarse,F_coarse,varargin)
   %
-  % Add description
-  %
   % Input:
   %   V0  (#vertices)x3 list of mesh vertex positions of the initial fine mesh
   %   F0  (#faces)x3 list of vertex indices that form each face of the
@@ -151,7 +149,7 @@ function [Pall_fine,Pall_coarse,F_exp,F_shrink] = shrink_fine_expand_coarse_3D(V
 
           if (mod(ii,expand_every)==0)
               [V_exp,moving_vertices_coarse,grad_energy,quad,grad_quadrature,C,~] = signed_distance_direction_quadrature_matrix(V_exp,F_exp,1,quadrature_order,...
-                  V_coarse,F_coarse,moving_vertices_coarse,'scalar_search',area_initial_coarse,A_qv_coarse,M_coarse,w_lap_coarse,L_coarse,-1);
+                  V_coarse,F_coarse,moving_vertices_coarse,A_qv_coarse,M_coarse,w_lap_coarse,L_coarse,-1);
 
               % Eltopo to remove intersections on the coarse mesh
               [V_exp,~] = collide_eltopo_mex(V_exp_prev,F_exp,V_exp,0,1e-4,1e-10);
@@ -175,10 +173,9 @@ function [Pall_fine,Pall_coarse,F_exp,F_shrink] = shrink_fine_expand_coarse_3D(V
 
           else
 
-
               V_shrink_prev = V_shrink;
               [V_shrink,moving_vertices_shrink,grad_energy,quad,grad_quadrature,C,~] = signed_distance_direction_quadrature_matrix(V_shrink,F_shrink,1,quadrature_order,...
-                  V_exp,F_coarse,moving_vertices_shrink,'scalar_search',area_initial_shrink,A_qv_shrink,M_shrink,w_lap_shrink,L_shrink,1,'step',step_size);
+                  V_exp,F_coarse,moving_vertices_shrink,A_qv_shrink,M_shrink,w_lap_shrink,L_shrink,1,'step',step_size);
 
               plot_struct.quad_points = quad;
               plot_struct.grad_vertices = grad_energy;
