@@ -244,8 +244,8 @@ void mexFunction(
       el_topo_integrate(&eltopo_time0, V1, &sim_general_options, &sim_integration_options, &V_final, &out_dt);
       eltopo_time0.vertex_locations = V_final;
       rest_dt = (1-out_dt)*rest_dt;
-      mexPrintf("current out_dt = %.4f\n", out_dt);
-      mexPrintf("running rest_dt = %.4f\n", rest_dt);
+      //mexPrintf("current out_dt = %.4f\n", out_dt);
+      //mexPrintf("running rest_dt = %.4f\n", rest_dt);
       attempts = attempts+1;
 
       if (out_dt<tol_dt){

@@ -283,7 +283,7 @@ function [V_coarse_final,V_new,F_to_refine,etienne_called,time_expansion,time_fi
       % Stepping in energy gradient direction until converged
       bb_iter = 1;
       beta_orig = beta;
-      BETA_MIN = 1e-3;
+      BETA_MIN = 1e-1;
       D_CV_MIN = 1e-4;
       CV_prev = CV_filtered;
       while true

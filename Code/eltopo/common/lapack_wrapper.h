@@ -110,7 +110,13 @@ namespace LAPACK{
     // ---------------------------------------------------------
     
 #ifdef __APPLE__
-#include <vecLib/clapack.h>
+// http://stackoverflow.com/questions/26527077/compiling-with-accelerate-framework-on-osx-yosemite
+#ifndef __has_extension
+#define __has_extension(x) 0
+#endif
+#define vImage_Utilities_h
+#define vImage_CVUtilities_h
+#include <Accelerate/Accelerate.h>
     
     inline int solve_general_system(int &n, int &nrhs, float *a, int lda, int *ipiv, float *b, int ldb, int &info)
     { return sgesv_( (__CLPK_integer*) &n, 

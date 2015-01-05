@@ -58,3 +58,14 @@ Then add path to make this function visible. Something like:
 
     addpath('../eltopo/eltopo3d/');
 
+#### gptoolbox mex files
+Set up matlab's mexopts with `-std=c++11 -stdlib=libc++` flags
+
+Must compile:
+
+    gptoolbox/mex/signed_distance.cpp
+    gptoolbox/mex/intersect_other.cpp
+    gptoolbox/mex/selfintersect.cpp
+    gptoolbox/mex/in_element_aabb.cpp
+    gptoolbox/mex/point_mesh_squared_distance.cpp
+    gptoolbox/mex/winding_number.cpp

@@ -28,7 +28,7 @@ INCLUDE_PATH = -I. -I../common -I../common/newsparse -I../common/meshes -I../com
 # On Mac OS X, this probably will work:
 
 DEPEND = g++ -DNO_GUI
-CC = g++ -Wall -DNO_GUI -fPIC 
+CC = g++ -Wall -DNO_GUI -fPIC -flax-vector-conversions
 RELEASE_FLAGS = -O3 -funroll-loops
 DEBUG_FLAGS = -g
 LINK = g++
