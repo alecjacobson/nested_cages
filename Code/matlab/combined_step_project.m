@@ -223,7 +223,7 @@ function [V_coarse_final,etienne_called,time_expansion,time_final_energy]  ...
         % Extract new positions for coarse mesh
         CV_filtered = V_all_bb(size(V,1)+1:end,:);
         % (CV_filtered,CF) should not intersect (V,F)
-%         assert(isempty(intersect_other(V,F,CV_filtered,CF,'FirstOnly',true)));
+        assert(isempty(intersect_other(V,F,CV_filtered,CF,'FirstOnly',true)));
 
         % Stop if the change in positions is tiny
         d_CV = max(normrow(CV_filtered - CV_prev));
@@ -251,7 +251,7 @@ function [V_coarse_final,etienne_called,time_expansion,time_final_energy]  ...
           CV_filtered = CV_prev;
           fprintf('No progress...\n');
         end
-        assert(isempty(intersect_other(V,F,CV_filtered,CF,'FirstOnly',true)));
+%         assert(isempty(intersect_other(V,F,CV_filtered,CF,'FirstOnly',true)));
 
         % Stop if beta is now too small
         if beta < BETA_MIN
