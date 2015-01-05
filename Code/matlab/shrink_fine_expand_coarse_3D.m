@@ -1,4 +1,4 @@
-function [Pall_fine,Pall_coarse,F_exp,F_shrink] = shrink_fine_expand_coarse_3D(V0,F0,V_coarse,F_coarse,varargin)
+function [Pall_fine,Pall_coarse] = shrink_fine_expand_coarse_3D(V0,F0,V_coarse,F_coarse,varargin)
   % SHRINK_FINE_EXPAND_COARSE_3D
   % [Pall_fine,Pall_coarse] = shrink_fine_expand_coarse_3D(V0,F0,V_coarse,F_coarse,varargin)
   %
@@ -188,7 +188,6 @@ function [Pall_fine,Pall_coarse,F_exp,F_shrink] = shrink_fine_expand_coarse_3D(V
 
               Pall_fine(:,:,end+1) = V_shrink;
               
-              V_shrink_prev = V_shrink;
               IF = intersect_other(Pall_fine(:,:,end),F_shrink,Pall_coarse(:,:,end),F_coarse);
               fprintf('%05d: number of intersections after fine mesh shrinking: %d \n',ii,size(IF,1));
 %               if (size(IF,1)==0)
