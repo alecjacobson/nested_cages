@@ -24,4 +24,27 @@ writeOBJ('/Users/Leo/PHD_Work/Cage_Generation_2013/nested_cages/Meshes/Results/M
 iso_V\{5\} = V;\
 iso_F\{5\} = F;\
 writeOBJ('/Users/Leo/PHD_Work/Cage_Generation_2013/nested_cages/Meshes/Results/Model4_isoCGAL/Model4_3.obj',iso_V\{5\},iso_F\{5\});\
-}
+\
+% fourth cage\
+[V,F] = signed_distance_isosurface(V0,F0,'Level',0.022,'RadiusBound',0.016,'DistanceBound',0.016,'AngleBound',28,'SignedDistanceType','pseudonormal');\
+iso_V\{4\} = V;\
+iso_F\{4\} = F;\
+writeOBJ('/Users/Leo/PHD_Work/Cage_Generation_2013/nested_cages/Meshes/Results/Model4_isoCGAL/Model4_4.obj',iso_V\{4\},iso_F\{4\});\
+\
+% fifth cage\
+[V,F] = signed_distance_isosurface(V0,F0,'Level',0.031,'RadiusBound',0.021,'DistanceBound',0.021,'AngleBound',28,'SignedDistanceType','pseudonormal');\
+iso_V\{3\} = V;\
+iso_F\{3\} = F;\
+writeOBJ('/Users/Leo/PHD_Work/Cage_Generation_2013/nested_cages/Meshes/Results/Model4_isoCGAL/Model4_5.obj',iso_V\{3\},iso_F\{3\});\
+\
+% sixth cage\
+[V,F] = signed_distance_isosurface(V0,F0,'Level',0.044,'RadiusBound',0.027,'DistanceBound',0.027,'AngleBound',28,'SignedDistanceType','pseudonormal');\
+iso_V\{2\} = V;\
+iso_F\{2\} = F;\
+writeOBJ('/Users/Leo/PHD_Work/Cage_Generation_2013/nested_cages/Meshes/Results/Model4_isoCGAL/Model4_6.obj',iso_V\{2\},iso_F\{2\});\
+\
+% seventh cage\
+[V,F] = signed_distance_isosurface(V0,F0,'Level',0.061,'RadiusBound',0.036,'DistanceBound',0.036,'AngleBound',28,'SignedDistanceType','pseudonormal');\
+iso_V\{1\} = V;\
+iso_F\{1\} = F;\
+writeOBJ('/Users/Leo/PHD_Work/Cage_Generation_2013/nested_cages/Meshes/Results/Model4_isoCGAL/Model4_7.obj',iso_V\{1\},iso_F\{1\});}
