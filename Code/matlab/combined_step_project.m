@@ -244,7 +244,7 @@ function [V_coarse_final,etienne_called,time_expansion,time_final_energy]  ...
       bb_iter = 1;
       beta_orig = beta;
       BETA_MIN = 1e-3;
-      D_CV_MIN = 1e-6;
+      D_CV_MIN = 1e-5;
       CV_prev = CV_filtered;
       while true
         % Update gradient on coarse mesh
@@ -285,6 +285,7 @@ function [V_coarse_final,etienne_called,time_expansion,time_final_energy]  ...
 
         % Stop if the change in positions is tiny
         d_CV = max(normrow(CV_filtered - CV_prev));
+        fprintf('d_CV:%g\n',d_CV);
         if d_CV < D_CV_MIN && bb_iter > 1
           fprintf('Max change in CV (%g) less than D_CV_MIN (%g)\n', ...
             d_CV,D_CV_MIN);
