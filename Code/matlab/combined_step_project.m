@@ -245,6 +245,8 @@ function [V_coarse_final,etienne_called,time_expansion,time_final_energy]  ...
       beta_orig = beta;
       BETA_MIN = 1e-3;
       D_CV_MIN = 1e-5;
+      %BETA_MIN = 1e-6;
+      %D_CV_MIN = 1e-6;
       CV_prev = CV_filtered;
       while true
         % Update gradient on coarse mesh
