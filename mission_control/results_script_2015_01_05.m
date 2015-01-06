@@ -24,7 +24,37 @@
 save('../../Meshes/Results/pelvis_volume.mat','cages_V','cages_F','Pall','V_coarse','F_coarse','V0','F0','timing');
 % Obs.:
 
+[V0,F0] = readOBJ('../../Meshes/Results/bunny_volume/bunny.obj');
+[cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = multires_per_layer(V0,F0,[2^(-14/3)*floor(size(F0,1)) 2^(-12/3)*floor(size(F0,1)) 2^(-10/3)*floor(size(F0,1)) 2^(-8/3)*floor(size(F0,1)) 2^(-6/3)*floor(size(F0,1)) floor(2^(-4/3)*size(F0,1)) floor(2^(-2/3)*size(F0,1))]);
+save('../../Meshes/Results/bunny_volume.mat','cages_V','cages_F','Pall','V_coarse','F_coarse','V0','F0','timing');
+% Obs.:
+
+[V0,F0] = readOBJ('../../Meshes/Results/horse_volume/horse.obj');
+[cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = multires_per_layer(V0,F0,[2^(-14/3)*floor(size(F0,1)) 2^(-12/3)*floor(size(F0,1)) 2^(-10/3)*floor(size(F0,1)) 2^(-8/3)*floor(size(F0,1)) 2^(-6/3)*floor(size(F0,1)) floor(2^(-4/3)*size(F0,1)) floor(2^(-2/3)*size(F0,1))]);
+save('../../Meshes/Results/horse_volume.mat','cages_V','cages_F','Pall','V_coarse','F_coarse','V0','F0','timing');
+% Obs.:
+
+[V0,F0] = readOBJ('../../Meshes/Results/arma_volume/arma.obj');
+[cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = multires_per_layer(V0,F0,[2^(-14/3)*floor(size(F0,1)) 2^(-12/3)*floor(size(F0,1)) 2^(-10/3)*floor(size(F0,1)) 2^(-8/3)*floor(size(F0,1)) 2^(-6/3)*floor(size(F0,1)) floor(2^(-4/3)*size(F0,1)) floor(2^(-2/3)*size(F0,1))]);
+save('../../Meshes/Results/arma_volume.mat','cages_V','cages_F','Pall','V_coarse','F_coarse','V0','F0','timing');
+% Obs.:
+
+[V0,F0] = readOBJ('../../Meshes/Results/Model1_volume/Model1.obj');
+[cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = multires_per_layer(V0,F0,[2^(-14/3)*floor(size(F0,1)) 2^(-12/3)*floor(size(F0,1)) 2^(-10/3)*floor(size(F0,1)) 2^(-8/3)*floor(size(F0,1)) 2^(-6/3)*floor(size(F0,1)) floor(2^(-4/3)*size(F0,1)) floor(2^(-2/3)*size(F0,1))]);
+save('../../Meshes/Results/Model1_volume.mat','cages_V','cages_F','Pall','V_coarse','F_coarse','V0','F0','timing');
+% Obs.:
+
 [V0,F0] = readOBJ('../../Meshes/Results/Model3_volume/Model3.obj');
 [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = multires_per_layer(V0,F0,[2^(-14/3)*floor(size(F0,1)) 2^(-12/3)*floor(size(F0,1)) 2^(-10/3)*floor(size(F0,1)) 2^(-8/3)*floor(size(F0,1)) 2^(-6/3)*floor(size(F0,1)) floor(2^(-4/3)*size(F0,1)) floor(2^(-2/3)*size(F0,1))]);
 save('../../Meshes/Results/Model3_volume.mat','cages_V','cages_F','Pall','V_coarse','F_coarse','V0','F0','timing');
+% Obs.:
+
+[V0,F0] = readOBJ('../../Meshes/Results/Model7_volume/Model7.obj');
+[cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = multires_per_layer(V0,F0,[2^(-14/3)*floor(size(F0,1)) 2^(-12/3)*floor(size(F0,1)) 2^(-10/3)*floor(size(F0,1)) 2^(-8/3)*floor(size(F0,1)) 2^(-6/3)*floor(size(F0,1)) floor(2^(-4/3)*size(F0,1)) floor(2^(-2/3)*size(F0,1))]);
+save('../../Meshes/Results/Model7_volume.mat','cages_V','cages_F','Pall','V_coarse','F_coarse','V0','F0','timing');
+% Obs.:
+
+[V0,F0] = readOBJ('../../Meshes/Results/Model9_volume/Model9.obj');
+[cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = multires_per_layer(V0,F0,[2^(-14/3)*floor(size(F0,1)) 2^(-12/3)*floor(size(F0,1)) 2^(-10/3)*floor(size(F0,1)) 2^(-8/3)*floor(size(F0,1)) 2^(-6/3)*floor(size(F0,1)) floor(2^(-4/3)*size(F0,1)) floor(2^(-2/3)*size(F0,1))]);
+save('../../Meshes/Results/Model9_volume.mat','cages_V','cages_F','Pall','V_coarse','F_coarse','V0','F0','timing');
 % Obs.:
