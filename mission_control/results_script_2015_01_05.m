@@ -30,7 +30,7 @@
 % % Obs.: Worked with eps = 1e-3
 
 [V0,F0] = readOBJ('../../Meshes/Results/horse_volume/horse.obj');
-[cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = multires_per_layer(V0,F0,[2^(-14/3)*floor(size(F0,1)) 2^(-12/3)*floor(size(F0,1)) 2^(-10/3)*floor(size(F0,1)) 2^(-8/3)*floor(size(F0,1)) 2^(-6/3)*floor(size(F0,1)) floor(2^(-4/3)*size(F0,1)) floor(2^(-2/3)*size(F0,1))],'eps_distance',1e-3);
+[cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = multires_per_layer(V0,F0,[2^(-14/3)*floor(size(F0,1)) 2^(-12/3)*floor(size(F0,1)) 2^(-10/3)*floor(size(F0,1)) 2^(-8/3)*floor(size(F0,1)) 2^(-6/3)*floor(size(F0,1)) floor(2^(-4/3)*size(F0,1)) floor(2^(-2/3)*size(F0,1))],'eps_distance',5e-3);
 save('../../Meshes/Results/horse_volume.mat','cages_V','cages_F','Pall','V_coarse','F_coarse','V0','F0','timing');
 % Obs.:
 
