@@ -37,4 +37,5 @@ LINK_LIBS = -framework OpenGL -framework GLUT -framework vecLib \
 
 
 RELEASE_FLAGS += -DMEX
-INCLUDE_PATH += -I/Applications/MATLAB_R2014b.app/extern/include/
+#INCLUDE_PATH += -I/Applications/MATLAB_R2014b.app/extern/include/
+INCLUDE_PATH += -I/Applications/MATLAB_R2013a.app/extern/include/
