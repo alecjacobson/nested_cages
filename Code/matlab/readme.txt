@@ -32,7 +32,6 @@ with meshplot, tetrahedralize them with Tetgen, etc.
 
  - gptoolbox
    - meshfix
- - Alec's "volume/matlab" repository (still? If so, what functions?)
  - cgal
  - eltopo
    - SuiteSparse
@@ -45,6 +44,8 @@ with meshplot, tetrahedralize them with Tetgen, etc.
 This is a command line program (should be a mex, instead) created from the
 CGAL examples. See top of `edge_collapse_enriched_polyhedron.cpp` for
 compilation instructions.
+
+(Might be out of date, see decimate_cgal)
 
 
 #### `collide_eltopo_mex`
@@ -69,3 +70,4 @@ Must compile:
     gptoolbox/mex/in_element_aabb.cpp
     gptoolbox/mex/point_mesh_squared_distance.cpp
     gptoolbox/mex/winding_number.cpp
+    gptoolbox/mex/decimate_cgal.cpp

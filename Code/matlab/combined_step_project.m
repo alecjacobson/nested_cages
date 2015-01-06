@@ -51,35 +51,54 @@ function [V_coarse_final,etienne_called,time_expansion,time_final_energy]  ...
       repmat(CF(:),1,3),repmat(1:3,numel(CF),1),repmat(N,3,1),size(CV,1),3));
   end
 
-  function G = displacement_gradient(V,V0)
+  function [G,cb_data] = displacement_gradient(V,V0)
     % Gradient of total displacement from (V0,F) to (V,F)
     %
     % Inputs:
     %   V  #V by 3 current positions
     %   V0  #V by 3 positions to take displacement with respect to (e.g. initial
     %     positions)
+    % Outputs:
+    %   G  #V by 3 list of gradient vectors
+    %   cb_data  unused output callback data field (needed to match expected
+    %     prototype)
     G = V0-V;
+    cb_data = [];
   end
-  function E = displacement_energy(V,V0)
+  function [E,cb_data] = displacement_energy(V,V0)
     G = displacement_gradient(V,V0);
     E = trace(G'*G);
+    cb_data = [];
   end
 
-  function G = volume_gradient(V,F)
+  function [G,cb_data] = volume_gradient(V,F)
     % Gradient of volume of mesh (V,F)
+    %
+    % Inputs:
+    %   V  #V by 3 mesh positions
+    %   F  #F by 3 mesh facet indices
+    % Outputs:
+    %   G  #V by 3 list of gradient vectors
+    %   cb_data  unused output callback data field (needed to match expected
+    %     prototype)
     G = area_weighted_normal(V,F);
+    cb_data = [];
   end
-  function E = volume_energy(V,F)
+  function [E,cb_data] = volume_energy(V,F)
     [~,E] = centroid(V,F);
+    cb_data = [];
   end
-
-  function G = symmetry_x_gradient(V,sym_pairs)
+  function [G,cb_data] = symmetry_x_gradient(V,sym_pairs)
     % Gradient of energy compairing differences of pairs of vertices (after
     % reflection due to symmetry over yz-plane)
     %
     % Inputs:
     %   V  #V by 3 current positions
     %   sym_pairs  #sym_pairs by 2 list of indices into V of symmetric pairs
+    % Outputs:
+    %   G  #V by 3 list of gradient vectors
+    %   cb_data  unused output callback data field (needed to match expected 
+    %     prototype)
     G = zeros(size(V));
     G(sym_pairs(:,1),1) = 2*(V(sym_pairs(:,1),1)+V(sym_pairs(:,2),1));
     G(sym_pairs(:,1),2) = 2*(V(sym_pairs(:,1),2)-V(sym_pairs(:,2),2));
@@ -87,13 +106,36 @@ function [V_coarse_final,etienne_called,time_expansion,time_final_energy]  ...
     G(sym_pairs(:,2),1) = grad_sym(sym_pairs(:,2),1) + 2*(V(sym_pairs(:,1),1)+V(sym_pairs(:,2),1));
     G(sym_pairs(:,2),2) = grad_sym(sym_pairs(:,2),2) - 2*(V(sym_pairs(:,1),2)-V(sym_pairs(:,2),2));
     G(sym_pairs(:,2),3) = grad_sym(sym_pairs(:,2),3) - 2*(V(sym_pairs(:,1),3)-V(sym_pairs(:,2),3));
+    cb_data = [];
   end
-  function E = symmetry_x_energy(V,sym_pairs)
+  function [E,cb_data] = symmetry_x_energy(V,sym_pairs)
     G = symmetry_x_gradient(V,sym_pairs)
     E = trace(G'*G);
+    cb_data = [];
   end
 
-  function G = volumetric_arap_gradient(TV0,TT,TV,delta_t)
+  function [G,cb_data] = surface_arap_gradient(V0,F,V)
+    % Gradient of surface based arap energy
+    %
+    % Inputs:
+    %   V0  #V by 3 list of rest-pose mesh vertex positions
+    %   F  #F by 3 list of mesh facet indices
+    %   V  #V by 3 list of deformed mesh vertex positions
+    % Outputs
+    %   G  #V by 3 list of gradient vectors
+    %   cb_data  callback data set with energy data.E and best fit rotations
+    %     data.R
+    %
+    cb_data = [];
+    [G,cb_data.E,cb_data.R] = arap_gradient(V0,F,V);
+  end
+  function [E,cb_data] = surface_arap_energy(V0,F,V)
+    E = [];
+    cb_data = [];
+    [cb_data.G,E,cb_data.R] = arap_gradient(V0,F,V);
+  end
+
+  function [G,cb_data] = volumetric_arap_gradient(TV0,TT,TV)
     % Gradient of volumetric arap
     % 
     % Inputs:
@@ -101,15 +143,19 @@ function [V_coarse_final,etienne_called,time_expansion,time_final_energy]  ...
     %     vertices come first TV0 = [V0;steiner]
     %   TT  #TT by 4 list of tet mesh indices into TV
     %   TV  #TV by 3  new tet mesh vertices (with surface coming first
-    %   delta_t  time step used for "conservation of momentum" term
+    % Outputs:
+    %   G  #V by 3 list of gradient vectors
+    %   cb_data  unused output callback data field (needed to match expected
+    %     prototype)
 
     % Compute one small step of arap flow
     % TV_flow = arap(...)
-    G = (TV-TV_flow)/delta_t;
     % Double check sign and magnitude 
+    cb_data = [];
   end
   function E = volumetric_arap_energy(TV0,TT,TV)
     % compute current energy of (TV,TT) w.r.t. (TV0,TT)
+    cb_data = [];
   end
 
   function [CV_filtered, etienne_called,pc,pv] = one_step_project(V_prev,V,F,CV,CF,energy,...
@@ -144,19 +190,25 @@ function [V_coarse_final,etienne_called,time_expansion,time_final_energy]  ...
      % initialize CV_filtered
      CV_filtered = CV;
     
+     % for most energies call back data is not used
+     cb_data = [];
      switch energy
       case {'displacement_step','displacement_step_and_volume'}
-        energy_gradient = @(CV_prev) displacement_gradient(CV_prev,CV_filtered);
-        energy_value    = @(CV_prev)   displacement_energy(CV_prev,CV_filtered);
+        energy_gradient = @(CV_prev,cb_data) displacement_gradient(CV_prev,CV_filtered);
+        energy_value    = @(CV_prev,cb_data)   displacement_energy(CV_prev,CV_filtered);
       case {'displacement_initial','displacement_initial_and_volume'}
-        energy_gradient = @(CV_prev) displacement_gradient(CV_prev,CV_orig);
-        energy_value    = @(CV_prev)   displacement_energy(CV_prev,CV_orig);
+        energy_gradient = @(CV_prev,cb_data) displacement_gradient(CV_prev,CV_orig);
+        energy_value    = @(CV_prev,cb_data)   displacement_energy(CV_prev,CV_orig);
       case {'volume'}
-        energy_gradient = @(CV_prev) volume_gradient(CV_prev,CF);
-        energy_value    = @(CV_prev)   volume_energy(CV_prev,CF);
+        energy_gradient = @(CV_prev,cb_data) volume_gradient(CV_prev,CF);
+        energy_value    = @(CV_prev,cb_data)   volume_energy(CV_prev,CF);
       case {'symmetry_x'}
-        energy_gradient = @(CV_prev) symmetry_x_gradient(CV_prev,sym_pairs);
-        energy_value    = @(CV_prev)   symmetry_x_energy(CV_prev,sym_pairs);
+        energy_gradient = @(CV_prev,cb_data) symmetry_x_gradient(CV_prev,sym_pairs);
+        energy_value    = @(CV_prev,cb_data)   symmetry_x_energy(CV_prev,sym_pairs);
+      case {'surface_arap'}
+        % Call back data will be used to reduce calls to `fit_rotations`: this
+        energy_gradient = @(CV_prev,cb_data) surface_arap_gradient(CV_orig,CF,CV_prev);
+        energy_value  = @(CV_prev,cb_data)     surface_arap_energy(CV_orig,CF,CV_prev);
       case {'volumetric_arap'}
         % Optimize for internal steiner points according to volumetric arap,
         % fixing surface to CV
@@ -166,8 +218,8 @@ function [V_coarse_final,etienne_called,time_expansion,time_final_energy]  ...
         %
         TV = arap(TV0,TT,1:size(CV,1),CV_filtered);
         TV_steiner = TV(size(CV,1)+1:end,:);
-        energy_gradient = @(CV_prev) volumetric_arap_gradient(TV0,TT,[CV_prev;TV_steiner],delta_t);
-        energy_value  = @(CV_prev)     volumetric_arap_energy(TV0,TT,[CV_prev;TV_steiner]);
+        energy_gradient = @(CV_prev,cb_data) volumetric_arap_gradient(TV0,TT,[CV_prev;TV_steiner],delta_t);
+        energy_value  = @(CV_prev,cb_data)     volumetric_arap_energy(TV0,TT,[CV_prev;TV_steiner]);
       end
 
       % V_all_prev  where the meshes were
@@ -191,12 +243,16 @@ function [V_coarse_final,etienne_called,time_expansion,time_final_energy]  ...
       % Stepping in energy gradient direction until converged
       bb_iter = 1;
       beta_orig = beta;
-      BETA_MIN = 1e-1;
-      D_CV_MIN = 1e-4;
+      BETA_MIN = 1e-3;
+      D_CV_MIN = 1e-6;
       CV_prev = CV_filtered;
       while true
         % Update gradient on coarse mesh
-        [CV_grad] = energy_gradient(CV_prev);
+        [CV_grad,cb_data] = energy_gradient(CV_prev,cb_data);
+
+        assert(isempty(intersect_other(V_prev,F,CV_prev,CF,'FirstOnly',true)));
+        [~,~,siIF] = selfintersect(CV_prev,CF,'DetectOnly',true,'FirstOnly',true);
+        assert(isempty(siIF));
 
         % Try to take one step using el topo
 %         assert(isempty(intersect_other(V_prev,F,CV_prev,CF,'FirstOnly',true)));
@@ -224,6 +280,8 @@ function [V_coarse_final,etienne_called,time_expansion,time_final_energy]  ...
         CV_filtered = V_all_bb(size(V,1)+1:end,:);
         % (CV_filtered,CF) should not intersect (V,F)
         assert(isempty(intersect_other(V,F,CV_filtered,CF,'FirstOnly',true)));
+        [~,~,siIF] = selfintersect(CV_filtered,CF,'DetectOnly',true,'FirstOnly',true);
+        assert(isempty(siIF));
 
         % Stop if the change in positions is tiny
         d_CV = max(normrow(CV_filtered - CV_prev));
@@ -235,21 +293,21 @@ function [V_coarse_final,etienne_called,time_expansion,time_final_energy]  ...
 
         % Compute energy at filtered positions
         E_val_prev = E_val;
-        E_val = energy_value(CV_filtered);
+        [E_val,cb_data] = energy_value(CV_filtered,cb_data);
         % Is energy decreasing (and not first run)
         if E_val < E_val_prev
           if bb_iter > 1
             % try to increase beta
             beta = min(1.1*beta,beta_orig);
           end
-          fprintf('Progress!\n');
+          fprintf('  Progress!\n');
         else
           assert(bb_iter > 1);
           % otherwise decrease beta
           beta = beta*0.5;
           % and roll back 
           CV_filtered = CV_prev;
-          fprintf('No progress...\n');
+          fprintf('  No progress...\n');
         end
 %         assert(isempty(intersect_other(V,F,CV_filtered,CF,'FirstOnly',true)));
 
@@ -266,16 +324,19 @@ function [V_coarse_final,etienne_called,time_expansion,time_final_energy]  ...
           delete(pv);
           % trisurf maintains previous axes, while tsuyrf doesn't
           pv = trisurf(F,V_prev(:,1),V_prev(:,2),V_prev(:,3),...
-              'FaceColor',[0.0 0.0 0.8],'FaceAlpha',0.2);
+              'FaceColor',[0.0 0.0 0.8],'FaceAlpha',0.2,'EdgeAlpha',0.2);
           pc = trisurf(CF,CV_filtered(:,1),CV_filtered(:,2),CV_filtered(:,3),...
-              'FaceColor',[0.5 0.0 0.0],'FaceAlpha',0.1);
-          title(sprintf('energy: %s, t: %d',energy,t),'FontSize',20);
+              'FaceColor',[0.5 0.0 0.0],'FaceAlpha',0.1,'EdgeAlpha',0.2);
+          title(sprintf('energy: %s, t: %d',energy,t),'FontSize',20,'Interpreter','none');
           drawnow;
           hold off;
         end
 
         % Updated previous positions for next iteration of loop
         CV_prev = CV_filtered;
+        % Assuming we have succeeded in moving the fine mesh, then V_prev
+        % should stay put
+        V_prev = V;
 
         bb_iter = bb_iter+1;
       end
@@ -285,7 +346,6 @@ function [V_coarse_final,etienne_called,time_expansion,time_final_energy]  ...
   end
 
 
-  disp('started combined_step_project');
   etienne_called = 0;
 
   energy_expansion = 'displacement_step';
@@ -374,7 +434,9 @@ function [V_coarse_final,etienne_called,time_expansion,time_final_energy]  ...
   % starting to time expansion reversing flow: we'll updated CV_filtered after
   % each reverse flow time step.
   tic;
+  fprintf('Re-inflation...\n');
   for t = k-1:-1:1
+    fprintf('reversing flow step %d...\n',t);
     % Previous positions of fine mesh
     V_prev = P_all(:,:,t+1);
     % Desired positions of fine mesh after step
@@ -388,6 +450,7 @@ function [V_coarse_final,etienne_called,time_expansion,time_final_energy]  ...
 
   
   % final optimization
+  fprintf('Final optimization...\n');
   tic
   [CV_filtered,etienne_called] = one_step_project(V_prev,V,F,...
         CV_filtered,CF,energy_final,beta,eps_proximity,...

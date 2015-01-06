@@ -133,6 +133,10 @@ AccelerationGrid::~AccelerationGrid()
 
 void AccelerationGrid::set( const Vec3st& dims, const Vec3d& xmin, const Vec3d& xmax )
 {
+  using namespace std;
+  //cout<<dims[0]<<" "<<dims[1]<<" "<<dims[2]<<endl;
+  //cout<<xmin[0]<<" "<<xmin[1]<<" "<<xmin[2]<<endl;
+  //cout<<xmax[0]<<" "<<xmax[1]<<" "<<xmax[2]<<endl;
     m_gridxmin = xmin;
     m_gridxmax = xmax;
     

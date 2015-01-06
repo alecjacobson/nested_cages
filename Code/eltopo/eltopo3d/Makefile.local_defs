@@ -35,3 +35,6 @@ LINK = g++
 LINK_LIBS = -framework OpenGL -framework GLUT -framework vecLib \
   -L$(CHOLMOD)/lib -lcholmod
 
+
+RELEASE_FLAGS += -DMEX
+INCLUDE_PATH += -I/Applications/MATLAB_R2014b.app/extern/include/

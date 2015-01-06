@@ -13,9 +13,9 @@
 //       -llapack -lblas -lstdc++ \
 //       /Users/Leo/PHD_Work/Cage_Generation_2013/code/starlab-mcfskel/core/external/cholmod-4.0.0/lib/osx64/libcholmod.a /Users/Leo/PHD_Work/Cage_Generation_2013/code/starlab-mcfskel/core/external/cholmod-4.0.0/lib/osx64/libamd.a /Users/Leo/PHD_Work/Cage_Generation_2013/code/starlab-mcfskel/core/external/cholmod-4.0.0/lib/osx64/libcolamd.a libeltopo_release.a ../talpa/obj/bfstream.o ../talpa/obj/iomesh.o -I/opt/local/include/eigen3 -I/Users/Leo/PHD_Work/Volume_Meshing_2012/libigl/include/igl /opt/local/lib/gcc47/libgomp.a /Users/Leo/PHD_Work/Volume_Meshing_2012/libigl/lib/libigl.a /opt/local/lib/libSuiteSparse.dylib -o collide_eltopo_two_objs
 // 
-//     g++ collide_eltopo_two_objs.cpp robustleastsquares.cpp \
+//     g++ collide_eltopo_two_objs.cpp \
 //       ../common/bfstream.cpp ../talpa/iomesh.cpp -I../common \
-//       -I../eltopo3d -I../talpa -I../talpa/drivers -I../common/tunicate
+//       -I../eltopo3d -I../talpa -I../talpa/drivers -I../common/tunicate \
 //       -llapack -lblas -lstdc++ -I/opt/local/include/eigen3 -lcholmod -L. \
 //       -leltopo_release -L/opt/local/lib -lSuiteSparse -DNO_GUI -o \
 //       collide_eltopo_two_objs
@@ -65,6 +65,9 @@
 #include <dirent.h>
 #include <sys/stat.h>
 
+#include <chrono>
+#include <thread>
+
 // ---------------------------------------------------------
 // Global interface declarations
 // ---------------------------------------------------------
@@ -77,7 +80,6 @@ extern "C" {
 
 int main(int argc, char **argv)
 {
-
     if( argc != 5 )
     {
         std::cout << "Usage: <executable> <OBJ_file_1> <OBJ_file_2> <num_constrained_vertices> <OBJ_output_file>" << std::endl;
@@ -159,7 +161,7 @@ int main(int argc, char **argv)
     // Set general parameters
     ElTopoGeneralOptions sim_general_options;
     // do not print stuff to the console
-    sim_general_options.m_verbose = 0;
+    sim_general_options.m_verbose = false;
     // do avoid self-intersections
     sim_general_options.m_collision_safety = 1;
     sim_general_options.m_proximity_epsilon = 1e-4;
