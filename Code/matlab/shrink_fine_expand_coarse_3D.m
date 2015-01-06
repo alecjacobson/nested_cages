@@ -184,7 +184,7 @@ function [Pall_fine,Pall_coarse] = shrink_fine_expand_coarse_3D(V0,F0,V_coarse,F
               plot_struct.V_shrink = V_shrink;
               plot_struct.V_shrink_prev = V_shrink_prev;
               plot_struct.F_shrink = F_shrink;
-              plot_struct = flow_plot_control(plot_struct,false);
+              plot_struct = flow_plot_control(plot_struct,true);
 
               Pall_fine(:,:,end+1) = V_shrink;
               
