@@ -114,7 +114,7 @@ function [V_coarse_final,etienne_called,time_expansion,time_final_energy]  ...
     cb_data = [];
   end
 
-  function [G,cb_data] = surface_arap_gradient(V0,F,V)
+  function [G,cb_data] = surface_arap_gradient(V0,F,V,arap_data)
     % Gradient of surface based arap energy
     %
     % Inputs:
@@ -127,35 +127,45 @@ function [V_coarse_final,etienne_called,time_expansion,time_final_energy]  ...
     %     data.R
     %
     cb_data = [];
-    [G,cb_data.E,cb_data.R] = arap_gradient(V0,F,V);
+    cb_data.arap_data = arap_data;
+    [G,cb_data.E,cb_data.R,cb_data.arap_data] = ...
+      arap_gradient(V0,F,V,'Data',cb_data.arap_data);
   end
-  function [E,cb_data] = surface_arap_energy(V0,F,V)
-    E = [];
-    cb_data = [];
-    [cb_data.G,E,cb_data.R] = arap_gradient(V0,F,V);
+  function [E,cb_data] = surface_arap_energy(V0,F,V,arap_data)
+    [G,cb_data] = surface_arap_gradient(V0,F,V,arap_data);
+    E = cb_data.E;
   end
 
-  function [G,cb_data] = volumetric_arap_gradient(TV0,TT,TV)
+  function [G,cb_data] = volumetric_arap_gradient(TV0,TT,V,TV,arap_data)
     % Gradient of volumetric arap
     % 
     % Inputs:
     %   TV0  #TV>#V by 3 list of tet mesh vertices in initial positions: surface
     %     vertices come first TV0 = [V0;steiner]
     %   TT  #TT by 4 list of tet mesh indices into TV
+    %   V  #V by 3 list of deformed mesh vertex positions
     %   TV  #TV by 3  new tet mesh vertices (with surface coming first
     % Outputs:
     %   G  #V by 3 list of gradient vectors
     %   cb_data  unused output callback data field (needed to match expected
     %     prototype)
-
-    % Compute one small step of arap flow
-    % TV_flow = arap(...)
-    % Double check sign and magnitude 
     cb_data = [];
+    cb_data.arap_data = arap_data;
+    b = 1:size(V,1);
+    % Save solution as initial value for next call
+    [cb_data.TV,cb_data.arap_data,~,R] = arap( ...
+      TV0,TT,b,V,'Energy','elements','V0',TV,'Tol',1e-7,'MaxIter',inf, ...
+      'Data',cb_data.arap_data);
+    [G,cb_data.E] = arap_gradient(TV0,TT,cb_data.TV, ...
+      'Energy','elements','Rotations',R,'Data',cb_data.arap_data);
+    G = G(b,:);
   end
-  function E = volumetric_arap_energy(TV0,TT,TV)
+  function [E,cb_data] = volumetric_arap_energy(TV0,TT,V,TV,arap_data)
     % compute current energy of (TV,TT) w.r.t. (TV0,TT)
-    cb_data = [];
+    [~,cb_data] = volumetric_arap_gradient(TV0,TT,V,TV,arap_data);
+    % Just pass along initial values (calls to energy never change solution)
+    cb_data.TV = TV;
+    E = cb_data.E;
   end
 
   function [CV_filtered, etienne_called,pc,pv] = one_step_project(V_prev,V,F,CV,CF,energy,...
@@ -207,8 +217,11 @@ function [V_coarse_final,etienne_called,time_expansion,time_final_energy]  ...
         energy_value    = @(CV_prev,cb_data)   symmetry_x_energy(CV_prev,sym_pairs);
       case {'surface_arap'}
         % Call back data will be used to reduce calls to `fit_rotations`: this
-        energy_gradient = @(CV_prev,cb_data) surface_arap_gradient(CV_orig,CF,CV_prev);
-        energy_value  = @(CV_prev,cb_data)     surface_arap_energy(CV_orig,CF,CV_prev);
+        cb_data.arap_data = [];
+        energy_gradient = @(CV_prev,cb_data) ...
+          surface_arap_gradient(CV_orig,CF,CV_prev,cb_data.arap_data);
+        energy_value  = @(CV_prev,cb_data) ...
+          surface_arap_energy(CV_orig,CF,CV_prev,cb_data.arap_data);
       case {'volumetric_arap'}
         % Optimize for internal steiner points according to volumetric arap,
         % fixing surface to CV
@@ -216,10 +229,13 @@ function [V_coarse_final,etienne_called,time_expansion,time_final_energy]  ...
         % Note: this is done only once at beginning of this flow step. It is
         % **not** done for each call to `energy_gradient`
         %
-        TV = arap(TV0,TT,1:size(CV,1),CV_filtered);
-        TV_steiner = TV(size(CV,1)+1:end,:);
-        energy_gradient = @(CV_prev,cb_data) volumetric_arap_gradient(TV0,TT,[CV_prev;TV_steiner],delta_t);
-        energy_value  = @(CV_prev,cb_data)     volumetric_arap_energy(TV0,TT,[CV_prev;TV_steiner]);
+        [TV0,TT,TF] = tetgen(CV_orig,CF,'Flags','-q2');
+        cb_data.TV = TV0;
+        cb_data.arap_data = [];
+        energy_gradient = @(CV_prev,cb_data) ...
+          volumetric_arap_gradient(TV0,TT,CV_prev,cb_data.TV,cb_data.arap_data);
+        energy_value  = @(CV_prev,cb_data)...
+          volumetric_arap_energy(TV0,TT,CV_prev,cb_data.TV,cb_data.arap_data);
       end
 
       % V_all_prev  where the meshes were
@@ -251,6 +267,9 @@ function [V_coarse_final,etienne_called,time_expansion,time_final_energy]  ...
       while true
         % Update gradient on coarse mesh
         [CV_grad,cb_data] = energy_gradient(CV_prev,cb_data);
+        %[dbE] = energy_value(CV_prev-beta*CV_grad,cb_data);
+        %[cb_data.E dbE]
+        %error
 
         assert(isempty(intersect_other(V_prev,F,CV_prev,CF,'FirstOnly',true)));
         [~,~,siIF] = selfintersect(CV_prev,CF,'DetectOnly',true,'FirstOnly',true);
