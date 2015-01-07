@@ -35,7 +35,7 @@ function [Pall_fine,Pall_coarse] = shrink_fine_expand_coarse_3D(V0,F0,V_coarse,F
   save(tmpf,'-regexp',sprintf('^%s$|',variables{:}),'-ascii');
   % get md5 checksum on input "state", we append .cache.mat to the check sum
   % because we'll use the checksum as the cache file name
-  [s,cache_name] = system(['md5 ' tmpf ' | awk ''{printf "."$1".cache.mat"}''']);
+  [s,cache_name] = system(['md5 -r ' tmpf ' | awk ''{printf "."$1".cache.mat"}''']);
   % clean up
   delete(tmpf);
   clear s tmpf variables;
