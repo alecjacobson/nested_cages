@@ -9,18 +9,37 @@ edge_collapse_enriched_polyhedron, SDFGen
 
 3) How to run in Matlab:
 
-3.1) Read a mesh 'mesh.off' into the (V,F) format
->> [V0 F0] = readOFF('mesh.off');
+3.1) Read a mesh into the (V0,F0) format
+
+```matlab
+[V0,F0] = load_mesh('../../Meshes/Results/bunny/bunny_0.obj');
+```
 
 3.2) Run 'multires_per_layer' specifying number of faces
 per output level. In this example, we sepcify 3 levels halving the
 number of faces from one level to the other:
->> [cages_V,cages_F,Pall,V_coarse,F_coarse] = multires_per_layer(V0,F0,[floor(size(F0,1)/8) floor(size(F0,1)/4) floor(size(F0,1)/2)],'quadrature_order',2);
+
+```
+levels = floor(2.^((-14:2:-2)/3)*size(F0,1));
+[cages_V,cages_F,Pall] = ...
+  multires_per_layer( ...
+  V0,F0, ...
+  levels, ...
+  'QuadratureOrder',2, ...
+  'ExpansionEnergy','volumetric_arap', ...
+  'FinalEnergy','none', ...
+  'BetaInit',1e-2, ...
+  'Eps',1e-3);
+```
 
 3.3) (cages_V{1}, cages_F{1}) is the coarsest level,
 ..., (cages_V{N}, cages_F{N}) is the finest level.
-Now you can save these meshes to .OFF, visualize them
-with meshplot, tetrahedralize them with Tetgen, etc.
+
+You can save all of them using:
+
+```matlab
+write_cages('../../Meshes/Results/model/model',cages_V,cages_F);
+```
 
 3.4) For more information, issue
 >> help multires_per_layer
