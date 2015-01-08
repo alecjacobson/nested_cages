@@ -15,7 +15,7 @@
 % save('/Users/leokollersacht/Documents/nested_cages/Meshes/Results/anchor_volumetric_arap/timing.mat','timing')
 % % Obs.: Flow problems, moving on
 
-[V0,F0] = load_mesh('/Users/leokollersacht/Documents/nested_cages/Meshes/Results/anchor_volume/arma_0.obj');
+[V0,F0] = load_mesh('/Users/leokollersacht/Documents/nested_cages/Meshes/Results/arma_volume/arma_0.obj');
 levels = floor(2.^((-14:2:-4)/3)*size(F0,1));
 [cages_V,cages_F,~,~,~,timing] = ...
   multires_per_layer( ...
@@ -30,7 +30,7 @@ write_cages('/Users/leokollersacht/Documents/nested_cages/Meshes/Results/arma_vo
 save('/Users/leokollersacht/Documents/nested_cages/Meshes/Results/arma_volumetric_arap/timing.mat','timing')
 % Obs.:
 
-[V0,F0] = load_mesh('/Users/leokollersacht/Documents/nested_cages/Meshes/Results/anchor_volume/bunny_0.obj');
+[V0,F0] = load_mesh('/Users/leokollersacht/Documents/nested_cages/Meshes/Results/bunny_volume/bunny_0.obj');
 levels = floor(2.^((-14:2:-4)/3)*size(F0,1));
 [cages_V,cages_F,~,~,~,timing] = ...
   multires_per_layer( ...
