@@ -43,6 +43,7 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = multires_per_layer(V0
   step_size = 1e-3;
   % coarse mesh expansion (during flow)
   expand_every = 0;
+  Fquad = [];
 
   % save timings
   timing.decimation = 0.0;
@@ -55,9 +56,9 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = multires_per_layer(V0
   % Map of parameter names to variable names
   params_to_variables = containers.Map( ...
     {'QuadratureOrder','StepSize','V_coarse','F_coarse','ExpandEvery', ...
-      'ExpansionEnergy','FinalEnergy','Eps','BetaInit','Debug'}, ...
+      'ExpansionEnergy','FinalEnergy','Eps','BetaInit','Debug','Fquad'}, ...
     {'quadrature_order','step_size','V_coarse','F_coarse','expand_every', ...
-      'energy_expansion','energy_final','eps_distance','beta_init','debug'});
+      'energy_expansion','energy_final','eps_distance','beta_init','debug','Fquad'});
   v = 1;
   while v <= numel(varargin)
     param_name = varargin{v};
@@ -147,7 +148,8 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = multires_per_layer(V0
           'FinalEnergy',energy_final, ...
           'Eps',eps_distance, ...
           'BetaInit',beta_init, ...
-          'Debug',debug);
+          'Debug',debug,...
+          'Fquad',Fquad);
 
 
       % output level
