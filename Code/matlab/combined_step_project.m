@@ -201,7 +201,7 @@ function [V_coarse_final,timing] = ...
         % Note: this is done only once at beginning of this flow step. It is
         % **not** done for each call to `energy_gradient`
         %
-        [cb_data.TV0,cb_data.TT,cb_data.TF] = tetgen(CV_orig,CF,'Flags','-q2');
+        [cb_data.TV0,cb_data.TT,cb_data.TF] = tetgen(CV_orig,CF,'Flags','-q2Y');
         cb_data.TV = cb_data.TV0;
         cb_data.arap_data = [];
         energy_gradient = @(CV_prev,cb_data) volumetric_arap_gradient(CV_prev,cb_data);
