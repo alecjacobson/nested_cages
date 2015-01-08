@@ -138,6 +138,21 @@ function [V_coarse_final,timing] = ...
     E = cb_data.E;
   end
 
+  function [G,cb_data] = surface_arap_planarity_gradient(V0,F,V,arap_data,Fquad)
+    cb_data = [];
+    cb_data.arap_data = arap_data;
+    [G_arap,cb_data.E,cb_data.R,cb_data.arap_data] = ...
+      arap_gradient(V0,F,V,'Data',cb_data.arap_data);
+    [G_plan,~] = planarity_gradient(V,Fquad);
+    G = G_arap+G_plan;
+  end
+  function [E,cb_data] = surface_arap_planarity_energy(V0,F,V,arap_data,Fquad)
+    [G,cb_data] = surface_arap_gradient(V0,F,V,arap_data);
+    E = cb_data.E;
+    [E_plan,~] = planarity_energy(V,Fquad);
+    E = E+E_plan;
+  end
+
   function [G,cb_data] = volumetric_arap_gradient(V,cb_data)
     % Gradient of volumetric arap
     % 
@@ -206,6 +221,13 @@ function [V_coarse_final,timing] = ...
         cb_data.arap_data = [];
         energy_gradient = @(CV_prev,cb_data) volumetric_arap_gradient(CV_prev,cb_data);
         energy_value  = @(CV_prev,cb_data) volumetric_arap_energy(CV_prev,cb_data);
+      case {'planarity'}
+        energy_gradient = @(CV_prev,cb_data) planarity_gradient(CV_prev,Fquad);
+        energy_value    = @(CV_prev,cb_data)   planarity_energy(CV_prev,Fquad);
+      case {'surface_arap_planarity'}
+        cb_data.arap_data = [];
+        energy_gradient = @(CV_prev,cb_data) surface_arap_planarity_gradient(CV_orig,CF,CV_prev,cb_data.arap_data,Fquad);
+        energy_value    = @(CV_prev,cb_data) surface_arap_planarity_energy(CV_orig,CF,CV_prev,cb_data.arap_data,Fquad);
       end
     end
 
@@ -216,10 +238,11 @@ function [V_coarse_final,timing] = ...
   eps_distance = 1e-4;
   beta_init = 1e-2;
   debug = true;
+  Fquad = [];
   % Map of parameter names to variable names
   params_to_variables = containers.Map( ...
-    {'ExpansionEnergy','FinalEnergy','Eps','BetaInit','Debug'}, ...
-    {'energy_expansion','energy_final','eps_distance','beta_init','debug'});
+    {'ExpansionEnergy','FinalEnergy','Eps','BetaInit','Debug','Fquad'}, ...
+    {'energy_expansion','energy_final','eps_distance','beta_init','debug','Fquad'});
   v = 1;
   while v <= numel(varargin)
     param_name = varargin{v};

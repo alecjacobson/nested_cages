@@ -146,6 +146,7 @@ function [CV_filtered,timing] = ...
       % Compute energy at filtered positions
       E_val_prev = E_val;
       [E_val,cb_data] = energy_value(CV_filtered,cb_data);
+      fprintf('energy = %g\n',E_val);
       % Is energy decreasing (and not first run)
       if E_val < E_val_prev
         if bb_iter > 1
@@ -184,8 +185,9 @@ function [CV_filtered,timing] = ...
       hold on;
         axis equal;
         % delete previous plot
-        delete(pc);
-        delete(pv);
+%         delete(pc);
+%         delete(pv);
+        cla;
         % trisurf maintains previous axes, while tsuyrf doesn't
         pv = trisurf(F,V_prev(:,1),V_prev(:,2),V_prev(:,3),...
             'FaceColor',[0.0 0.0 0.8],'FaceAlpha',0.2,'EdgeAlpha',0.2);
