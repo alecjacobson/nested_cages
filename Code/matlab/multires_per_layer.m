@@ -155,7 +155,7 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = multires_per_layer(V0
       % output level
       cages_F{k} = F_coarse{k};
       cages_V{k} = V_coarse_new;
-      save('partial.mat',cages_V,cages_F);
+      save('partial.mat','cages_V','cages_F');
       %V_coarse{k} = cages_V{k};
       %F_coarse{k} = cages_F{k};
 
