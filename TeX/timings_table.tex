@@ -6,20 +6,22 @@
 \rowcolors{2}{white}{lightbluishgrey}
 \begin{tabular}{l r r r r r r r r r r r r r r r r r}
 \rowcolor{white}
-Model name  & Input \#F & \#F for layers & Avg. shrink time per layer & Avg.
-re-inflation time & Energy type\\
+Model name  & \#F & Layers' \#F & Avg.\ Shrink & Avg.\ Re-inflate& Energy\\
 \midrule
 Octopus & 100,000 & 3,936 \ 6,248 \ 9,920 \ 15,748 \ 25,000 \ 39,684 \ 62,994 & 11s & 227s & Volume \\
 Pelvis & 40,316 & 1,586 \ 2,516 \ 3,998 \ 6,346 \ 10,078 \ 15,994 \ 25,394 & 11s & 460s & Volume  \\
 Model9 (Warrior?) & 26,658 & 1,048 \ 1,666 \ 2,644 \ 4,198 \ 6,664 \ 10,578 \ 16,790 & 37s & 497s & Volume  \\
 Anchor & 10,778 & 678 \ 1,068 \ 1,696 \ 2,694 \ 4,276 \ 6,788 & 8s & 34s & Volume \\
 Horse & 39,696 & 1,562 \ 2,480 \ 3,936 \ 6,250 \ 9,922 \ 15,752 \ 25,006 & 12s & 321s & Surface ARAP \\
-Armadillo & 12,000 & 470 \ 748 \ 1,190 \ 1,888 \ 2,998 \ 4,760 & 27s & 998s & Voumetric ARAP \\
+Armadillo & 12,000 & 470 \ 748 \ 1,190 \ 1,888 \ 2,998 \ 4,760 & 27s & 998s & Volumetric ARAP \\
 Bunny & 34,832 & 1,371 \ 2,177 \ 3,455 \ 5,485 \ 8,708 \ 13,823 & 3s & 95s & Volumetric ARAP \\
-Gargo & 13,500 & 531 \ 843 \ 1,339 \ 2,126 \ 3,375 \ 5,357 \ 8,504 & 2s & 90s & Volumetric ARAP
+Gargo & 13,500 & 531 \ 843 \ 1,339 \ 2,126 \ 3,375 \ 5,357 \ 8,504 & 2s & 90s & Volumetric ARAP\\
 % new entries here:
 \bottomrule
 \end{tabular}
-\caption{}
+\caption{
+``Avg.\ Shrink'' is the average time to shrink each layer inside the previous.
+``Avg.\ Re-inflate'' is the average time to re-inflate each layer.
+}
 \label{tab:timings}
 \end{table*}
