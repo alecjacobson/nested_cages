@@ -2,6 +2,8 @@
 \section{Results and applications}
 \label{sec:results}
 
+\input{timings_table}
+
 \subsection{Needs figures made:}
 - Zoo:
   - anchor
@@ -15,25 +17,21 @@
   - Model9
   - pelvis
   - octopus
+  - horse
 - couplingdown comparison of decimators
 - rampant stress test with small number of layers vs CGAL
- 
+- cgal iso surface generation comparison vs CGAL
+- Plain decimation creating bad overlaps
 
+- didactic 2D figures
+  - flow
+  - expansion
 - rampant 100 layers
 - beast symmetry (+arap) cage
 - Kenshi's hand: just triangle mesh using arap energy
 - Kenshi's hand: planarization energy 
 - Kenshi's hand: compute HC and make cage-based deformation
-- fill in timings table
 - Model4: generate our results to match cgal's
-- regenerate octopus
-- didactic 2D figures
-  - flow
-  - expansion
-+ horse redo with ARAP energy
-x download chang xi's ball mesh sequence
-- cartoon heart
-- left atrium
 - failure case for simpler flows: mean curvature flow on fine mesh does not
   go inside coarse mesh, may even intersect itself
     - pelvis or rampant failing to go inside at all
@@ -57,6 +55,8 @@ x download chang xi's ball mesh sequence
   - rerun with higher resolution
 - comparison of volumetric arap, surface arap, volume
 
+- cartoon heart
+- left atrium
 - flow Model3 (human) inside and inflate Model4 (armour)
 - buddha using open flipper decimation
 - propagate cages along animation sequence (just re-inflation)
