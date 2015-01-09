@@ -120,8 +120,10 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = multires_per_layer(V0
     if (~decimation_given)
       tic
       ratio = levels(k)/size(F_coarse{k+1},1);
+%       [V_coarse{k},F_coarse{k}] = ...
+%         decimate_cgal(V_coarse{k+1},F_coarse{k+1},ratio);
       [V_coarse{k},F_coarse{k}] = ...
-        decimate_cgal(V_coarse{k+1},F_coarse{k+1},ratio);
+        cgal_simplification(V_coarse{k+1},F_coarse{k+1},levels(k));
       [~,~,siIF] = selfintersect( ...
         V_coarse{k},F_coarse{k},'DetectOnly',true,'FirstOnly',true);
       if exist('meshfix','file')
@@ -130,7 +132,7 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = multires_per_layer(V0
           % 1*needed for multiplying
           A = 1*facet_adjacency_matrix(F_coarse{k});
           small_angles = ...
-            min(internalangles(V_coarse{k},F_coarse{k}),[],2)<(5/180*pi); %5°
+            min(internalangles(V_coarse{k},F_coarse{k}),[],2)<(5/180*pi); %5??
           if ~any(small_angles)
             break;
           end
