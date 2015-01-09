@@ -1,15 +1,18 @@
-function [Pall_fine,Pall_coarse] = shrink_fine_expand_coarse_3D(V0,F0,V_coarse,F_coarse,varargin)
+function [Pall_fine,Pall_coarse] = shrink_fine_expand_coarse_3D( ...
+  V0,F0,V_coarse,F_coarse,varargin)
   % SHRINK_FINE_EXPAND_COARSE_3D
-  % [Pall_fine,Pall_coarse] = shrink_fine_expand_coarse_3D(V0,F0,V_coarse,F_coarse,varargin)
+  %
+  % [Pall_fine,Pall_coarse] = shrink_fine_expand_coarse_3D( ...
+  %   V0,F0,V_coarse,F_coarse,varargin)
   %
   % Input:
   %   V0  (#vertices)x3 list of mesh vertex positions of the initial fine mesh
-  %   F0  (#faces)x3 list of vertex indices that form each face of the
-  %   initial mesh
-  %   V_coarse   (#vertices_cage)x3 list of mesh vertex positions of the 
-  %   coarse mesh
-  %   F_coarse   (#faces_cage)x3 list of vertex indices that form each face
-  %   of the coarse mesh
+  %   F0  (#faces)x3 list of vertex indices that form each face of the initial
+  %     mesh
+  %   V_coarse   (#vertices_cage)x3 list of mesh vertex positions of the coarse
+  %     mesh
+  %   F_coarse   (#faces_cage)x3 list of vertex indices that form each face of
+  %     the coarse mesh
   %   Optional:
   %     'quadrature_order': 1, 2 or 3 (default=2)
   %     'step_size': time step for the flow (default=1e-3)
@@ -199,7 +202,10 @@ function [Pall_fine,Pall_coarse] = shrink_fine_expand_coarse_3D(V0,F0,V_coarse,F
         DV = normalizerow(DV);
         % desired step vector
         D_des = V_shrink - V_shrink_prev;
-        D_pos = bsxfun(@times,max(sum(D_des.*DV,2),0),DV);
+        D_dot = sum(D_des.*DV,2); 
+        D_comp = D_des - bsxfun(@times,D_dot,DV);
+        D_proj = bsxfun(@times,max(D_dot,0),DV);
+        D_pos = D_proj+D_comp;
         V_shrink = V_shrink_prev + D_pos;
       end
 
