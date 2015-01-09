@@ -6,9 +6,10 @@
 
 \begin{figure}
 \includegraphics[width=\linewidth]{figs/warrior-poisson-vs-cgal}
-\caption{Contouring signed distance fields maintains nesting but requires
-aggressive steps between layers. This destroys the shape-awareness of
-that layer's volumetric Laplacian.} 
+\caption{Contouring a shape's distance field requires aggressive spacing
+between isolevels to produce valid nesting. Semantically distant parts
+\emph{fuse} together, destroying the shape-awareness of the volumetric
+Laplacian.} 
 \label{fig:warrior-poisson}
 \end{figure}
 
