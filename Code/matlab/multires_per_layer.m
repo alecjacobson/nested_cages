@@ -94,6 +94,7 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = multires_per_layer(V0
               % I have migrated the symmetric decimation to a separate
               % function. Requires tests
               [V_coarse{k},F_coarse{k}] = symmetry_x_decimation(V0,F0,levels(k));
+              decimation_given = true;
 
           end
 
@@ -114,9 +115,9 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = multires_per_layer(V0
     % % only generate coarse layers if they were not prescribed
     if (~decimation_given)
       tic
-      ratio = levels(k)/size(cages_F{k+1},1);
+      ratio = levels(k)/size(F_coarse{k+1},1);
       [V_coarse{k},F_coarse{k}] = ...
-        decimate_cgal(cages_V{k+1},cages_F{k+1},ratio);
+        decimate_cgal(V_coarse{k+1},F_coarse{k+1},ratio);
       [~,~,siIF] = selfintersect( ...
         V_coarse{k},F_coarse{k},'DetectOnly',true,'FirstOnly',true);
       if exist('meshfix','file')
@@ -170,9 +171,6 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = multires_per_layer(V0
     cages_F{k} = F_coarse{k};
     cages_V{k} = V_coarse_new;
     save('partial.mat','cages_V','cages_F');
-    %V_coarse{k} = cages_V{k};
-    %F_coarse{k} = cages_F{k};
-
   end
 
   Pall = Pall_all_times;

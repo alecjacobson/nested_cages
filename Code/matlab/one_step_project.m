@@ -24,7 +24,7 @@ function [CV_filtered,timing] = ...
   %   CV_filtered: new embedding for the coarse mesh
   %   timing statistics for this step
 
-  function flag = is_converged(CV_filtered,CV_prev,beta)
+  function flag = is_converged(CV_filtered,CV_prev,beta,E_val)
     % Stop if the change in positions is tiny
     d_CV = max(normrow(CV_filtered - CV_prev));
     if d_CV < D_CV_MIN && bb_iter > 1
@@ -33,6 +33,11 @@ function [CV_filtered,timing] = ...
       flag = true;
       return;
     end 
+    if E_val <= 0
+      fprintf('\nEnergy (%g) is <=0\n',E_val);
+      flag = true;
+      return;
+    end
     % Stop if beta is now too small
     if beta < BETA_MIN
       fprintf('\nBeta (%g) less than BETA_MIN (%g)\n',beta,BETA_MIN);
@@ -173,7 +178,7 @@ function [CV_filtered,timing] = ...
       beta = beta*0.5;
       fprintf('+');
 
-      if is_converged(CV_filtered,CV_prev,beta)
+      if is_converged(CV_filtered,CV_prev,beta,E_val)
         % Use last state since it had less energy
         CV_prev = CV_filtered;
         break;
@@ -182,14 +187,6 @@ function [CV_filtered,timing] = ...
 
 
     %assert(isempty(intersect_other(V,F,CV_filtered,CF,'FirstOnly',true)));
-
-    % Stop if the change in positions is tiny
-    d_CV = max(normrow(CV_filtered - CV_prev));
-    if d_CV < D_CV_MIN && bb_iter > 1
-      fprintf('Max change in CV (%g) less than D_CV_MIN (%g)\n', ...
-        d_CV,D_CV_MIN);
-      break;
-    end 
 
     if debug
       hold on;
@@ -206,6 +203,11 @@ function [CV_filtered,timing] = ...
         title(sprintf('energy: %s, t: %d',plot_info.energy,plot_info.t),'FontSize',20,'Interpreter','none');
         drawnow;
       hold off;
+    end
+
+    % Stop if the change in positions is tiny
+    if is_converged(CV_filtered,CV_prev,inf,E_val)
+      break;
     end
 
     % Updated previous positions for next iteration of loop

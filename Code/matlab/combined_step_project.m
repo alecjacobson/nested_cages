@@ -22,6 +22,8 @@ function [V_coarse_final,timing] = ...
   %   Optional:
   %     'ExpansionEnergy': followed by either 
   %       'displacement_step'  "Drag energy" tries to stay put at each iteration
+  %       'displacement_path'  "Drag energy" tries to not move at all
+  %         throughout iteration: only takes one step.
   %       'displacement_initial' Tries to return to intial position L2 norm
   %       'surface_arap'  Minimize ARAP spokes and rims energy on surface
   %       'volumetric_arap'  Minimize ARAP in tet mesh inside shape
@@ -191,10 +193,16 @@ function [V_coarse_final,timing] = ...
     % for most energies call back data is not used
     cb_data = [];
     switch energy
-      case {'displacement_step','displacement_step_and_volume'}
+      case {'displacement_step'}
+        % Displacement to solution from previous step
         energy_gradient = @(CV_prev,cb_data) displacement_gradient(CV_prev,CV_filtered);
         energy_value    = @(CV_prev,cb_data)   displacement_energy(CV_prev,CV_filtered);
-      case {'displacement_initial','displacement_initial_and_volume'}
+      case {'displacement_path'}
+        % Displacement to self: 0 (lazy, should just return 0s but this costs
+        % nothing)
+        energy_gradient = @(CV_prev,cb_data) displacement_gradient(CV_prev,CV_prev);
+        energy_value    = @(CV_prev,cb_data)   displacement_energy(CV_prev,CV_prev);
+      case {'displacement_initial'}
         energy_gradient = @(CV_prev,cb_data) displacement_gradient(CV_prev,CV_orig);
         energy_value    = @(CV_prev,cb_data)   displacement_energy(CV_prev,CV_orig);
       case {'volume'}
@@ -337,10 +345,6 @@ function [V_coarse_final,timing] = ...
 
 
   % final optimization
-  switch energy_final
-  case {'volumetric_arap'}
-    warning('Replacing final energy with ''none''');
-  end
   tic
   if ~strcmp(energy_final,'none')
     plot_info.t = inf;
