@@ -128,10 +128,12 @@ function [V_coarse_final,timing] = ...
     %   cb_data  callback data set with energy data.E and best fit rotations
     %     data.R
     %
-    cb_data = [];
     cb_data.arap_data = arap_data;
     [G,cb_data.E,cb_data.R,cb_data.arap_data] = ...
-      arap_gradient(V0,F,V,'Data',cb_data.arap_data);
+      arap_gradient(V0,F,V,'Data',cb_data.arap_data,'SinglePrecision',true);
+    %warning('Saving arap state');
+    %R = cb_data.R;
+    %save('arap.mat','V0','F','V','G','R');
   end
   function [E,cb_data] = surface_arap_energy(V0,F,V,arap_data)
     [G,cb_data] = surface_arap_gradient(V0,F,V,arap_data);
@@ -139,7 +141,6 @@ function [V_coarse_final,timing] = ...
   end
 
   function [G,cb_data] = surface_arap_planarity_gradient(V0,F,V,arap_data,Fquad)
-    cb_data = [];
     cb_data.arap_data = arap_data;
     [G_arap,cb_data.E,cb_data.R,cb_data.arap_data] = ...
       arap_gradient(V0,F,V,'Data',cb_data.arap_data);

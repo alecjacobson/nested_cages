@@ -111,52 +111,69 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = multires_per_layer(V0
   % loop over different levels
   for k=num_levels:-1:1
 
-      % % only generate coarse layers if they were not prescribed
-      if (~decimation_given)
-          tic
-          [V_coarse{k},F_coarse{k}] = cgal_simplification(cages_V{k+1},cages_F{k+1},levels(k));
-          [~,~,siIF] = selfintersect( ...
-            V_coarse{k},F_coarse{k},'DetectOnly',true,'FirstOnly',true);
-           if exist('meshfix','file')
-            [V_coarse{k},F_coarse{k}] = meshfix(V_coarse{k},F_coarse{k});
-           else
-             error('Decimation contains self-intersections, but no meshfix');
-           end
-          timing.decimation = timing.decimation + toc;
-      end
-
-%       % save partial result
-%       save('partial.mat','Pall','V_coarse','F_coarse','V0','F0');
-
-      % shrink fine mesh, expand coarse mesh
+    % % only generate coarse layers if they were not prescribed
+    if (~decimation_given)
       tic
-      [Pall,Pall_coarse] = shrink_fine_expand_coarse_3D(cages_V{k+1},cages_F{k+1},...
-          V_coarse{k},F_coarse{k},'quadrature_order',quadrature_order,'step_size',step_size,'expand_every',expand_every);
-      timing.flow = timing.flow + toc;
+      ratio = levels(k)/size(cages_F{k+1},1);
+      [V_coarse{k},F_coarse{k}] = ...
+        decimate_cgal(cages_V{k+1},cages_F{k+1},ratio);
+      [~,~,siIF] = selfintersect( ...
+        V_coarse{k},F_coarse{k},'DetectOnly',true,'FirstOnly',true);
+      if exist('meshfix','file')
+        % Also remove triangles with tiny angles
+        for iter = 1:100
+          % 1*needed for multiplying
+          A = 1*facet_adjacency_matrix(F_coarse{k});
+          small_angles = ...
+            min(internalangles(V_coarse{k},F_coarse{k}),[],2)<(5/180*pi); %5°
+          if ~any(small_angles)
+            break;
+          end
+          for grow = 1:iter-1
+            small_angles = (A*small_angles)~=0;
+          end
+          fprintf('Removing %d skinny facets...\n',nnz(small_angles));
+          F_coarse{k} = F_coarse{k}(~small_angles,:);
+          [V_coarse{k},F_coarse{k}] = meshfix(V_coarse{k},F_coarse{k});
+        end
+      else
+        error('Decimation contains self-intersections, but no meshfix');
+      end
+      timing.decimation = timing.decimation + toc;
+    end
 
-      Pall_all_times{k} = Pall;
+    %% save partial result
+    %save('partial.mat','Pall','V_coarse','F_coarse','V0','F0');
 
-%       % save partial result
-%       save('partial.mat','Pall','Pall_coarse','V_coarse','F_coarse','V0','F0');
+    % shrink fine mesh, expand coarse mesh
+    tic
+    [Pall,Pall_coarse] = shrink_fine_expand_coarse_3D(cages_V{k+1},cages_F{k+1},...
+        V_coarse{k},F_coarse{k},'quadrature_order',quadrature_order,'step_size',step_size,'expand_every',expand_every);
+    timing.flow = timing.flow + toc;
 
-      % push coarse mesh with physical simulation to obtain the cages
-      [V_coarse_new,timing.per_layer{k}] = ...
-        combined_step_project( ...
-          Pall,cages_F{k+1},...
-          Pall_coarse(:,:,end),F_coarse{k}, ...
-          'ExpansionEnergy',energy_expansion, ...
-          'FinalEnergy',energy_final, ...
-          'Eps',eps_distance, ...
-          'BetaInit',beta_init, ...
-          'Debug',debug,...
-          'Fquad',Fquad);
+    Pall_all_times{k} = Pall;
+
+%     % save partial result
+%     save('partial.mat','Pall','Pall_coarse','V_coarse','F_coarse','V0','F0');
+
+    % push coarse mesh with physical simulation to obtain the cages
+    [V_coarse_new,timing.per_layer{k}] = ...
+      combined_step_project( ...
+        Pall,cages_F{k+1},...
+        Pall_coarse(:,:,end),F_coarse{k}, ...
+        'ExpansionEnergy',energy_expansion, ...
+        'FinalEnergy',energy_final, ...
+        'Eps',eps_distance, ...
+        'BetaInit',beta_init, ...
+        'Debug',debug,...
+        'Fquad',Fquad);
 
 
-      % output level
-      cages_F{k} = F_coarse{k};
-      cages_V{k} = V_coarse_new;
-      %V_coarse{k} = cages_V{k};
-      %F_coarse{k} = cages_F{k};
+    % output level
+    cages_F{k} = F_coarse{k};
+    cages_V{k} = V_coarse_new;
+    %V_coarse{k} = cages_V{k};
+    %F_coarse{k} = cages_F{k};
 
   end
 

@@ -27,18 +27,17 @@ function [CV_filtered,timing] = ...
   function flag = is_converged(CV_filtered,CV_prev,beta)
     % Stop if the change in positions is tiny
     d_CV = max(normrow(CV_filtered - CV_prev));
-    fprintf('d_CV:%g\n',d_CV);
     if d_CV < D_CV_MIN && bb_iter > 1
-      fprintf('Max change in CV (%g) less than D_CV_MIN (%g)\n', ...
+      fprintf('\nMax change in CV (%g) less than D_CV_MIN (%g)\n', ...
         d_CV,D_CV_MIN);
       flag = true;
       return;
     end 
     % Stop if beta is now too small
     if beta < BETA_MIN
-      fprintf('Beta (%g) less than BETA_MIN (%g)\n',beta,BETA_MIN);
-     flag = true;
-     return;
+      fprintf('\nBeta (%g) less than BETA_MIN (%g)\n',beta,BETA_MIN);
+      flag = true;
+      return;
     end
     flag = false;
   end
@@ -114,6 +113,19 @@ function [CV_filtered,timing] = ...
     assert(isempty(siIF));
 
     while true
+
+
+      if max(abs(CV_grad(:)))>1
+        cla;
+        hold on;
+        tsurf(CF,CV_prev, ...
+            'FaceColor',[0.5 0.0 0.0],'FaceAlpha',0.2,'EdgeAlpha',0.2);
+        tsurf(CF,CV_prev-CV_grad, ...
+            'FaceColor',[0.0 0.5 0.0],'FaceAlpha',0.2,'EdgeAlpha',0.2);
+        hold off;
+      end
+      assert(max(abs(CV_grad(:)))<1,'Gradient is too big. Aborting...');
+
       % Try to take one step using el topo
       %assert(isempty(intersect_other(V_prev,F,CV_prev,CF,'FirstOnly',true)));
       [V_all_bb,rest_dt] = collide_eltopo_mex( ...
@@ -146,21 +158,20 @@ function [CV_filtered,timing] = ...
       % Compute energy at filtered positions
       E_val_prev = E_val;
       [E_val,cb_data] = energy_value(CV_filtered,cb_data);
-      fprintf('energy = %g\n',E_val);
       % Is energy decreasing (and not first run)
       if E_val < E_val_prev
         if bb_iter > 1
           % try to increase beta
           beta = min(1.1*beta,beta_init);
         end
-        fprintf('  Progress...\n');
+        fprintf('-');
         break;
       end
 
       assert(bb_iter > 1);
       % otherwise decrease beta and continue
       beta = beta*0.5;
-      fprintf('  No progress...\n');
+      fprintf('+');
 
       if is_converged(CV_filtered,CV_prev,beta)
         % Use last state since it had less energy
@@ -174,7 +185,6 @@ function [CV_filtered,timing] = ...
 
     % Stop if the change in positions is tiny
     d_CV = max(normrow(CV_filtered - CV_prev));
-    fprintf('d_CV:%g\n',d_CV);
     if d_CV < D_CV_MIN && bb_iter > 1
       fprintf('Max change in CV (%g) less than D_CV_MIN (%g)\n', ...
         d_CV,D_CV_MIN);

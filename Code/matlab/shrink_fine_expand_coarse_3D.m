@@ -127,6 +127,8 @@ function [Pall_fine,Pall_coarse] = shrink_fine_expand_coarse_3D(V0,F0,V_coarse,F
     set(gca,'yticklabel',[])
 
     % initialize plot handles
+    % clear title
+    title('shrinking','FontSize',30);
     hold on;
     pc = trisurf(F_exp,V_exp(:,1),V_exp(:,2),V_exp(:,3),'FaceColor',[0.5 0.0 0.0],'FaceAlpha',0.05);
     pv = trisurf(F_shrink,V_shrink(:,1),V_shrink(:,2),V_shrink(:,3),'FaceColor',[0.0 0.0 0.8],'FaceAlpha',0.4);
