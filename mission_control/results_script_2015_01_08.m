@@ -107,7 +107,9 @@
 
 [V0,F0] = load_mesh('/Users/leokollersacht/Documents/nested_cages/Meshes/Results/maxplank_200k_varap/maxplank_200k_0.obj');
 V0 = V0/max(max(abs(V0)));
-levels = 1000:1000:50000;
+% % Illegal instruction: 4 (wtf?)
+% levels = 1000:1000:50000;
+levels = 1000:500:25000;
 [cages_V,cages_F,~,~,~,timing] = ...
   multires_per_layer( ...
   V0,F0, ...
