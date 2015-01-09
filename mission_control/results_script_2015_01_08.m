@@ -109,7 +109,9 @@
 V0 = V0/max(max(abs(V0)));
 % % Illegal instruction: 4 (wtf?)
 % levels = 1000:1000:50000;
-levels = 1000:500:25000;
+% % Illegal instruction: 4 (wtf?)
+% levels = 1000:500:25000;
+levels = 1000:500:10000;
 [cages_V,cages_F,~,~,~,timing] = ...
   multires_per_layer( ...
   V0,F0, ...
