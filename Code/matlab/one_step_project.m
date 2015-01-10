@@ -171,7 +171,6 @@ function [CV_filtered,timing] = ...
 
       [E_val,cb_data] = energy_value(CV_filtered,cb_data);
       % Is energy decreasing (and not first run)
-      fprintf('\n energy = %g, opt = %g',E_val,E_opt);
       if E_val < E_opt
         E_opt = E_val;
         if bb_iter > 1
