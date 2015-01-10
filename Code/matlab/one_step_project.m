@@ -56,10 +56,11 @@ function [CV_filtered,timing] = ...
   plot_info.energy = 'unknown';
   debug = true;
   skip_el_topo = false;
+  D_CV_MIN = 1e-5;
   % Map of parameter names to variable names
   params_to_variables = containers.Map( ...
-    {  'SkipElTopo','Eps','BetaInit','Tol','PlotInfo','Debug'}, ...
-    {'skip_el_topo','eps_distance','beta_init','tol_dt','plot_info','debug'});
+    {  'SkipElTopo','Eps','BetaInit','Tol','PlotInfo','Debug','D_CV_MIN'}, ...
+    {'skip_el_topo','eps_distance','beta_init','tol_dt','plot_info','debug','D_CV_MIN'});
   v = 1;
   while v <= numel(varargin)
     param_name = varargin{v};
@@ -104,7 +105,6 @@ function [CV_filtered,timing] = ...
   % Stepping in energy gradient direction until converged
   bb_iter = 1;
   BETA_MIN = 1e-3;
-  D_CV_MIN = 1e-5;
   %BETA_MIN = 1e-6;
   %D_CV_MIN = 1e-6;
   CV_prev = CV_filtered;
@@ -171,6 +171,7 @@ function [CV_filtered,timing] = ...
 
       [E_val,cb_data] = energy_value(CV_filtered,cb_data);
       % Is energy decreasing (and not first run)
+      fprintf('\n energy = %g, opt = %g',E_val,E_opt);
       if E_val < E_opt
         E_opt = E_val;
         if bb_iter > 1
