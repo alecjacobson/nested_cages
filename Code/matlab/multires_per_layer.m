@@ -93,7 +93,7 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = multires_per_layer(V0
       for k=1:num_levels
           % if energy is symmetry_x, perform special decimation to produce
           % symmetric initial coarse meshes
-          if strcmp(energy_final,'symmetry_x')
+          if (strcmp(energy_final,'symmetry_x')||strcmp(energy_expansion,'symmetry_x'))
 
               % I have migrated the symmetric decimation to a separate
               % function. Requires tests
