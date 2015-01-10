@@ -7,34 +7,38 @@ all: obj nest_view
 
 #CXX=clang++ -D__ASSERT_MACROS_DEFINE_VERSIONS_WITHOUT_UNDERSCORES=0
 CXX=g++
-CFLAGS+=-DIGL_STATIC_LIBRARY -fopenmp
+#CFLAGS+=-DIGL_STATIC_LIBRARY -fopenmp
+CFLAGS+=-fopenmp
 CFLAGS+=-g -O3 -DNDEBUG
 #CFLAGS+=-g -O0 
 
 LIBIGL=/usr/local/igl/libigl/
 LIBIGL_INC=-I$(LIBIGL)/include
-LIBIGL_LIB=-L$(LIBIGL)/lib -ligl -liglmatlab -liglcgal -liglboolean
 
-CORK=$(LIBIGL)/external/cork/
-CORK_INC=-I$(CORK)/include/
-CORK_LIB=-L$(CORK)/lib/ -lcork
-
-CGAL=/opt/local/
+IGL_WITH_CSG=0
+ifeq ($(IGL_WITH_CSG),1)
+	CORK=$(LIBIGL)/external/cork/
+	CORK_INC=-I$(CORK)/include/
+	CORK_LIB=-L$(CORK)/lib/ -lcork
+	CGAL=/opt/local/
 # Needs to come before matlab include because matlab has a bogus gmp
-CGAL_LIB=-L$(CGAL)/lib -lCGAL -lCGAL_Core -lgmp -lmpfr -lboost_thread-mt -lboost_system-mt
-CGAL_INC=-I$(CGAL)/include -I/usr/include/
+	CGAL_LIB=-L$(CGAL)/lib -lCGAL -lCGAL_Core -lgmp -lmpfr -lboost_thread-mt -lboost_system-mt
+	CGAL_INC=-I$(CGAL)/include -I/usr/include/
 # This is absolutely necessary for Exact Construction
-CGAL_FLAGS=-frounding-math -fsignaling-nans 
+	CGAL_FLAGS=-frounding-math -fsignaling-nans 
+	CFLAGS+=-DWITH_CSG
+endif
 
 EIGEN3_INC=-I/opt/local/include/eigen3 -I/opt/local/include/eigen3/unsupported
 
 ANTTWEAKBAR_INC=-I$(LIBIGL)/external/AntTweakBar/include
-ANTTWEAKBAR_LIB=-L$(LIBIGL)/external/AntTweakBar/lib -lAntTweakBar -framework AppKit
+ANTTWEAKBAR_LIB=-L$(LIBIGL)/external/AntTweakBar/lib -lAntTweakBar
 
-MATLAB_INC=-I$(MATLAB)/extern/include/
-MATLAB_LIB=-L$(MATLAB)/bin/maci64 -lmx -lmat -lmex -lstdc++
-
-CARBON_LIB=-framework Carbon
+UNAME := $(shell uname)
+ifeq ($(UNAME), Darwin)
+	CARBON_LIB=-framework Carbon
+	ANTTWEAKBAR_LIB+=-framework AppKit
+endif
 
 # Use free glut for mouse scrolling
 #FREE_GLUT=/opt/local/
@@ -44,8 +48,8 @@ OPENGL_LIB=-framework OpenGL
 GLUT_LIB=-framework GLUT
 GLUT_INC=
 
-INC=$(LIBIGL_INC) $(ANTTWEAKBAR_INC) $(EIGEN3_INC) $(MATLAB_INC) $(GLUT_INC) $(CORK_INC) $(CGAL_INC)
-LIB=$(OPENGL_LIB) $(GLUT_LIB) $(ANTTWEAKBAR_LIB) $(LIBIGL_LIB) $(CGAL_LIB) $(MATLAB_LIB) $(CARBON_LIB) $(CORK_LIB) 
+INC=$(LIBIGL_INC) $(ANTTWEAKBAR_INC) $(EIGEN3_INC) $(GLUT_INC) $(CORK_INC) $(CGAL_INC)
+LIB=$(OPENGL_LIB) $(GLUT_LIB) $(ANTTWEAKBAR_LIB) $(LIBIGL_LIB) $(CGAL_LIB) $(CARBON_LIB) $(CORK_LIB) 
 
 CPP_FILES=$(wildcard ./*.cpp)
 OBJ_FILES=$(addprefix obj/,$(notdir $(CPP_FILES:.cpp=.o))) 
