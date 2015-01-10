@@ -100,6 +100,7 @@ function [CV_filtered,timing] = ...
   beta = beta_init;
   % initialize energy as inf
   E_val = inf;
+  E_opt = inf;
   % Stepping in energy gradient direction until converged
   bb_iter = 1;
   BETA_MIN = 1e-3;
@@ -168,11 +169,10 @@ function [CV_filtered,timing] = ...
       [~,~,siIF] = selfintersect(CV_filtered,CF,'DetectOnly',true,'FirstOnly',true);
       assert(isempty(siIF));
 
-      % Compute energy at filtered positions
-      E_val_prev = E_val;
       [E_val,cb_data] = energy_value(CV_filtered,cb_data);
       % Is energy decreasing (and not first run)
-      if E_val < E_val_prev
+      if E_val < E_opt
+        E_opt = E_val;
         if bb_iter > 1
           % try to increase beta
           beta = min(1.1*beta,beta_init);

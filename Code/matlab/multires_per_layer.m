@@ -44,6 +44,8 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = multires_per_layer(V0
   % coarse mesh expansion (during flow)
   expand_every = 0;
   Fquad = [];
+  partial_path = 'partial.mat';
+  smoothing = 0;
 
   % save timings
   timing.decimation = 0.0;
@@ -59,10 +61,10 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = multires_per_layer(V0
   params_to_variables = containers.Map( ...
     {'QuadratureOrder','StepSize','V_coarse','F_coarse','ExpandEvery', ...
       'ExpansionEnergy','FinalEnergy','Eps','BetaInit','Debug','Fquad', ...
-      'SkipElTopo','PositiveProjection'}, ...
+      'SkipElTopo','PositiveProjection','PartialPath','Smoothing'}, ...
     {'quadrature_order','step_size','V_coarse','F_coarse','expand_every', ...
       'energy_expansion','energy_final','eps_distance','beta_init','debug','Fquad', ...
-      'skip_el_topo','positive_projection'});
+      'skip_el_topo','positive_projection','partial_path','smoothing'});
   v = 1;
   while v <= numel(varargin)
     param_name = varargin{v};
@@ -152,7 +154,8 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = multires_per_layer(V0
     % shrink fine mesh, expand coarse mesh
     tic
     [Pall,Pall_coarse] = shrink_fine_expand_coarse_3D(cages_V{k+1},cages_F{k+1},...
-        V_coarse{k},F_coarse{k},'quadrature_order',quadrature_order,'step_size',step_size,'expand_every',expand_every);
+        V_coarse{k},F_coarse{k},'quadrature_order',quadrature_order,...
+        'step_size',step_size,'expand_every',expand_every,'smoothing',smoothing);
     timing.flow = timing.flow + toc;
 
     Pall_all_times{k} = Pall;
@@ -177,7 +180,7 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = multires_per_layer(V0
     % output level
     cages_F{k} = F_coarse{k};
     cages_V{k} = V_coarse_new;
-    save('partial.mat','cages_V','cages_F');
+    save(partial_path,'cages_V','cages_F','timing');
   end
 
   Pall = Pall_all_times;

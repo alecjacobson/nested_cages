@@ -54,11 +54,12 @@ function [Pall_fine,Pall_coarse] = shrink_fine_expand_coarse_3D( ...
   step_size = 1e-3;
   expand_every = 0;
   positive_projection = false;
+  smoothing = 0;
 
   % Map of parameter names to variable names
   params_to_variables = containers.Map( ...
-    {'quadrature_order','step_size','expand_every','eps_distance','PositiveProjection'}, ...
-    {'quadrature_order','step_size','expand_every','eps_distance','positive_projection'});
+    {'quadrature_order','step_size','expand_every','eps_distance','PositiveProjection','smoothing'}, ...
+    {'quadrature_order','step_size','expand_every','eps_distance','positive_projection','smoothing'});
   v = 1;
   while v <= numel(varargin)
     param_name = varargin{v};
@@ -111,7 +112,7 @@ function [Pall_fine,Pall_coarse] = shrink_fine_expand_coarse_3D( ...
   % needed to run 'signed_distance_direction_quadrature_matrix'
   % remove in the future
   M_shrink = massmatrix(V_shrink,F_shrink,'barycentric');
-  w_lap_shrink = 0.0;
+  w_lap_shrink = smoothing;
   L_shrink = cotmatrix(V_shrink,F_shrink);
   % initialize all vertices as moving vertices
   moving_vertices_shrink = ones(size(V_shrink,1),1);
