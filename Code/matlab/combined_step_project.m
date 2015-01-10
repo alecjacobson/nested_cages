@@ -107,13 +107,13 @@ function [V_coarse_final,timing] = ...
     G(sym_pairs(:,1),1) = 2*(V(sym_pairs(:,1),1)+V(sym_pairs(:,2),1));
     G(sym_pairs(:,1),2) = 2*(V(sym_pairs(:,1),2)-V(sym_pairs(:,2),2));
     G(sym_pairs(:,1),3) = 2*(V(sym_pairs(:,1),3)-V(sym_pairs(:,2),3));
-    G(sym_pairs(:,2),1) = grad_sym(sym_pairs(:,2),1) + 2*(V(sym_pairs(:,1),1)+V(sym_pairs(:,2),1));
-    G(sym_pairs(:,2),2) = grad_sym(sym_pairs(:,2),2) - 2*(V(sym_pairs(:,1),2)-V(sym_pairs(:,2),2));
-    G(sym_pairs(:,2),3) = grad_sym(sym_pairs(:,2),3) - 2*(V(sym_pairs(:,1),3)-V(sym_pairs(:,2),3));
+    G(sym_pairs(:,2),1) = G(sym_pairs(:,2),1) + 2*(V(sym_pairs(:,1),1)+V(sym_pairs(:,2),1));
+    G(sym_pairs(:,2),2) = G(sym_pairs(:,2),2) - 2*(V(sym_pairs(:,1),2)-V(sym_pairs(:,2),2));
+    G(sym_pairs(:,2),3) = G(sym_pairs(:,2),3) - 2*(V(sym_pairs(:,1),3)-V(sym_pairs(:,2),3));
     cb_data = [];
   end
   function [E,cb_data] = symmetry_x_energy(V,sym_pairs)
-    G = symmetry_x_gradient(V,sym_pairs)
+    G = symmetry_x_gradient(V,sym_pairs);
     E = trace(G'*G);
     cb_data = [];
   end
@@ -303,7 +303,7 @@ function [V_coarse_final,timing] = ...
   tol_dt = 1e-1;
 
   sym_pairs = [];
-  if strcmp(energy_final,'symmetry_x')
+  if (strcmp(energy_final,'symmetry_x')||strcmp(energy_expansion,'symmetry_x'))
       % brute-force way of detecting pairs of points symmetric w.r.t.
       % to x=0 plane
       for i=1:size(CV,1)
