@@ -24,7 +24,18 @@ function A = grad_quadrature_to_vertices(V0,F0,area_initial,quadrature_order)
   %      elseif (quadrature_order==3)
   %        (#vertices)x(4*#faces) that converts gradient at 3rd order 
   %        quadrature points to vertices on the mesh
-    
+  
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  % Check for cached result, do NOT edit variables until cache is checked,
+  % your function code comes later. See below
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  [cache_exists,cache_name] = find_cache();
+  if cache_exists
+    fprintf('Using cache...\n');
+    load(cache_name);
+    return;
+  end
+  fprintf('First time. Creating cache...\n');
   
   if (quadrature_order==1)
       % initialize matrix A (this should be in a separate function)
@@ -237,4 +248,8 @@ function A = grad_quadrature_to_vertices(V0,F0,area_initial,quadrature_order)
       error('specify quadrature order 1, 2 or 3 ')
       
   end
+  
+  create_cache(cache_name);
+  
+end
   

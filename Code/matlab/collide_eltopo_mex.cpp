@@ -73,7 +73,6 @@
 
 using namespace std;
 
-ofstream* os;
 vector<vector<double> > V_eltopo;
 
 extern void _main();
@@ -172,7 +171,6 @@ void mexFunction(
   eps_prox = *mxGetPr(prhs[4]);
   tol_dt = *mxGetPr(prhs[5]);
 
-  os = new ofstream("./collide_eltopo_mex-log.txt");
 
   vector<vector<double> > V0_ = readMatrix<double>(V0_mx);
   vector<vector<double> > V1_ = readMatrix<double>(V1_mx);
@@ -244,8 +242,8 @@ void mexFunction(
       el_topo_integrate(&eltopo_time0, V1, &sim_general_options, &sim_integration_options, &V_final, &out_dt);
       eltopo_time0.vertex_locations = V_final;
       rest_dt = (1-out_dt)*rest_dt;
-      mexPrintf("current out_dt = %.4f\n", out_dt);
-      mexPrintf("running rest_dt = %.4f\n", rest_dt);
+      //mexPrintf("current out_dt = %.4f\n", out_dt);
+      //mexPrintf("running rest_dt = %.4f\n", rest_dt);
       attempts = attempts+1;
 
       if (out_dt<tol_dt){
@@ -271,7 +269,6 @@ void mexFunction(
       V_eltopo.push_back(temp);
   }
 
-  os->close();
 
   plhs[0] = writeMatrix(V_eltopo);
   plhs[1] = mxCreateDoubleMatrix(1,1, mxREAL);
