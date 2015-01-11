@@ -165,10 +165,10 @@ levels = floor(2.^((-12:2:-2)/3)*size(F0,1));
   'Eps',1e-3);
 write_cages('/Users/leokollersacht/Documents/nested_cages/Meshes/Results/arma_varap_new/arma',cages_V,cages_F);
 save('/Users/leokollersacht/Documents/nested_cages/Meshes/Results/arma_varap_new/timing.mat','timing')
-% Obs.: Re-run after bug fixes
+% Obs.: Same artifacts on the tale
 
 [V0,F0] = load_mesh('/Users/leokollersacht/Documents/nested_cages/Meshes/Results/arma_volume/arma_0.obj');
-levels = floor(2.^((-12:2:-2)/3)*size(F0,1));
+levels = floor(2.^((-10:2:-2)/3)*size(F0,1));
 [cages_V,cages_F,~,~,~,timing] = ...
   multires_per_layer( ...
   V0,F0, ...
@@ -177,7 +177,9 @@ levels = floor(2.^((-12:2:-2)/3)*size(F0,1));
   'ExpansionEnergy','surface_arap', ...
   'FinalEnergy','none', ...
   'BetaInit',1e-2, ...
-  'Eps',1e-3);
+  'Eps',1e-3,...
+  'PartialPath','partial_01_09_01.mat');
 write_cages('/Users/leokollersacht/Documents/nested_cages/Meshes/Results/arma_arap_new/arma',cages_V,cages_F);
 save('/Users/leokollersacht/Documents/nested_cages/Meshes/Results/arma_arap_new/timing.mat','timing')
-% Obs.: Let's also try with surface ARAP
+% Obs.: Crashed after Etienne's code succeeded. Re-runinng with one
+% less layer and saving partial path
