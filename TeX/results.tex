@@ -5,12 +5,22 @@
 \input{timings_table}
 
 \begin{figure}
-\includegraphics[width=\linewidth]{figs/warrior-poisson-vs-cgal}
-\caption{Contouring a shape's distance field requires aggressive spacing
-between isolevels to produce valid nesting. Semantically distant parts
-\emph{fuse} together, destroying the shape-awareness of the volumetric
-Laplacian.} 
-\label{fig:warrior-poisson}
+  \includegraphics[width=\linewidth]{figs/swat-cage}
+  \caption{The \emph{S.W.A.T. man} is an artifact-ridden mesh with 2806 pairs
+  of intersecting triangles, 24 non-manifold edges, 51 boundary loops and 51
+  connected components. Our shrinking flow to the input overlapping coarse cage
+  is robust to such artifacts. Once inside, we re-inflate and produce a fully
+  exterior cage.}
+  \label{fig:swat-cage}
+\end{figure}
+
+\begin{figure}
+  \includegraphics[width=\linewidth]{figs/warrior-poisson-vs-cgal}
+  \caption{Contouring a shape's distance field requires aggressive spacing
+  between isolevels to produce valid nesting. Semantically distant parts
+  \emph{fuse} together, destroying the shape-awareness of the volumetric
+  Laplacian.} 
+  \label{fig:warrior-poisson}
 \end{figure}
 
 \subsection{Needs figures made:}
@@ -32,11 +42,15 @@ Laplacian.}
 - cgal iso surface generation comparison vs CGAL
 - Plain decimation creating bad overlaps
 
+- voxelize to get containing shell--> decimate --> run our pipeline to force
+  outside: use for volumetric calculations: This has the benefit that the
+  containing mesh is nice quality (cf. \cite{Jacobson:WN:2013}) and tightly
+  fitting (cf. \cite{Xu:2014:SDF}).
 - didactic 2D figures
   - flow
   - expansion
 - rampant 100 layers
-- beast symmetry (+arap) cage
+- swat symmetry cage
 - Kenshi's hand: just triangle mesh using arap energy
 - Kenshi's hand: planarization energy 
 - Kenshi's hand: compute HC and make cage-based deformation
@@ -48,6 +62,9 @@ Laplacian.}
       place
     - or 2d flow
 
+- comparison of volumetric arap, surface arap, volume
+- bunny: add random noise to initial model and run pipeline
+  - rerun with higher resolution
 - xyz-dragon High resolution stress test
 - alec: implement multigrid
   - Multigrid Poisson equation. Show that naive non-nested meshes will have
@@ -60,9 +77,7 @@ Laplacian.}
   - Multi-res ARAP deformation/physical elastics
   - Bijective mapping (Locally injective mapping of tet mesh conforming to all
     layers): maintains nesting.
-- bunny: add random noise to initial model and run pipeline
-  - rerun with higher resolution
-- comparison of volumetric arap, surface arap, volume
+- beast for zoo
 
 - cartoon heart
 - left atrium
