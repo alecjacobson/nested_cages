@@ -1,5 +1,5 @@
 % cat comparison
-[V0,F0] = load_mesh('/Users/leokollersacht/Documents/nested_cages/Meshes/Results/sca09_comparisons/cat-reference.off');
+[V0,F0] = load_mesh('../../Meshes/Results/sca09_comparisons/cat-reference.off');
 % open flipper decimation has a zero volume ear that messes the flow up
 [cages_V,cages_F,~,~,~,timing] = ...
 multires_per_layer( ...
@@ -10,13 +10,18 @@ V0,F0, ...
 'FinalEnergy','none', ...
 'BetaInit',1e-2, ...
 'Eps',1e-3);
-write_cages('/Users/leokollersacht/Documents/nested_cages/Meshes/Results/sca09_comparisons/cat_arap',cages_V,cages_F);
-save('/Users/leokollersacht/Documents/nested_cages/Meshes/Results/sca09_comparisons/cat_arap_timing','timing')
-% Obs.: 
+write_cages('../../Meshes/Results/sca09_comparisons/cat_arap',cages_V,cages_F);
+save('../../Meshes/Results/sca09_comparisons/cat_arap_timing','timing')
+% Obs.: OK
+
+% Dane: Openflipper not able to decimate. Statistics says there are 
+% geometrically degenerate faces. Meshfix doesn't work. Skipping...
+
+% Dog: All initial meshes introduce difficulties for the flow
 
 % horse_gallop comparison
-[V0,F0] = load_mesh('/Users/leokollersacht/Documents/nested_cages/Meshes/Results/sca09_comparisons/horse-gallop-reference.off');
-[V_coarse{1},F_coarse{1}] = load_mesh('/Users/leokollersacht/Documents/nested_cages/Meshes/Results/sca09_comparisons/horse-gallop-reference-openflipper-624.off');
+[V0,F0] = load_mesh('../../Meshes/Results/sca09_comparisons/horse-gallop-reference.off');
+[V_coarse{1},F_coarse{1}] = load_mesh('../../Meshes/Results/sca09_comparisons/horse-gallop-reference-openflipper-624.off');
 [cages_V,cages_F,~,~,~,timing] = ...
 multires_per_layer( ...
 V0,F0, ...
@@ -26,6 +31,6 @@ V0,F0, ...
 'FinalEnergy','none', ...
 'BetaInit',1e-2, ...
 'Eps',1e-3,'V_coarse',V_coarse,'F_coarse',F_coarse);
-write_cages('/Users/leokollersacht/Documents/nested_cages/Meshes/Results/sca09_comparisons/horse_gallop_arap',cages_V,cages_F);
-save('/Users/leokollersacht/Documents/nested_cages/Meshes/Results/sca09_comparisons/horse_gallop_timing','timing')
-% Obs.: 
+write_cages('../../Meshes/Results/sca09_comparisons/horse_gallop_arap',cages_V,cages_F);
+save('../../Meshes/Results/sca09_comparisons/horse_gallop_timing','timing')
+% Obs.: OK
