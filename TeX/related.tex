@@ -49,6 +49,7 @@ control is lost and close features are still quickly merged.
 
 Multi-grid 
 
+
 \cite{McAdams:2011} Finite difference multigrid on voxelized input. Why not
 voxelize? Glue geodesically distant parts together: voxel size determined by
 min feature size and min void size. What about duplicated cells? Is there a
@@ -67,6 +68,9 @@ decimation paper for creating ``node-nested'' tet meshes, building on
 \cite{guillard1993}. Select subset of nodes, try to connect in a reasonable,
 Delaunay-ish way. Simple linear restriction operator.
 
+\cite{Brune:2011} Try to maintain corners while removing vertices to get a
+node-nested coarsening.  Re-discretization (FEM-style) solves.
+
 \cite{fish1995efficient} just an example of a (nonlinear) multigrid solver
 which expects the user to provide (nested?) tetrahedral meshes as input.
 
@@ -80,6 +84,9 @@ Adaptive simulations for visco-elastic solids. Computes a hierarchy of
 non-nested decimations (QSlim \cite{Garland:1997:SSU}), tethers fine mesh
 points to \emph{closest} coarse vertex.
 
+\cite{CGCDP:2002} assume a subdivision lattice containing the deforming shape
+as part of the input. Presumably this cage is modeled manually.
+
 Flows
 \cite{Kazhdan2012} remove singularities, also self-intersections
 \cite{Sacht:SIV:2013}, in general, will not move inside original surface
@@ -88,6 +95,11 @@ Alternating global scaling and attraction, attempts to move inside. No
 guarantees, requires parameter tuning \cite{Wang:2008}
 
 \cite{Tagliasacchi:2012:MCS} coerces flow toward the medial axis
+
+Alternatives to geometric multigrid: algebraic multi-grid (cite Brandt) or
+algebraic techniques for special problem \cite{Krishnan:2013:EPL} (doesn't
+generalize beyond ``M-matrices'')
+
 
 \alec{Look in ETH MS Thesis for further citations. Ask Daniele and Derek
 whether we should cite MS Thesis and how.}
