@@ -276,6 +276,7 @@
 
 % Noisey bunny
 [V0,F0] = load_mesh('/Users/leokollersacht/Documents/nested_cages/Meshes/Results/bunnyfixed_energies/bunny-50k.ply');
+N = per_vertex_normals(V0,F0);
 N0 = V0+2e-2*bsxfun(@times,rand(size(N,1),1)-0.5,N);
 levels = floor(2.^((-14:2:-2)/3)*size(F0,1));
 [cages_V,cages_F,~,~,~,timing] = ...
