@@ -75,4 +75,4 @@ levels = 1000:1000:49000; %50 layers
   'PartialPath','partial_01_09_02.mat');
 write_cages('/Users/leokollersacht/Documents/nested_cages/Meshes/Results/rampant_varap_50/rampant',cages_V,cages_F);
 save('/Users/leokollersacht/Documents/nested_cages/Meshes/Results/rampant_varap_50/timing.mat','timing');
-% Obs.: Internet connection problems on the way. Extracted partial result
+% Obs.: 
