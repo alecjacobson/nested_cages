@@ -71,8 +71,8 @@ function [V,moving_vertices,grad_V,quad_points,grad_quadrature,C,s] = signed_dis
       if (order==1)
           
           % only quadrature point (barycenters)
-          p1 = (1/3)*(V0(F0(moving_faces,1),:)+V0(F0(moving_faces,2),:)+V0(F0(moving_faces,3),:));
-          quad_points = p1;
+          p123 = (1/3)*(V0(F0(moving_faces,1),:)+V0(F0(moving_faces,2),:)+V0(F0(moving_faces,3),:));
+          quad_points = p123;
           
           [grad_p_all,~,C] = signed_distance_direction(quad_points,V_coarse,F_coarse);
           grad_quadrature = -grad_p_all;
