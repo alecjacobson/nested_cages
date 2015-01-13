@@ -311,7 +311,7 @@
 
 [V0,F0] = load_mesh('/Users/leokollersacht/Documents/nested_cages/Meshes/Results/maxplank_200k_varap/maxplank_200k_0.obj');
 V0 = V0/max(max(abs(V0)));
-levels = floor(2.^((-20:2:-2)/3)*size(F0,1));
+levels = floor(2.^((-20:2:-4)/3)*size(F0,1));
 [cages_V,cages_F,~,~,~,timing] = ...
   multires_per_layer( ...
   V0,F0, ...
@@ -324,4 +324,6 @@ levels = floor(2.^((-20:2:-2)/3)*size(F0,1));
   'PartialPath','partial_01_08.mat');
 write_cages('/Users/leokollersacht/Documents/nested_cages/Meshes/Results/maxplank_200k_varap/maxplank_200k',cages_V,cages_F);
 save('/Users/leokollersacht/Documents/nested_cages/Meshes/Results/maxplank_200k_varap/timing.mat','timing')
-% Obs.:
+% Obs.: Tried levels = floor(2.^((-20:2:-2)/3)*size(F0,1)); but simulation
+% took longer than a day to finish. Changing levels to
+% levels = floor(2.^((-20:2:-4)/3)*size(F0,1));
