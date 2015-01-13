@@ -101,7 +101,8 @@ int main(int argc, char **argv)
         num_vertices = num_vertices+1;
     }
     // get vertex positions
-    double V0[3*num_vertices];
+//    double V0[3*num_vertices];
+    double *V0 = new double[3*num_vertices];
     int i = 0;
     for (std::vector<Vec3d>::iterator it = x0.begin() ; it != x0.end(); ++it){
         Vec3d vertex = *it;
@@ -113,7 +114,8 @@ int main(int argc, char **argv)
     // get numver of triangles
     int num_triangles = mesh_time0.num_triangles();
     // get face indices
-    int F0[3*num_triangles];
+//    int F0[3*num_triangles];
+    int *F0 = new int[3*num_triangles];
     std::vector<Vec3st> tri_pointer = mesh_time0.get_triangles();
     i = 0;
     for (std::vector<Vec3st>::iterator it = tri_pointer.begin(); it<tri_pointer.end(); ++it){
@@ -148,7 +150,8 @@ int main(int argc, char **argv)
 //    // Read mesh_time0 from BIN file
 //    read_binary_pos_tris_file(mesh_time1, x1, argv[2]);
     // get vertex positions
-    double V1[3*num_vertices];
+//    double V1[3*num_vertices];
+    double *V1 = new double[3*num_vertices];
     i = 0;
     for (std::vector<Vec3d>::iterator it = x1.begin() ; it != x1.end(); ++it){
         Vec3d vertex = *it;
@@ -207,6 +210,9 @@ int main(int argc, char **argv)
         i = i + 1;
     }
 
+    delete[] V0;
+    delete[] F0;
+    delete[] V1;
     // Save on argv[5] obj path
     write_objfile(mesh_time0,x2,argv[4]);
 
