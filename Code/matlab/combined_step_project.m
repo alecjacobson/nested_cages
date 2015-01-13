@@ -203,8 +203,8 @@ function [V_coarse_final,timing] = ...
         energy_gradient = @(CV_prev,cb_data) displacement_gradient(CV_prev,CV_prev);
         energy_value    = @(CV_prev,cb_data)   displacement_energy(CV_prev,CV_prev);
       case {'displacement_initial'}
-        energy_gradient = @(CV_prev,cb_data) displacement_gradient(CV_prev,CV_orig);
-        energy_value    = @(CV_prev,cb_data)   displacement_energy(CV_prev,CV_orig);
+        energy_gradient = @(CV_prev,cb_data) displacement_gradient(CV_prev,CV_ref);
+        energy_value    = @(CV_prev,cb_data)   displacement_energy(CV_prev,CV_ref);
       case {'volume'}
         energy_gradient = @(CV_prev,cb_data) volume_gradient(CV_prev,CF);
         energy_value    = @(CV_prev,cb_data)   volume_energy(CV_prev,CF);
@@ -215,9 +215,9 @@ function [V_coarse_final,timing] = ...
         % Call back data will be used to reduce calls to `fit_rotations`: this
         cb_data.arap_data = [];
         energy_gradient = @(CV_prev,cb_data) ...
-          surface_arap_gradient(CV_orig,CF,CV_prev,cb_data.arap_data);
+          surface_arap_gradient(CV_ref,CF,CV_prev,cb_data.arap_data);
         energy_value  = @(CV_prev,cb_data) ...
-          surface_arap_energy(CV_orig,CF,CV_prev,cb_data.arap_data);
+          surface_arap_energy(CV_ref,CF,CV_prev,cb_data.arap_data);
       case {'volumetric_arap'}
         % Optimize for internal steiner points according to volumetric arap,
         % fixing surface to CV
@@ -225,7 +225,7 @@ function [V_coarse_final,timing] = ...
         % Note: this is done only once at beginning of this flow step. It is
         % **not** done for each call to `energy_gradient`
         %
-        [cb_data.TV0,cb_data.TT,cb_data.TF] = tetgen(CV_orig,CF,'Flags','-q2Y');
+        [cb_data.TV0,cb_data.TT,cb_data.TF] = tetgen(CV_ref,CF,'Flags','-q2Y');
         cb_data.TV = cb_data.TV0;
         cb_data.arap_data = [];
         energy_gradient = @(CV_prev,cb_data) volumetric_arap_gradient(CV_prev,cb_data);
@@ -235,8 +235,8 @@ function [V_coarse_final,timing] = ...
         energy_value    = @(CV_prev,cb_data)   planarity_energy(CV_prev,Fquad);
       case {'surface_arap_planarity'}
         cb_data.arap_data = [];
-        energy_gradient = @(CV_prev,cb_data) surface_arap_planarity_gradient(CV_orig,CF,CV_prev,cb_data.arap_data,Fquad);
-        energy_value    = @(CV_prev,cb_data) surface_arap_planarity_energy(CV_orig,CF,CV_prev,cb_data.arap_data,Fquad);
+        energy_gradient = @(CV_prev,cb_data) surface_arap_planarity_gradient(CV_ref,CF,CV_prev,cb_data.arap_data,Fquad);
+        energy_value    = @(CV_prev,cb_data) surface_arap_planarity_energy(CV_ref,CF,CV_prev,cb_data.arap_data,Fquad);
       end
     end
 
@@ -250,10 +250,11 @@ function [V_coarse_final,timing] = ...
   Fquad = [];
   skip_el_topo = false;
   D_CV_MIN = 1e-5;
+  CV_ref = [];
   % Map of parameter names to variable names
   params_to_variables = containers.Map( ...
-    {  'SkipElTopo','ExpansionEnergy','FinalEnergy','Eps','BetaInit','Debug','Fquad','D_CV_MIN'}, ...
-    {'skip_el_topo','energy_expansion','energy_final','eps_distance','beta_init','debug','Fquad','D_CV_MIN'});
+    {  'SkipElTopo','ExpansionEnergy','FinalEnergy','Eps','BetaInit','Debug','Fquad','D_CV_MIN','RefCage'}, ...
+    {'skip_el_topo','energy_expansion','energy_final','eps_distance','beta_init','debug','Fquad','D_CV_MIN','CV_ref'});
   v = 1;
   while v <= numel(varargin)
     param_name = varargin{v};
@@ -273,6 +274,9 @@ function [V_coarse_final,timing] = ...
   % coarse  mesh
   CV = V_coarse;
   CF = F_coarse;
+  if isempty(CV_ref)
+    CV_ref = CV;
+  end
   % Shrunk fine mesh
   V = P_all(:,:,end);
 
@@ -317,10 +321,8 @@ function [V_coarse_final,timing] = ...
       end
   end
 
-  % Initial guess at filtered coarse mesh vertices
-  CV_orig = CV;
   CV_filtered = CV;
-  %  Important that this is called after CV_orig and sym_pairs is set
+  %  Important that this is called after CV_ref and sym_pairs is set
   [energy_gradient,energy_value,cb_data] = ...
     energy_handles_from_string(energy_expansion);
   % starting to time expansion reversing flow: we'll updated CV_filtered after

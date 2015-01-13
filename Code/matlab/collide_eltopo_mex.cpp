@@ -180,7 +180,8 @@ void mexFunction(
   // get number of vertices
   int num_vertices = mxGetM(V0_mx);
   // get vertex positions
-  double V0[3*num_vertices];
+//  double V0[3*num_vertices];
+  double *V0 = new double[3*num_vertices];
   for (int i = 0; i<num_vertices; i++){
       V0[3*i] = V0_[i][0];
       V0[3*i+1] = V0_[i][1];
@@ -189,7 +190,8 @@ void mexFunction(
   // get number of triangles
   int num_triangles = mxGetM(F_mx);
   // get face indices
-  int F0[3*num_triangles];
+//  int F0[3*num_triangles];
+  int *F0 = new int[3*num_triangles];
   for (int i = 0; i<num_triangles; i++){
       F0[3*i] = F[i][0]-1;
       F0[3*i+1] = F[i][1]-1;
@@ -212,7 +214,8 @@ void mexFunction(
   eltopo_time0.vertex_masses = masses;
 
   // Mesh at time 1
-  double V1[3*num_vertices];
+//  double V1[3*num_vertices];
+  double *V1 = new double[3*num_vertices];
   // get vertex positions
   for (int i = 0; i<num_vertices; i++){
       V1[3*i] = V1_[i][0];
@@ -276,6 +279,9 @@ void mexFunction(
   out_ptr = mxGetPr(plhs[1]);
   *out_ptr= rest_dt;
 
+  delete[] V0;
+  delete[] F0;
+  delete[] V1;
   V_eltopo.clear();
 
   // Restore the std stream buffer Important!
