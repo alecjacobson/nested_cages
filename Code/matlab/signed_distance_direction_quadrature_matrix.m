@@ -83,10 +83,10 @@ function [V,moving_vertices,grad_V,quad_points,grad_quadrature,C,s] = signed_dis
       elseif (order==2)
           
           % define the 3 quadrature points (edge-midpoints)
-          p1 = 0.5*(V0(F0(moving_faces,1),:)+V0(F0(moving_faces,2),:));
-          p2 = 0.5*(V0(F0(moving_faces,2),:)+V0(F0(moving_faces,3),:));
-          p3 = 0.5*(V0(F0(moving_faces,3),:)+V0(F0(moving_faces,1),:));
-          quad_points = [p1;p2;p3];
+          p12 = 0.5*(V0(F0(moving_faces,1),:)+V0(F0(moving_faces,2),:));
+          p23 = 0.5*(V0(F0(moving_faces,2),:)+V0(F0(moving_faces,3),:));
+          p31 = 0.5*(V0(F0(moving_faces,3),:)+V0(F0(moving_faces,1),:));
+          quad_points = [p12;p23;p31];
           
           [grad_p_all,~,C] = signed_distance_direction(quad_points,V_coarse,F_coarse);
           grad_quadrature = -grad_p_all;
