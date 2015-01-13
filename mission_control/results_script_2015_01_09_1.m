@@ -284,8 +284,8 @@
 % save('/Users/leokollersacht/Documents/nested_cages/Meshes/Results/Model6_varap_new/timing.mat','timing')
 % % Obs.: Too difficult flow, skipping
 
-[V0,F0] = load_mesh('/Users/leokollersacht/Documents/nested_cages/Meshes/Results/Model7_volume/Model7_0.obj');
-levels = floor(2.^((-14:2:-2)/3)*size(F0,1));
+[V0,F0] = load_mesh('/Users/leokollersacht/Documents/nested_cages/Meshes/Results/horse_volume/horse_0.obj');
+levels = 1000:1000:25000;
 [cages_V,cages_F,~,~,~,timing] = ...
   multires_per_layer( ...
   V0,F0, ...
@@ -296,6 +296,6 @@ levels = floor(2.^((-14:2:-2)/3)*size(F0,1));
   'BetaInit',1e-2, ...
   'Eps',1e-3,...
   'PartialPath','partial_01_09_01.mat');
-write_cages('/Users/leokollersacht/Documents/nested_cages/Meshes/Results/Model7_varap_new/anchor',cages_V,cages_F);
-save('/Users/leokollersacht/Documents/nested_cages/Meshes/Results/Model7_varap_new/timing.mat','timing')
-% Obs.: Stuck in the first layer with varap (let for the end, try surface arap)
+write_cages('/Users/leokollersacht/Documents/nested_cages/Meshes/Results/horse_arap_25new/horse',cages_V,cages_F);
+save('/Users/leokollersacht/Documents/nested_cages/Meshes/Results/horse_arap_25new/timing.mat','timing')
+% Obs.: 
