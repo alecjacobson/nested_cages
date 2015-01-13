@@ -55,11 +55,12 @@ function [Pall_fine,Pall_coarse] = shrink_fine_expand_coarse_3D( ...
   expand_every = 0;
   positive_projection = false;
   smoothing = 0;
+  first_only = false;
 
   % Map of parameter names to variable names
   params_to_variables = containers.Map( ...
-    {'quadrature_order','step_size','expand_every','eps_distance','PositiveProjection','smoothing'}, ...
-    {'quadrature_order','step_size','expand_every','eps_distance','positive_projection','smoothing'});
+    {'FirstOnly','quadrature_order','step_size','expand_every','eps_distance','PositiveProjection','smoothing'}, ...
+    {'first_only','quadrature_order','step_size','expand_every','eps_distance','positive_projection','smoothing'});
   v = 1;
   while v <= numel(varargin)
     param_name = varargin{v};
@@ -87,7 +88,7 @@ function [Pall_fine,Pall_coarse] = shrink_fine_expand_coarse_3D( ...
   % concatenate meshes and test for intersections
   V_all = [V_exp;V_shrink];
   F_all = [F_exp;F_shrink+size(V_exp,1)];
-  [~,~,IF] = selfintersect(V_all,F_all,'DetectOnly',true);
+  IF = intersect_other(V_shrink,F_shrink,V_exp,F_exp,'FirstOnly',true);
 
   %initialize flow
   ii = 1;
@@ -170,8 +171,14 @@ function [Pall_fine,Pall_coarse] = shrink_fine_expand_coarse_3D( ...
 
       Pall_coarse(:,:,ii) = V_exp;
 
-      IF = intersect_other(V_shrink,F_shrink,V_exp,F_exp);
-      fprintf('%05d: number of intersections after coarse mesh expansion: %d \n',ii,size(IF,1));
+      IF = intersect_other(V_shrink,F_shrink,V_exp,F_exp,'FirstOnly',first_only);
+      if first_only
+        if ~isempty(IF)
+          fprintf('%05d: intersections remain after coarse mesh expansion.\n',ii);
+        end
+      else
+        fprintf('%05d: number of intersections after coarse mesh expansion: %d \n',ii,size(IF,1));
+      end
 
       plot_struct.quad_points = quad;
       plot_struct.grad_vertices = grad_energy;
@@ -221,8 +228,20 @@ function [Pall_fine,Pall_coarse] = shrink_fine_expand_coarse_3D( ...
 
       Pall_fine(:,:,end+1) = V_shrink;
 
-      IF = intersect_other(Pall_fine(:,:,end),F_shrink,Pall_coarse(:,:,end),F_coarse);
-      fprintf('%05d: number of intersections after fine mesh shrinking: %d \n',ii,size(IF,1));
+      IF = intersect_other( ...
+        Pall_fine(:,:,end), ...
+        F_shrink, ...
+        Pall_coarse(:,:,end), ...
+        F_coarse, ...
+        'FirstOnly',first_only && (mod(ii-1,10)~=0) );
+      if first_only && (mod(ii-1,10)~=0)
+        if ~isempty(IF)
+          fprintf('%05d: intersections remain after fine mesh shrinking.\n',ii);
+        end
+      else
+        fprintf('%05d: number of intersections after fine mesh shrinking: %d \n',ii,size(IF,1));
+      end
+
       %if (size(IF,1)==0)
       %    V_int = [V_shrink;Pall_coarse(:,:,end)];
       %    F_int = [F_shrink; size(V_shrink,1)+F_coarse];

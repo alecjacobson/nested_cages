@@ -19,7 +19,8 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = multires_per_layer(V0
   %     'step_size': step length for the flow (default=1e-3)
   %     'expand_every': expands the coarse mesh during the flow every
   %         'expand_every' steps.
-  %     ... and any optional arguements to combined_step_project
+  %     ... and any optional arguements to combined_step_project or
+  %       shrink_fine_expand_coarse_3D
   % Output:
   %   cages_V   array with (#levels) matrices with vertices positions. 
   %             cages_V{k} corresponds to levels(k)-output mesh
@@ -57,15 +58,18 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = multires_per_layer(V0
   debug = true;
   skip_el_topo = false;
   positive_projection = false;
+  first_only = false;
 
   % Map of parameter names to variable names
   params_to_variables = containers.Map( ...
     {'QuadratureOrder','StepSize','V_coarse','F_coarse','ExpandEvery', ...
       'ExpansionEnergy','FinalEnergy','Eps','BetaInit','Debug','Fquad', ...
-      'SkipElTopo','PositiveProjection','PartialPath','Smoothing','D_CV_MIN'}, ...
+      'SkipElTopo','PositiveProjection','PartialPath','Smoothing', ...
+      'D_CV_MIN','FirstOnly'}, ...
     {'quadrature_order','step_size','V_coarse','F_coarse','expand_every', ...
       'energy_expansion','energy_final','eps_distance','beta_init','debug','Fquad', ...
-      'skip_el_topo','positive_projection','partial_path','smoothing','D_CV_MIN'});
+      'skip_el_topo','positive_projection','partial_path','smoothing', ...
+      'D_CV_MIN','first_only'});
   v = 1;
   while v <= numel(varargin)
     param_name = varargin{v};
@@ -156,7 +160,8 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = multires_per_layer(V0
     tic
     [Pall,Pall_coarse] = shrink_fine_expand_coarse_3D(cages_V{k+1},cages_F{k+1},...
         V_coarse{k},F_coarse{k},'quadrature_order',quadrature_order,...
-        'step_size',step_size,'expand_every',expand_every,'smoothing',smoothing);
+        'step_size',step_size,'expand_every',expand_every, ...
+        'smoothing',smoothing,'FirstOnly',first_only);
     timing.flow = timing.flow + toc;
 
     Pall_all_times{k} = Pall;
