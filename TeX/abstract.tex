@@ -1,19 +1,21 @@
 \begin{abstract} 
+
 Many tasks in geometry processing and physical simulation benefit from
-multiresolution hierarchies. The coarse
-approximations must satisfy several desiderata, in order for the
-multiresolution algorithms to be efficient and accurate: the coarsened object
-should respect the topology of the original, it should \emph{enclose} the
-original object, yet should fit the original as tightly as possible, i.e.
-include a minimal amount of extraneous volume. Existing techniques for building
-a multiresolution hierarchy, such as tracing distance level sets of the object,
-voxelizing the object, or meshing the object followed by decimation, violate
-one or more of these desiderata. We propose a solution that satisfies all three
-requirements by successively constructing each next-coarsest level of the hierarchy, 
-using a sequence of decimation, flow, and contact-aware physical simulation steps. 
-From coarse to fine, each layer then fully encloses the next while
-retaining a snug fit and respecting the original surface topology. We show that the method 
-is applicable to a wide variety of shapes of complex geometry and topology, and demonstrate
+multiresolution hierarchies. The coarse approximations must satisfy several
+desiderata, in order for the multiresolution algorithms to be efficient and
+accurate: the coarsened object should respect the topology of the original, it
+should \emph{enclose} the original object, yet should fit the original as
+tightly as possible, i.e.  include a minimal amount of extraneous volume.
+Existing techniques for building a multiresolution hierarchy, such as tracing
+distance level sets of the object, voxelizing the object, or meshing the object
+followed by decimation, violate one or more of these desiderata. We propose a
+solution that satisfies all three requirements by successively constructing
+each next-coarsest level of the hierarchy, using a sequence of decimation,
+flow, and contact-aware physical simulation steps.  From coarse to fine, each
+layer then fully encloses the next while retaining a snug fit and respecting
+the original surface topology. We show that the method is applicable to a wide
+variety of shapes of complex geometry and topology, and demonstrate
 applicability of the hierarchy to geometric modeling and multigrid simulation.
+
 \end{abstract}
 

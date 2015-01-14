@@ -1,4 +1,5 @@
-*.DS_Store5~
+*.DS_Store~
+*.DS_Store
 *.aux
 *.bbl
 *.blg
@@ -9,6 +10,10 @@ TeX/nested.pdf
 *.cache.mat
 *.cache.*.mat
 *.mexmaci64
+*.aux*.make
+*.fls
+*.dvi
+*.d
 TeX/multigrid-notes.txt
 TeX/nested.fdb_latexmk
 TeX/nested.fls
