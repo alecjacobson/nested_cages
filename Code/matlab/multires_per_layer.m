@@ -121,6 +121,7 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = multires_per_layer(V0
   cages_F{num_levels+1} = F0;
   timing.per_layer = cell(num_levels,1);
   % loop over different levels
+  
   for k=num_levels:-1:1
 
     % % only generate coarse layers if they were not prescribed
@@ -156,21 +157,33 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = multires_per_layer(V0
       timing.decimation = timing.decimation + toc;
     end
 
-    % shrink fine mesh, expand coarse mesh
-    tic
-    [Pall,Pall_coarse] = shrink_fine_expand_coarse_3D(cages_V{k+1},cages_F{k+1},...
+%     % Previous code
+%     % shrink fine mesh, expand coarse mesh
+%     tic
+%     [Pall,Pall_coarse] = shrink_fine_expand_coarse_3D(cages_V{k+1},cages_F{k+1},...
+%         V_coarse{k},F_coarse{k},'quadrature_order',quadrature_order,...
+%         'step_size',step_size,'expand_every',expand_every, ...
+%         'smoothing',smoothing,'FirstOnly',first_only);
+%     timing.flow = timing.flow + toc;
+
+    [Pall,Pall_coarse] = shrink_fine_expand_coarse_3D(V_coarse{k+1},F_coarse{k+1},...
         V_coarse{k},F_coarse{k},'quadrature_order',quadrature_order,...
         'step_size',step_size,'expand_every',expand_every, ...
         'smoothing',smoothing,'FirstOnly',first_only);
     timing.flow = timing.flow + toc;
-
+    if (k~=num_levels)
+        % shift flow steps forward
+        Pall(:,:,size(Pall_expansion,3)+1:size(Pall_expansion,3)+size(Pall,3)) = Pall;
+        % Append steps comming from previous attempt
+        Pall(:,:,1:size(Pall_expansion,3)) = Pall_expansion; 
+    end
     Pall_all_times{k} = Pall;
 
     %% save partial result
     %save('partial.mat','Pall','Pall_coarse','V_coarse','F_coarse','V0','F0');
 
     % push coarse mesh with physical simulation to obtain the cages
-    [V_coarse_new,timing.per_layer{k}] = ...
+    [V_coarse_new,timing.per_layer{k},Pall_expansion] = ...
       combined_step_project( ...
         Pall,cages_F{k+1},...
         Pall_coarse(:,:,end),F_coarse{k}, ...
