@@ -300,7 +300,7 @@
 % save('/Users/leokollersacht/Documents/nested_cages/Meshes/Results/horse_arap_25new/timing.mat','timing')
 % % Obs.: Simulation was taking too long for the last layer
 
-[V0,F0] = load_mesh('/Users/leokollersacht/Documents/nested_cages/Meshes/Results/maxplank_478k_varap/max-clean-478k.obj');
+[V0,F0] = load_mesh('/Users/leokollersacht/Documents/nested_cages/Meshes/Results/maxplank_478k_varap/max-clean-478k.ply');
 V0 = V0/max(max(abs(V0)));
 levels = floor(2.^((-22:2:-2)/3)*size(F0,1));
 [cages_V,cages_F,~,~,~,timing] = ...
