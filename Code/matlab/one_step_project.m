@@ -57,10 +57,11 @@ function [CV_filtered,timing] = ...
   debug = true;
   skip_el_topo = false;
   D_CV_MIN = 1e-5;
+  BETA_MIN = 1e-3;
   % Map of parameter names to variable names
   params_to_variables = containers.Map( ...
-    {  'SkipElTopo','Eps','BetaInit','Tol','PlotInfo','Debug','D_CV_MIN'}, ...
-    {'skip_el_topo','eps_distance','beta_init','tol_dt','plot_info','debug','D_CV_MIN'});
+    {  'SkipElTopo','Eps','BetaInit','Tol','PlotInfo','Debug','D_CV_MIN','BETA_MIN'}, ...
+    {'skip_el_topo','eps_distance','beta_init','tol_dt','plot_info','debug','D_CV_MIN','BETA_MIN'});
   v = 1;
   while v <= numel(varargin)
     param_name = varargin{v};
@@ -104,7 +105,6 @@ function [CV_filtered,timing] = ...
   E_opt = inf;
   % Stepping in energy gradient direction until converged
   bb_iter = 1;
-  BETA_MIN = 1e-3;
   %BETA_MIN = 1e-6;
   %D_CV_MIN = 1e-6;
   CV_prev = CV_filtered;
