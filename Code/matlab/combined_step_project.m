@@ -245,7 +245,7 @@ function [V_coarse_final,timing,Pall_expansion] = ...
   energy_final = 'volume';
   % define target cage (many times initial mesh)
   eps_distance_final = 1e-4;
-  eps_distance_expansion = eps_distance;
+  eps_distance_expansion = eps_distance_final;
   beta_init = 1e-2;
   debug = true;
   Fquad = [];
