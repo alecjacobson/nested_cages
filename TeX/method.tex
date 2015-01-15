@@ -3,14 +3,17 @@
 
 % establish input and output
 The input to our method is a sequence of $k+1$ potentially overlapping
-triangles meshes $(\V_0,\F_0),(\V_1,\F_1),\dots,(\V_k,\F_k)$, where $\V_i$ is a
-list of 3D vertex positions and $\F_i$ is a list of triangle index triplets.
+triangles meshes $(\Minp_0,\Minp_1,\dots,\Minp_k)$.
 %
-In general, we only assume that each mesh \emph{approximates} the surface of the same
-solid object.
+Each mesh $\Minp_i$ has a corresponding list of \emph{initial} vertex positions
+$\MVinp_i \in \R^{n_i \times 3}$ and list of triangle indices $\T_i \in
+\{1,\dots,n_i\}^{m_i \times 3}$.
 %
-In a typical scenario, $(\V_0,\F_0)$ is a high-resolution \emph{original} mesh and
-$(\V_1,\F_1),\dots,(\V_k,\F_k)$ are decimations of decreasing resolution.
+In general, we only assume that each mesh \emph{approximates} the surface of
+the same solid object.
+%
+In a typical scenario, $\Minp_0$ is a high-resolution \emph{original} mesh and
+$\Minp_1,\dots,\Minp_k$ are decimations of decreasing resolution.
 %
 We require that each input mesh is \emph{watertight} \cite{Dey:2003jf}:
 %
@@ -23,387 +26,211 @@ Depending on the application, troublesome input meshes may be \emph{cleaned} as
 a pre-process using available tools (e.g.\
 \cite{Attene:2010vv,Jacobson:WN:2013}).
 
-The output of our method is a new sequence of $k$ lists of vertex positions 
-$\V'_1,\dots,\V'_k$ such that all points on $(\V'_{i-1},\F_{i-1})$ are
-strictly
-\emph{inside} $(\V'_i,\F_i)$ for $i=1\dots k$, letting $\V'_0 = \V_0$ (see
-\reffig{2d-nested-layers-notaion}).
+The output of our method is a new sequence of $k$ vertex positions
+$\MVout_1,\dots,\MVout_k$ such that for $i=1\dots k$ each $\Mout_i =
+(\MVout_i,\T_i)$ is a deformed mesh whose surface (not just vertex set) lies
+strictly outside $\Mout_{i-1}$, letting $\Mout_0 = \Minp_0$. Recursively this
+ensures that each $\Mout_i$ lies strictly outside $\Mout_j$ for
+$j=i-1,\dots,0$. We call such meshes \emph{nested} (see
+\reffig{boxing-layers}).
+
+\begin{figure}
+  \includegraphics[width=\linewidth]{figs/boxing-layers}
+  \caption{We deform a set of input overlapping decimations so that each
+  contains all finer layers (2D illustration).}
+  \label{fig:boxing-layers}
+\end{figure}
 
 We opt to alter only the vertex positions (\emph{geometric embedding}) of each
-mesh, and not the number or connectivity of vertices ($\F_i$ are unchanged). Among
-other benefits, this design decision ensures that the number of vertices in each
-mesh is exactly maintained.
+mesh, and not the number or connectivity of vertices ($\T_i$ are unchanged).
+Among other benefits, this design decision ensures that the number of vertices
+in each decimated mesh is exactly maintained.
 
-The \emph{nesting} property of the output meshes is easily \emph{verified} by testing
-that the winding number of at least one vertex of $\V'_{i-1}$ with respect to
-$(\V'_i,\F_i)$ is positive and no intersections exist between
-$(\V'_{i-1},\F_{i-1})$ and $(\V'_i,\F_i)$. 
+The \emph{nesting} property of the output meshes is easily \emph{verified} by
+testing that the winding number of at least one vertex of $\MVout_{i-1}$ with
+respect to $\Mout_i$ is positive and no intersections exist between
+$\Mout_{i-1}$ and $\Mout_i$.
 
 Now we describe a general method that guarantees this nesting property while
-optimizing any problem specific energy (e.g.\ distance between meshes, mesh
-volumes).
+optimizing any problem specific energy (e.g.\ mesh
+volumes, mesh surface quality).
 
 Our method operates recursively on two meshes of the sequence at a time: we
-compute $\V'_i$ by considering only the solution to the previous level
-$(\V'_{i-1},\F_{i-1})$ and initial mesh $(\V_i,\F_i)$. 
+compute $\Mout_i$ by considering only its original embedding $\Minp_i$ and the
+solution to the previous level $\Mout_{i-1}$. 
 %
-Without loss of generality, let us simplify our notation and consider computing
-$\V'_1$ from $(\V'_0,\F_0)$ and $(\V_1,\F_1)$. We refer to the $0$th
-mesh as the ``fine mesh'' and the $1$st mesh as the ``coarse mesh''.
+In this way we compute $\Mout_1,\Mout_2,\dots,\Mout_k$ in order, ensuring
+nesting between each subsequent pair.
 %
-Computing new coarse mesh vertex positions $\V'_1$ involves three phases:
+Breaking the problem of nesting many cages into individual subproblems is key
+to our success as it will greatly reduce the complexity of the optimization
+problems described later on.
+
+To simplify notation, from now on, we only consider compute the new positions
+of a \emph{coarse} mesh $\Cout$ from its original mesh $\Cinp$ and the next
+\emph{finer} mesh $\Fout$. 
+%
+Computing new coarse mesh vertex positions $\CVout$ involves two phases:
 \emph{flow} the fine mesh until fully inside the coarse mesh, \emph{re-inflate}
 the fine mesh to its original embedding while \emph{pushing} the coarse mesh
-out of the way, and finally \emph{optimize} the coarse mesh embedding (see
-\reffig{2d-pipeline}).
+out of the way (see \reffig{boxing-pipeline}).
+
+\begin{figure}
+  \includegraphics[width=\linewidth]{figs/boxing-pipeline}
+  \caption{Our pipeline has two stages for each pair of neighboring coarse
+  $\Cout$ and fine $\Fout$ layers.}
+  \label{fig:boxing-pipeline}
+\end{figure}
 
 \subsection{Flow}
 \label{sec:flow}
 
-Without loss of generality, the input fine mesh $(\V'_0,\F_0)$ and coarse mesh
-$(\V_1,\F_1)$ are free of \emph{self}-intersections,
+Without loss of generality, the fine mesh $\Fout$ and coarse mesh
+$\Cinp$ are free of \emph{self}-intersections,
 %
 but, in general, the fine mesh will overlap the coarse mesh: some triangles of
 the fine mesh will intersect those of the coarse mesh, implying that some
-portion of $(\V'_0,\F_0)$ lies outside of $(\V_1,\F_1)$. Equivalently, there
-exists a non-empty set of points on $(\V'_0,\F_0)$ with \emph{positive} signed
-distance with respect to $(\V_1,\F_1)$ \footnote{Assuming a negative
-inside, positive outside convention.}.
+portion of $\Fout$ lies outside of $\Cinp$. Equivalently, there exists a
+non-empty set of points on $\Fout$ with \emph{positive} signed distance with
+respect to $\Cinp$, assuming a negative-inside/positive-outside convention.
 %
-Our idea is to find a new embedding $\widehat{\V}_0$ that \emph{minimize
-signed distance} integrated over all points $\p$ of the fine mesh to the
-closest point $\q$ on the coarse mesh:
+Our idea is to find a new embedding of the fine mesh $\FVflow$ which
+\emph{minimizes signed distance} integrated over all deformed surface points
+$\pflow$ closest point $\qinp$ on the coarse mesh:
+%
 \begin{align}
 \label{equ:sd-energy}
- Φ(\widehat{\V}_0) &= ∫_{(\widehat{\V}_0,\F_0)} s(\p) u(\p) \,dA,\\
-& u(\p) = \left\| \p - \argmin_{\q \in (\V_1,\F_1)} \|\p-\q\|\right\|,\\
-& s(\p) = \begin{cases}
-  1 & \text{ if $\p$ is outside $(\V_1,\F_1)$},\\
-  0 & \text{ if $\p$ is exactly on $(\V_1,\F_1)$},\\
-  -1 & \text{ if $\p$ is inside $(\V_1,\F_1)$},
+ Φ(\FVflow) &= ∫_{\Fout} s(\pflow) u(\pflow) \,dA,\\
+& u(\pflow) = \left\| \pflow - \argmin_{\qinp \in \Cinp} \|\pflow-\qinp\|\right\|,\\
+& s(\pflow) = \begin{cases}
+  1 &  \text{ if $\pflow$    is outside $\Cinp$},\\
+  0 &  \text{ if $\pflow$ is exactly on $\Cinp$},\\
+  -1 & \text{ if $\pflow$    is inside $\Cinp$},
 \end{cases}
 \end{align}
+%
+where $u(\pflow)$ is the \emph{unsigned} distance from $\pflow$ to
+the coarse mesh and $s(\pflow)$ modulates by the appropriate sign.
 
-where $u(\p)$ is the \emph{unsigned} distance from $\p$ to the coarse mesh and
-$s(\p)$ modulates by the appropriate sign.
-
-\leo{$dA$ has to be fixed, and we are using the one induced by the initial embedding.
-If we don't fix, we don't flow all the way towards the medial axis. I have an analytic example
-for a sphere, not sure how much details we should provide for this point.}
+We may immediately write the energy $Φ$ as sum of integrals over each triangle
+$T_i$ in $\Fout$:
+\begin{equation}
+Φ(\FVflow) = ∑_{i=1}^{m_F}
+  ∫_{\pflow \in T_i} s(\pflow) u(\pflow)\,dA.
+\end{equation}
 
 \leo{I would prefer to use $d$ for distance, instead of $u$}.
+\alec{Me too, but we use $dA$ for the integral nearby and $u$ stands for
+$u$nsigned distance.}
 
-\alec{Are we actually using signed \emph{squared} distance?}
+%
+\begin{wrapfigure}{r}{1.02in}
+%
+\centering
+%
+\includegraphics[width=\linewidth]{figs/cutting-corners}
+%
+\end{wrapfigure}
+%
+It is important that $\pflow$ consider \emph{all points} on the fine mesh, not
+just vertices. Though \emph{all vertices} in $\FVflow$ may lie inside the
+coarse mesh, points on facets might still lie outside (see inset). It is also
+important that $\qinp$ consider \emph{any point} on the coarse mesh, as the
+nearest vertex may be arbitrarily farther away than the closest point along a
+facet.
 
-\leo{We are using the one whose gradient is the vector connecting to the closest 
-point on the coarse mesh. I think it's not squared then.}
 
-It is important that $\p$ consider \emph{all points} on the fine mesh, not just
-vertices. Though \emph{all vertices} in $\widehat{\V}_0$ may lie inside
-the coarse mesh, parts of edges and facets might still lie outside (see
-\reffig{2d-cutting-corner}). It is also important that $\q$ consider \emph{any
-point} on the coarse mesh, as the nearest vertex may be arbitrarily farther
-away than the closest point along an edge or facet.
-
-We may immediately write our energy as sum of integrals over each triangle 
-$\{a,b,c\}$ in $(\widehat{\V}_0,\F_0)$:
-\begin{equation}
-Φ(\widehat{\V}_0) = ∑_{\forall \{a,b,c\}} ∫_{\p \in \{a,b,c\}} s(\p) u(\p)\,dA.
-\end{equation}
-
-We minimize the energy by taking small steps opposite the gradient direction
-for each vertex position $\widehat{\vv}$ in $\widehat{\V}_0(t)$ as a function
+We minimize this energy by taking small steps opposite the gradient direction
+for each vertex position $\fflow$ in $\FVflow(t)$ as a function
 of a hypothetical \emph{time} variable $t$:
 \begin{equation}
-\dd{\widehat{\vv}}{t} = -\Grad_{\widehat{\vv}} Φ(\widehat{\V}_0).
+\dd{\fflow}{t} = -∇_{\fflow} Φ(\FVflow)
 \end{equation}
 %
-By following this gradient, we \emph{flow} the fine mesh vertices, until
-$\widehat{\V}_0(t)$ is fully inside the coarse mesh.
+By following this gradient, we \emph{flow} the fine mesh vertices $\Fflow(t)$
+until fully inside the coarse mesh.
 
-Our continuous energy in \refequ{sd-energy} is similar to the data terms found
-in non-rigid registration techniques \alec{cite non-rigid ICP paper}. However,
-the sign modulator $s(\p)$ makes an important difference. Minimizing unsigned
-(positive) distances would encourage points toward the surface of the coarse
-mesh. Instead, by encouraging negative distances, points are attracted to the
-medial axis \emph{within} the coarse mesh.
+Our energy is similar to the data terms found in non-rigid registration
+techniques \cite{chang2010geometric}. However, the sign modulator $s(\pflow)$
+makes an important difference. Minimizing unsigned (positive) distances would
+flow points toward the surface of the coarse mesh.  Instead, by allowing and
+encouraging negative distances, points are attracted to the medial axis
+\emph{within} the coarse mesh.
 
-To differentiate the 
-continuous energy in \refequ{sd-energy}, we
+To update each vertex $\fflow$ we must differentiate the continuous energy in
+\refequ{sd-energy}. To approximate the continuous integral in each triangle
+$T_i$ incident on vertices $a,b,c$, we sample at discrete quadrature points
+$\pflow_j$ and with corresponding weights $w_j$, $j=1,\dots,h$:
 %
-first approximate the continuous integral using a discrete set of quadrature 
-evaluation points $\p_i$ and corresponding weights $w_i$ for each triangle:
 \begin{align}
-Φ(\widehat{\V}_0) &\approx ∑_{\forall \{a,b,c\}} ∑_i w_i s(\p_i) u(\p_i),\\
-& \p_i = 
-\lambda_a \vv_a + 
-\lambda_b \vv_b + 
-\lambda_c \vv_c,
+Φ(\FVflow) &\approx ∑_{i=1}^{m_F} ∑_{j=1}^h w_j s(\pflow_j) u(\pflow_j),\\
+& \pflow_j = 
+λ_a \fflow_a + 
+λ_b \fflow_b + 
+λ_c \fflow_c,
 \end{align}
-where $\lambda_a,\lambda_b,\lambda_c$ are the barycentric coordinates locating $\p_i$
-in the triangle $\{a,b,c\}$.
-
-\leo{If $w_i$ are per-triangle weights (area in the initial embedding), I think it would be more clear
-to put it outside the second summation and replace by $w_{\{a,b,c\}}$ (since it corresponds
-to the $\{a,b,c\}$ triangle, not quadrature point $p_i$).}
+where $λ_a,λ_b,λ_c$ are the barycentric coordinates locating
+$\pflow_j$ in $T_i$.
 
 %
 We use second-order quadrature rules and see diminishing returns with more
 exact schemes.
 %
-However, the difficulty of differentiating $u(\p_i)$ remains. To tackle this,
-we adapt the successful iterative closest point approach of non-rigid
-registration techniques. Namely, we assume that the closest point $\q_i^*$ to each
-$\p_i$ remains constant during each small time step. Likewise, we assume that
-the sign $s(\p_i)=s_i^*$ remains constant during each time step.
+However, the difficulty of differentiating the unsigned distance function
+$u(\pflow_j)$ remains. To tackle this, we adapt the successful iterative
+closest point approach of non-rigid registration techniques. Namely, we assume
+that the closest point $\qinp_j^*$ to each $\pflow_j$ remains constant
+during each small time step. Likewise, we assume that the sign
+$s(\pflow_j)=s_j^*$ remains constant during each small time step.
 
-Now, the we can derive a
-gradient for the $j$th mesh vertex $\widehat{vv}_i$. 
-Without loss of generality, if we assume triangle indices ${a,b,c}$ are always
-\emph{rotated} so that $a=j$, if any, then 
+
 \begin{align}
-\dd{\widehat{\vv}_i}{t} &\approx -\Grad_{\widehat{\vv}_i} 
-∑_{\forall \{a,b,c\} | a = j} ∑_i w_i s(\p_i) u(\p_i),\\
-&= -\Grad_{\widehat{\vv}_i} 
-∑_{\forall \{a,b,c\} | a = j} ∑_i w_i s_i^* \|\p_i -\q_i^*\|,\\
-&= -
-∑_{\forall \{a,b,c\} | a = j} ∑_i w_i s_i^* \Grad_{\widehat{\vv}_i} \|\p_i -\q_i^*\|,\\
-&=-
-∑_{\forall \{a,b,c\} | a = j} ∑_i w_i s_i^* \Grad_{\widehat{\vv}_i}
-\|
-\lambda_a \vv_i + 
-\lambda_b \vv_b + 
-\lambda_c \vv_c
--\q_i^*\|,
+\dd{\fflow}{t} &\approx 
+-∇_{\fflow} ∑_{i\in N(\fflow)} ∑_{j=1}^h w_j s(\pflow_j) u(\pflow_j),\\
+&= 
+-∇_{\fflow} ∑_{i\in N(\fflow)} ∑_{j=1}^h w_j s_j^* \|\pflow_j -\qinp_j^*\|,\\
+&=
+-∑_{i\in N(\fflow)} ∑_{j=1}^h w_j s_j^* ∇_{\fflow} \|\pflow_j -\qinp_j^*\|,\\
 \end{align}
-\alec{whhhhhhaaat. My gradient has run amok. How come I'm not getting that we
-have a weighted sum of directions toward the closest points to each quadrature
-point?}
-
-\leo{It would be easier to call $s \cdot u$ as a single function, to avoid product rules.
-Also, you are forgetting a chain rule (since each quadrature points depends on the embedding).
-I have it all written down in a pptx, could share or simply write this derivation.}
+where $N(\fflow)$ gathers all triangles incident on vertex $\fflow$. Applying
+the chain rule and being careful when $\pflow_j\approx \qinp_j^*$ (when our
+assumption that $s(\pflow_j)=s_j^*$ is invalid), we arrive at
 \begin{align}
-&=-
-∑_{\forall \{a,b,c\} | a = j} ∑_i w_i s_i^* \g_i,\\
+\dd{\fflow}{t} &\approx 
+-∑_{i\in N(\fflow)} ∑_{j=1}^h w_j s_j^* (D\pflow_j)^\transpose ∇_{\pflow_j}
+\|\pflow_j -\qinp_j^*\| \\
+&=
+-∑_{i\in N(\fflow)} ∑_{j=1}^h w_j λ_f \g_i,\\
+,\\
 &\text{ where } \g_i = \begin{cases}
-\frac{\p_i -\q_i^*}{\|\p_i -\q_i^*\|} & \text{ if } \|\p_i
+s_j^* \frac{\widehat{\p}_i -\q_i^*}{\|\widehat{\p}_i -\q_i^*\|} & \text{ if } \|\widehat{\p}_i
 -\q_i^*\|<\epsilon,\\
 \n(\q_i^*) & \text{ otherwise },
 \end{cases}
 \end{align}
-where $\n(\q_i^*)$ is the unit normal at $\q_i^*$. This normal is chosen with
-care. To ensure that it points \emph{inside} the coarse mesh, we determine if
-$\q_i^*$ lies near a vertex, near an edge or in the middle of a triangle and
-use an interior angle weighted average of incident triangle normals, a uniform
-average of incident triangle normals or triangle normal,
-respectively \cite{Baerentzen:2005:SDC}.
+where $λ_f$ is the barycentric coordinate of $\pflow_i$ corresponding to
+$\fflow$ and $\n(\q_i^*)$ is the unit normal at $\q_i^*$. This normal is chosen
+with care to ensure that it points \emph{inside} the coarse mesh. We determine
+if $\q_i^*$ lies near a vertex, near an edge or in the middle of a triangle and
+use an interior-angle-weighted average of incident triangle normals, a uniform
+average of incident triangle normals or triangle normal, respectively
+\cite{Baerentzen:2005:SDC}.
 
-We iterate this flow stepping with magnitude proportional to a small ``time
-step'': $∆t \approx XXXXXX$ \alec{what do we use?} \leo{Default is $10^{-3}$,
-which works well for models scaled between -1 and 1. Can be tuned as optional parameter}. 
-After each time step we
-recompute signs $s_i^*$ and closest points $\q_i^*$ all quadrature points. We
-terminate if all signs are negative \emph{and} no intersecting faces are found
-between $(\widehat{\V}_0,\F_0)$ and $(\V_1,\F_1)$.
-
-There is no formal, provable guarantee that this flow will succeed. Indeed, in
-rare, difficult cases the flow converges without moving the fine mesh fully
-inside the coarse mesh. This may occur if the medial axis of the coarse mesh
-lies outside of the fine mesh. This is especially rare if the input sequence
-results from decimation as decimation effectively \emph{prunes} and simplifies
-a mesh's medial axis.
-
-Rather than admit defeat, we propose a additional step which alleviates many
-occurrences of this problem. We reverse the picture and expand the coarse mesh,
-flowing it away from the current fine mesh along its signed distance field.
-
-\leo{I think it is too early to put this last paragraph here. I'd rather discuss it in a limitation section.
-Could be a bit harming here. It would be nicer to show working results here.}
-
-\alec{Might want to answer question: why not just expand the coarse mesh or
-always do both?}
-
-\leo{Expansion is more complicated because it is performed in a coarser mesh. Additionally,
-we have to run a physical simulation at every step to guarantee it does not tangle, which 
-is not needed for the fine mesh.}
-
-\alec{Relationship to David's penetration depth energy: needs intersection free
-state; and Untangling Cloths' volume minimization: might push coarse mesh
-\emph{inside} fine mesh instead.}
-
-\alec{Should state that we 1) don't care if $(\widehat{\V}_0,\F_0)$ becomes
-self-intersection or 2) cannot become self-intersecting.}
-
-\leo{We don't care.}
-
-\subsection{Re-inflation}
-\label{sec:reinflation}
-
-At this point, we have flowed the fine mesh vertices so that
-$(\widehat{\V}_0,\F_0)$ is fully inside $(\V_1,\F_1)$. We now restore the fine
-mesh to its original vertex positions $\V_0$, detecting and resolving collisions with
-the coarse mesh along the way.
-
-To do this, we iterate through the vertex positions computed for each time step
-during the flow described in \refsec{flow} \emph{in reverse}.
-%
-Doing so without moving the coarse mesh vertices would immediately result in
-fine-coarse intersections.
-
-We can describe each reverse step in our flow in terms of a displacement per
-time step, that is, in terms of \emph{velocities}. For the fine mesh, the
-positions after the next reverse time step are known, and thus so are its
-velocities:
-\begin{align}
-\widehat{\V}_0(t-∆t) &= 
-\widehat{\V}_0(t) - ∆t \widehat{\U}_0(t),\\
-\widehat{\U}_0(t) &= 
-\frac{\widehat{\V}_0(t) - \widehat{\V}_0(t-∆t)}{∆t}
-\end{align}
-where $\widehat{\V}_0(t)$ are the vertex positions of the fine mesh at ``flow
-time'' $t$ with the positions returning to their input positions at time zero
-$\widehat{\V}_0(0) = \V'(0)$, and $\widehat{\U}_0(t)$ are the instantaneous
-per-vertex 3D velocity vectors at time $t$.
-%
-\alec{The signs are funny since we're flowing backwards.}
-
-For the coarse mesh, the positions $\bar{\V}_1(t-∆t)$---and in turn velocities
-$\U_1(t)$---are not fixed. In general, there are an infinite number of
-\emph{feasible} choices of $\U_1(t)$ so that the repositioned coarse mesh
-$(\bar{\V}_1(t-∆t),\F_1)$ remains free of intersections with itself and with the
-\emph{re-inflating} fine mesh $(\widehat{V}_0(t-∆t),\F_0)$.
-%
-To regularize this problem, we minimize the change in position, or equivalently
-minimize the magnitude of velocities.
-%
-Our reverse time step problem becomes:
-%
-\begin{align}
-\label{equ:simulation}
-&\argmin_{\U_1(t)} \left\|\U_1(t)\right\|^2,\\
-&\text{ subject to: }\\
-&(\bar{\V}_1(t-∆t),\F_1) \text{ does not intersect itself},\\
-&(\bar{\V}_1(t-∆t),\F_1) \text{ does not intersect } (\V_0(t-∆t),\F_0).
-\end{align}
-
-\alec{This is just disallowing instantaneous collisions. We actually model a
-harder problem: no continuous collisions. ``Why?''}
-
-By reformulating our problem in a manner familiar to physically based
-simulation, we may leverage state of the art contact detection and response
-methods.
-%
-Abstractly, we can treat these methods as a ``black box'', providing it
-the fine mesh $(\V_0(t),\F_0)$ and coarse mesh $(\bar{\V}_1(t),\F_1)$ at the end of the
-reverse flow time step and the desired velocities $\U_0(t)$ and $\U_1(t)$. 
+\begin{figure*}
+  \includegraphics[width=\linewidth]{figs/rampant-flow}
+  \caption{Mean curvature flow \protect\cite{Kazhdan2012} shrinks the fine mesh
+  (blue), but via a path outside the coarse mesh (wireframe).  During
+  re-inflation this causes unnecessary collisions, leading to failure.
+  Instead, our flow directly flows the fine mesh into the coarse mesh.}
+  \label{fig:rampant-flow}
+\end{figure*}
 
 
-There remains one interesting twist. Our problem requires the fine mesh to
-return exactly to its original positions. In physically-based simulation
-parlance, this is tantamount to assigning the fine mesh \emph{infinite mass}.
-%
-Many methods are fundamentally incapable of handling such constraints
-\alec{cite synchronous penalty-based methods?}.
-%
-Instead, we experimented with two methods.
+\alec{gather all comments from method-take-1}
 
-First, we adapt the ``velocity adjuster'', \alec{there's a better word than
-``adjuster''} surface tracking method of \cite{Brochu:2009} to deal with
-infinite masses. \alec{What did we have to change in El Topo? We decrease the
-time step and retry assuming linear motion?}
-
-\leo{We removed a phase called RIZ (Rigid Impact Zones), that allowed infinite mass 
-vertices to not reach final positions. We also replaced Cholmod by IGL's min quad with
-fixed (it better handled difficult cases). Finally, we also decrease time step as you described.}
-
-In difficult cases, too many time step subdivisions are needed, suggesting
-failure to make progress in finite time. To handle these hard cases, we fall
-back on a second, more robust but slower method: speculative asynchronous
-contact mechanics \cite{Ainsley:2012:SPA}. This method is an extension of the
-only known method to guarantee intersection prevention and positive progress
-for \emph{finite mass} objects \cite{Harmon:2009}. Our infinite masses pose an
-interesting stress test for this method, but we see success, albeit at a slower
-pace.
-
-\subsection{Optimization}
-
-So far we have allowed the coarse mesh positions to \emph{drift} as they are
-\emph{pushed} outward by the re-inflating fine mesh. Afterwards, the embedding
-of the coarse mesh $(\bar{\V}_1(0),\F_1)$ is strictly outside the fine mesh,
-but may have strayed from an \emph{optimal} embedding.
-
-Our final phase improves the positioning of the coarse mesh. The formulation is
-general and allows the user to define the optimality metric for the
-domain-specific problem at hand. 
-
-Given a differentiable energy $E(\V'_1)$ and a current, feasible embedding
-$(\V'_1,\F_1)$ we set up the following ``simulation'', reminiscent of
-\refequ{simulation}:
-\begin{align}
-&\argmin_{\U'_1} \left\|\U'_1 - δ \Grad E(\V'_1) \right\|^2,\\
-&\text{ subject to: }\\
-&(\V'_1+\U'_1,\F_1) \text{ does not intersect itself},\\
-&(\V'_1+\U'_1,\F_1) \text{ does not intersect } (\V'_0,\F_0).
-\end{align}
-where $δ \approx XXXXXX$\alec{what do we use?} \leo{Default is starting with
-$δ = 10^{-1}$ and do a binary search to decrease energy while $δ > 10^{-3}$} is a small step size
-parameter and $\Grad E(\V'_1)$ is the gradient of the user supplied energy with
-respect to vertex positions. We solve this problem iteratively, setting $\V'_1
-\leftarrow \V'_1 + \U'_1$ after each step until convergence using the same
-black box solvers as in \refsec{reinflation}.
-
-We experimented with a few different choices of optimality measures.
-One natural choice is to minimize the coarse layer's volume, preferring a
-tighter fit. In this case, we define:
-\begin{align}
-E_\text{volume}(\V'_1) &= ∫_{(\V'_1,\F_1)} 1 \,dA,\\
-\Grad E_\text{volume}(\V'_1) &= \N_1,
-\end{align}
-where $\N_1$ are the per-vertex, area-weighted normals \alec{Should just be a
-citation for this}.
-
-\alec{what other energies? Dirichlet? ARAP? symmetry? planarization? Do we
-really need to include definitions and gradients for all of these?}
-
-\leo{Symmetry, planarization and proximity are partially implemented, could be done.
-If we are going to have a supplemental PDF for other reasons, I would then add 
-derivations there.}
-
-\alec{Need to address: ``why not optimize while reinflating? why optimize only
-at the end?'' We prioritize feasibility and performance before
-quality...hmmm...that doesn't sound good.}
-
-\leo{Because we are not concerned about the quality of intermediate steps.
-We only care about the quality of the cage itself. And indeed it is faster.}
-
-\alec{Need to address: ``why not try avoid collisions during decimation?''}
-
-\alec{Might want to address: ``why accept pre-decimated meshes? Why not include
-decimation as part of pipeline''?}
-
-\leo{Default is to decimate while layers are generated. I.e., when we finish one layer, 
-this layer is decimated to be the coarse layer for the next round. Alternatively,
-all coarse layers may be prescribed as input.}
-
-\alec{Need to address: ``why not shrink wrap a mesh from well outside?''}
-
-\leo{The way we are doing now starts the final minimization at something close to what
-we want, so less risk of finding local minima.}
-
-\alec{We could handle energies which measure across layers. Minimize squared
-separation distance between adjacent layers: might pay to expand middle layer
-to balance space between fine and coarse layers. We can model this as one large
-optimization problem, and recommend that one still proceed with a block
-coordinate descent freezing all but one layer iteratively.}
-
-\alec{Discuss optimization step computation: gradient descent, Newton's,
-lerping with Global minimum. Displacement energies: Hessian is identity so
-Newton's is equivalent to G.D. ARAP, Hessian is slow and unstable. Local
-Global?}
-
-\alec{justification for using signed-distance field: medial axis of coarse mesh
-should be simpler version of medial axis of the fine mesh. high freq details
-are culled: 2d didactic figure.}
-
-\alec{might need to add smoothing if decimation doesn't obey proximity}
+\alec{if the coarse mesh collides with itself during expansion and then does
+not separate, won't it be impossible for the next layer to succeed? I think
+this is a symptom of the conservative nature of our approach. To guarantee
+nesting we force each intermediary mesh to re-inflate strictly to its output
+positions. This is sufficient but not necessary to maintain that it contains
+the fine layers it encloses.}
