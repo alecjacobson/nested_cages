@@ -40,7 +40,7 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = multires_per_layer(V0
   Pall = [];
   % below parameter only used for ElTopo
   eps_distance_final = 1e-4;
-  eps_distance_expansion = eps_distance;
+  eps_distance_expansion = eps_distance_final;
   beta_init = 1e-2;
   step_size = 1e-3;
   % coarse mesh expansion (during flow)
