@@ -216,6 +216,55 @@ use an interior-angle-weighted average of incident triangle normals, a uniform
 average of incident triangle normals or triangle normal, respectively
 \cite{Baerentzen:2005:SDC}.
 
+We iterate this flow, stepping with magnitude proportional to a small ``time
+step'' ($∆t \approx 10^{-3}$ for models scaled to the unit sphere), using a
+line search along the optimized direction to determine a step with non-negative
+progress toward reducing the energy $Φ$.
+%
+After each time step we update signs $s_i^*$ and closest points $\q_i^*$ for
+all quadrature points. We terminate if all signs are negative \emph{and} no
+intersecting faces are found between $\Fflow$ and $\Cinp$.
+%
+
+%
+\begin{wrapfigure}{r}{1.02in}
+%
+\centering
+%
+\includegraphics[width=\linewidth]{figs/boxer-medial-axis-vert}
+%
+\end{wrapfigure}
+%
+There is no formal, provable guarantee that this flow will succeed. Indeed, in
+rare, difficult cases the flow converges without moving the fine mesh fully
+inside the coarse mesh (e.g.\ all quadrature points lie near the medial axis).
+This may also occur if the coarse mesh so poorly matches the fine mesh that its
+medial axis lies significantly outside of the fine mesh. This is especially
+rare if the input sequence results from decimation as decimation effectively
+\emph{prunes} and simplifies a mesh's medial axis (see
+\reffig{boxer-medial-axis}).
+
+%\begin{figure}
+%  \includegraphics[width=\linewidth]{figs/boxer-medial-axis}
+%  \caption{The fine mesh will flow toward the medial axis of the
+%  coarse mesh (red, left), which is typically a simplification of the fine
+%  mesh's medial axis (right).}
+%  \label{fig:boxer-medial-axis}
+%\end{figure}
+
+\paragraph{Relationship to other flows}
+%
+Many smoothing flows produce shrinking effects
+\cite{Taubin:1995,desbrun99implicitfairing,Crane:2013:RFV}. For the purpose of
+fairing, volume loss is often actively avoided \cite{desbrun99implicitfairing}.
+%
+Without volume preservation the flows may eventually shrink to the shape's
+medial axis \cite{Au:2008,Tagliasacchi:2012:MCS} or to a round point
+\cite{Kazhdan:2012}, but these flows make no effort to keep the flowing surface
+strictly \emph{inside} its original volume (much less the volume of a coarse decimation). Such
+wandering flows will cause unnecessary complications in the re-inflation step
+we describe next (see \reffig{rampant-flow}).
+
 \begin{figure*}
   \includegraphics[width=\linewidth]{figs/rampant-flow}
   \caption{Mean curvature flow \protect\cite{Kazhdan2012} shrinks the fine mesh
