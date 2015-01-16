@@ -4,7 +4,7 @@
 
 \paragraph{Multiresolution}
 %
-Regular grids and lattices naturally enable multiresolution numerical methods.
+Methods based on regular grids or lattices naturally support multiresolution numerical methods.
 %
 McAdams et al.\ successfully employ multgrid on voxelized shapes to animate
 elastic charaters \cite{McAdams:2011}.
@@ -51,7 +51,7 @@ irregular as the coarsest layer, simplifying level design \cite{feng1997non}.
 %mesh coincide: user provides meshes. I'm not sure how much better this
 %restriction would really be compared to simple barycentric one.
 
-Unmodified mesh decimations \cite{Garland:1997:SSU} have been used for adaptive
+A second group of methods generate a multiresolution hierarchy using decimation. Unmodified mesh decimations \cite{Garland:1997:SSU} have been used for adaptive
 simulations for visco-elastic solids \cite{Debunne:2001:DRD}.
 %
 Such non-nested cages require extrapolation or one-to-many mappings to
@@ -59,9 +59,9 @@ Such non-nested cages require extrapolation or one-to-many mappings to
 %
 We show cases where this fails to converge for common linear systems on
 irregular domains and better convergence for strictly nesting cages where
-prolongation is pure linear interpolation.
+prolongation is a purely linear interpolation.
 
-Algebraic alternatives to geometric meshing based multiresolution also exist,
+Algebraic alternatives to geometric remeshing also exist,
 but are recommended only when geometric information is not available
 \cite{falgout06}.
 %
@@ -200,7 +200,7 @@ decimation and works as a post process to nest each layer.
 %\cite{Tagliasacchi:2012:MCS} coerces flow toward the medial axis
 
 \alec{\cite{ContactAwareModeling:2011} introduces contact handling to geometric
-modeling, inspires us to consider the contanct and collisions toolset familiar
+modeling, and inspired us to consider the contanct and collisions toolset familiar
 to physically based simulation to our geometry processing task.}
 
 \alec{Relationship to David's penetration depth energy: needs intersection free
