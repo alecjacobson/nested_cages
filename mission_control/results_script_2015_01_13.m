@@ -87,7 +87,7 @@ levels = floor(2.^((-22:2:-2)/3)*size(F0,1));
   'EpsFinal',1e-3,...
   'EpsExpansion',1e-3,...
   'PartialPath','partial_01_13.mat');
-write_cages('/Users/leokollersacht/Documents/nested_cages/Meshes/Results/octopus-500k-varap_final/octopus',cages_V,cages_F);
-save('/Users/leokollersacht/Documents/nested_cages/Meshes/Results/octopus-500k-varap_final/timing.mat','timing')
+write_cages('/Users/leokollersacht/Documents/nested_cages/Meshes/Results/octopus-500k-arap_final/octopus',cages_V,cages_F);
+save('/Users/leokollersacht/Documents/nested_cages/Meshes/Results/octopus-500k-arap_final/timing.mat','timing')
 % Obs.: VARAP: Eltopo stuck at the last step of first layer.
 % Try ARAP now
