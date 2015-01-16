@@ -69,6 +69,6 @@ levels = 750:250:13000; %50 layers
   'EpsFinal',1e-3,...
   'EpsExpansion',1e-3,...
   'PartialPath','partial_01_13.mat');
-write_cages('/Users/leokollersacht/Documents/nested_cages/Meshes/Results/maxplank_arap50_final/maxplank',cages_V,cages_F);
-save('/Users/leokollersacht/Documents/nested_cages/Meshes/Results/maxplank_arap50_final/timing.mat','timing');
+write_cages('/Users/leokollersacht/Documents/nested_cages/Meshes/Results/maxplank_varap50_final/maxplank',cages_V,cages_F);
+save('/Users/leokollersacht/Documents/nested_cages/Meshes/Results/maxplank_varap50_final/timing.mat','timing');
 % Obs.: ARAP:Stuck in the last step for the 2nd layer
