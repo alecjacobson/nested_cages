@@ -161,4 +161,4 @@ levels = floor(2.^((-22:2:-2)/3)*size(F0,1));
   'PartialPath','partial_01_09_02.mat');
 write_cages('/Users/leokollersacht/Documents/nested_cages/Meshes/Results/octopus-500k-disppath_final/octopus',cages_V,cages_F);
 save('/Users/leokollersacht/Documents/nested_cages/Meshes/Results/octopus-500k-disppath_final/timing.mat','timing')
-% Obs.: 
+% Obs.: OK
