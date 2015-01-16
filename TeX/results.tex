@@ -2,15 +2,10 @@
 \section{Results and applications}
 \label{sec:results}
 
-\input{timings_table}
+\alec{We should say where we get the decimations and reference the decimators
+comparison figure.}
 
-\begin{figure}
-  \includegraphics[width=\linewidth]{figs/dane-horse-vs-ben-chen}
-  \caption{Methods like \protect\cite{Ben-Chen:2009:SDT} use coarse cages a
-  computational workhorses to reduce complexity. Their iterative offset
-  heuristic produces oversmoothed, loosely fitting cages.}
-  \label{fig:dane-vs-ben-chen}
-\end{figure}
+\input{timings_table}
 
 \begin{figure}
   \includegraphics[width=\linewidth]{figs/swat-cage}
@@ -20,15 +15,6 @@
   is robust to such artifacts. Once inside, we re-inflate and produce a fully
   exterior cage.}
   \label{fig:swat-cage}
-\end{figure}
-
-\begin{figure}
-  \includegraphics[width=\linewidth]{figs/warrior-poisson-vs-cgal}
-  \caption{Contouring a shape's distance field requires aggressive spacing
-  between isolevels to produce valid nesting. Semantically distant parts
-  \emph{fuse} together, destroying the shape-awareness of the volumetric
-  Laplacian.} 
-  \label{fig:warrior-poisson}
 \end{figure}
 
 \begin{figure}

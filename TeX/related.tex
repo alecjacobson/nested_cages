@@ -1,111 +1,210 @@
 \section{Related work}
 \label{sec:related}
 
-Decimation
 
-Non-nested decimation \cite{Garland:1997:SSU} and progressive meshes
-\cite{Hoppe:1996:PM} \cite{Melax98} Typically the goal is appearance preserving
-\cite{Cohen:1998:AS}, though later considered more elaborate tasks like
-preserving sensations (haptics) \cite{Otaduy:2003:SPS}
-\alec{I guess we could try to make the case for haptics scenarios where one-sided safe
-contacts are ``essential''}
-
-Combine decimation hierarchy with bounding volumes for faster, more accurate
-collision detection
-\cite{Otaduy:2003:CDH} 
-
-Planar decimation avoiding flips (and therefor also self-intersections) in
-output \cite{AnderssonGL09}.  \cite{gumhold2003intersection} new coarse mesh
-won't contain self-intersections, but not trying to avoid intersections with
-original fine mesh.
-
-Rather than work against the mountain of advances in shape decimation we
-complement them. Our method takes as input an arbitrary decimation and works as
-a post process to nest each layer.
-
-Cage generation
-
-\cite{Ben-Chen:2009:SDT} creates an offset surface via Poisson reconstruction,
-
-\cite{Deng:2011vr,Xian:2012tv}
-
-Offset surfaces 
-
-\cite{Campen:2010} Exact offset surface of triangle mesh is a curved surface
-and only approximated by a fine mesh.  Could generalized 2d offset method
-\cite{chen2005polygon} to 3D \cite{Jacobson:WN:2013}.  Or just mesh signed
-distance field directions (e.g.\ using \cite{cgal}). Can be made robust to
-nasty input with \cite{Xu:2014:SDF} and used for creating low res tet mesh for
-simulation.
+\paragraph{Multiresolution}
 %
-But offsets are bad idea for creating coarse mesh: too fine OR lose nesting
-guarantee OR too far away (and start to combine features)
+Regular grids and lattices naturally enable multiresolution numerical methods.
+%
+McAdams et al.\ successfully employ multgrid on voxelized shapes to animate
+elastic charaters \cite{McAdams:2011}.
+%
+The main downside of grid based methods is their handling of irregular
+boundaries.
+%
+To avoid \emph{gluing} together geodesically distant parts of the shape, the
+shape must be modeling in an accommodating pose. If changing the input is not
+possible, then the grid size must be chosen smaller that not just the smallest
+features but also the \emph{smallest void} between features.
+%
+A hypothetical solution is to duplicate cells in close areas and managing
+adjacencies when two or more duplicated patches merge and split.
+%
+This succeeds in the less complicated topologies of 2D cartoons
+\cite{Sykora09}, but is avoided in 3D: Wojtan et al. 2011 opt for dynamic mesh
+\emph{surgery} to avoid the need for duplication \cite{wojtan2011liquid}.
+%
+Cell duplication is not only difficult to realize robustly, but also riddles
+multigrid numerical methods with expensive, SIMD-breaking boundary handling
+code: detracting from the performance gains of memory-efficient regular grids.
 
-\cite{Shen:2004:IAI}, as an application, iteratively refine a MLS surface to
-enclose an existing model: search for global parameter to minimize distance
-indirectly. Presented algorithm determines if level-set is outside, but
-contouring could still "slice" into original surface.  Further, topological
-control is lost and close features are still quickly merged. 
+Multiresolution on unstructured grids or tetrahedral meshes is more
+temperamental than regular grids and constructing each level requires care
+\cite{fish1995efficient}.
+%
+Geometric multiresolution schemes typically coarsen an input tetrahedral mesh
+by removing all but a subset of its vertices and attempting to connect them in
+a reasonable way \cite{guillard1993,Adams:1999:PMS} create each coarser
+tetrahedral. Special care is required to maintain any semblance of the original
+boundary \cite{Brune:2011}, essentially devolving into constrained Delaunay
+tessellation with no guarantee that the coarsening will not \emph{eat away}
+large portions of the domain.
+%
+In many scenarios, the boundary of the domain is assumed to be only as
+irregular as the coarsest layer, simplifying level design \cite{feng1997non}.
 
-Multi-grid 
+%\cite{fish1995efficient} just an example of a (nonlinear) multigrid solver
+%which expects the user to provide (nested?) tetrahedral meshes as input.
+%
+%\cite{feng1997non} more complicated restriction operator for Galerkin multigrid
+%on non-nested meshes, though it seems it's expected that the surfaces of each
+%mesh coincide: user provides meshes. I'm not sure how much better this
+%restriction would really be compared to simple barycentric one.
 
+Unmodified mesh decimations \cite{Garland:1997:SSU} have been used for adaptive
+simulations for visco-elastic solids \cite{Debunne:2001:DRD}.
+%
+Such non-nested cages require extrapolation or one-to-many mappings to
+\emph{prolongate} solutions on the coarse levels to finer levels.
+%
+We show cases where this fails to converge for common linear systems on
+irregular domains and better convergence for strictly nesting cages where
+prolongation is pure linear interpolation.
 
-\cite{McAdams:2011} Finite difference multigrid on voxelized input. Why not
-voxelize? Glue geodesically distant parts together: voxel size determined by
-min feature size and min void size. What about duplicated cells? Is there a
-citation for this? Boundary handling overwhelms advantages of regular grid. Is
-this even always well-defined? Nice if we had a counterexample.
-\cite{Sykora09} replicates lattice cells in 2d, not sure how this affects his
-shape-matching-style ARAP optimization.
+Algebraic alternatives to geometric meshing based multiresolution also exist,
+but are recommended only when geometric information is not available
+\cite{falgout06}.
+%
+Recently, Krishnan et al. \shortcite{Krishnan:2013:EPL} proposed a
+multiresolution preconditioner for Laplace-based systems on images and
+surfaces.
+%
+This method combines the elegance of algebraic techniques with some geometric
+information derived from the characteristics of the Laplacian matrix, but is
+limited to special problems.
 
-\cite{wojtan2011liquid} fluid sims often couple Eulerian (finite difference)
-grids with tracked surfaces. Seems that Wojtan et.\ al will identify grid cells
-containing more than one distant surfaces and perform \emph{surgery on the
-surface} rather than duplicate grid cells.
+\paragraph{Offset surfaces for simulation meshes}
+In addition to multiresolution layers, our method is suitable for creating a
+single-layer ``simulation mesh'' for physically based animation.
+%
+A simulation mesh reduces computational complexity and ensures robust
+deformations for the complex, artifact-ridden geometries embedded inside them.
+%
+Previous practitioners have experimented with automatic means to create the
+surface of these simulation meshes via contouring offset surfaces
+\cite{Campen:2010}.
+%
+The challenge is not just defining a scalar function with an isosurface
+enveloping the object, but also \emph{contouring it} with a piecewise-linear
+triangle mesh without 1) cutting corners too harshly and intersecting the input
+or 2) resorting to fine resolution nullifying any performance gains.
+%
+Xu et al. \shortcite{Xu:2014:SDF} define a robust signed distance field, but
+pass the field to an off-the-shelf contour mesher without any attempt to
+guarantee non-intersection with the input.
+%
+Similarly, Shen et al.\ \shortcite{Shen:2004:IAI} iteratively refine a moving
+least squares iso-surface to enclose an existing model tightly via a global
+scaling parameter. Like the signed distance function, though the continuous
+iso-surface may not intersect the input model, this is invalidating during
+generic contouring.
+%
+A large enough iso-value or small-enough resolution tolerance must always be
+chosen to ensure non-intersection after contouring.
+%
+For large iso-values, topological control is lost and close features are
+quickly merged (see \reffig{warrior-poisson}).
+%
+Whereas high-resolution contouring could actually lead to a more densely sampled
+surface than the input.
+%
+By deforming input decimations, we constrain our pipeline to ensure its output
+will match the desired mesh resolutions. 
 
-\cite{Adams:1999:PMS} Ritz-Galerkin multigrid, actually this is a mesh
-decimation paper for creating ``node-nested'' tet meshes, building on
-\cite{guillard1993}. Select subset of nodes, try to connect in a reasonable,
-Delaunay-ish way. Simple linear restriction operator.
+\begin{figure}
+  \includegraphics[width=\linewidth]{figs/warrior-poisson-vs-cgal}
+  \caption{Contouring a shape's distance field requires aggressive spacing
+  between isolevels to produce valid nesting. Semantically distant parts
+  \emph{fuse} together, destroying the shape-awareness of the volumetric
+  Laplacian.} 
+  \label{fig:warrior-poisson}
+\end{figure}
 
-\cite{Brune:2011} Try to maintain corners while removing vertices to get a
-node-nested coarsening.  Re-discretization (FEM-style) solves.
+\paragraph{Automatic cages for deformation}
+%
+Most generalized barycentric coordinates used for shape deformation expect an
+input ``cage'' to be completely exterior to the input shape (e.g.\
+\cite{Ju:2005:MVC,HarmonicCoodinates07}).
+%
+Creating such cages manually is time consuming and breaks automatic pipelines.
+%
+Ben-Chen et al.\ \shortcite{Ben-Chen:2009:SDT} create exterior cages
+automatically by iteratively creating an offset surface via Poisson surface
+reconstruction \cite{PoissonSurfaceReconstruction06}. There is no guarantee
+that this process will converge. Further, a single-layer cage created with our
+method is much tighter fitting for the same vertex count (see
+\reffig{dane-vs-ben-chen}).
+%
+Deng et al.\ attempt to keep coarse meshes exterior during decimation and
+resort to post-hoc global intersection resolution to repair invalid output
+cages \shortcite{Deng:2011vr}.
+%
+Xian et al.\ construct automatic cages via simplifying dense voxelization of
+the input shape \shortcite{Xian:2009}, stitching oriented bounding boxes
+around vertex clusters \shortcite{Xian:2012tv}, or by offsetting coarse
+on-surface triangulations of feature curves \shortcite{Xian:2013}.
+%
+These cages are often dense or loose fitting and may still self-intersect or
+intersect the input shape globally, as only local checks are conducted.
 
-\cite{fish1995efficient} just an example of a (nonlinear) multigrid solver
-which expects the user to provide (nested?) tetrahedral meshes as input.
+\begin{figure}
+  \includegraphics[width=\linewidth]{figs/dane-horse-vs-ben-chen}
+  \caption{Methods like \protect\cite{Ben-Chen:2009:SDT} use coarse cages a
+  computational workhorses to reduce complexity. Their iterative offset
+  heuristic produces oversmoothed, loosely fitting cages.}
+  \label{fig:dane-vs-ben-chen}
+\end{figure}
 
-\cite{feng1997non} more complicated restriction operator for Galerkin multigrid
-on non-nested meshes, though it seems it's expected that the surfaces of each
-mesh coincide: user provides meshes. I'm not sure how much better this
-restriction would really be compared to simple barycentric one.
+%Alternatives to geometric multigrid: algebraic multi-grid (cite Brandt) or
+%algebraic techniques for special problem \cite{Krishnan:2013:EPL} (doesn't
+%generalize beyond ``M-matrices'')
 
-\cite{Debunne:2001:DRD} 
-Adaptive simulations for visco-elastic solids. Computes a hierarchy of
-non-nested decimations (QSlim \cite{Garland:1997:SSU}), tethers fine mesh
-points to \emph{closest} coarse vertex.
+%\cite{CGCDP:2002} assume a subdivision lattice containing the deforming shape
+%as part of the input. Presumably this cage is modeled manually.
 
-\cite{CGCDP:2002} assume a subdivision lattice containing the deforming shape
-as part of the input. Presumably this cage is modeled manually.
+\paragraph{Decimation}
+%
+The majority of work on surface mesh decimation aims to preserve outward
+appearance with lower and lower mesh resolution
+\cite{Hoppe:1996:PM,Garland:1997:SSU,Melax98}.
+%
+Along these lines, Gumhold et al.\ output decimations free of
+\emph{self-}intersections, ensuring for example that a character's clothing
+stays outside its body after decimation.
+%
+In contrast, our method assumes self-intersection free input decimations and
+transforms them into nested layers, with no intersections \emph{across}
+hierarchy layers.
+%
+Recent work has considered more elaborate decimation goals than appearance such
+as preserving haptic sensations \cite{Otaduy:2003:SPS}.
+%
+Otaduy et al.\ also demonstrate how to combine mesh decimations and bounding
+volume hierarchies to achieve faster collision detection and handle without
+affecting visual appearance \shortcite{Otaduy:2003:CDH}.
+%
+Our nested cages could be used to create hierarchical decimations strictly
+containing the input shape, ensuring strictly conservative collision detection.
+%
+Rather than work against the staggering quality of existing shape decimation
+techniques, we complement them. Our method takes as input an arbitrary
+decimation and works as a post process to nest each layer.
 
-Flows
-\cite{Kazhdan2012} remove singularities, also self-intersections
-\cite{Sacht:SIV:2013}, in general, will not move inside original surface
+%Flows
+%\cite{Kazhdan2012} remove singularities, also self-intersections
+%\cite{Sacht:SIV:2013}, in general, will not move inside original surface
 
-Alternating global scaling and attraction, attempts to move inside. No
-guarantees, requires parameter tuning \cite{Wang:2008}
+% Alternating global scaling and attraction, attempts to move inside. No
+% guarantees, requires parameter tuning \cite{Wang:2008}
 
-\cite{Tagliasacchi:2012:MCS} coerces flow toward the medial axis
+%\cite{Tagliasacchi:2012:MCS} coerces flow toward the medial axis
 
-Alternatives to geometric multigrid: algebraic multi-grid (cite Brandt) or
-algebraic techniques for special problem \cite{Krishnan:2013:EPL} (doesn't
-generalize beyond ``M-matrices'')
-
-
-\alec{Look in ETH MS Thesis for further citations. Ask Daniele and Derek
-whether we should cite MS Thesis and how.}
+\alec{\cite{ContactAwareModeling:2011} introduces contact handling to geometric
+modeling, inspires us to consider the contanct and collisions toolset familiar
+to physically based simulation to our geometry processing task.}
 
 \alec{Relationship to David's penetration depth energy: needs intersection free
 state; and Untangling Cloths' volume minimization: might push coarse mesh
 \emph{inside} fine mesh instead.}
 
-\alec{Need to address: ``why not try avoid collisions during decimation?''}
+%\alec{Need to address: ``why not try avoid collisions during decimation?''}
