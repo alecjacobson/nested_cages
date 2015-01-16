@@ -80,9 +80,10 @@ element-inversion artifacts if the object is entirely contained within the cage
 For accelerating collision detection, it is essential that the cage
 conservatively enclose the object.
 %
-Nesting is not a necessary condition for multiresolution convergence, but the
-affordance of a simple linear interpolation prolongation operator is known to
-produce more robust, more efficient, and easier to implement solvers
+Nesting is not a necessary condition for multiresolution convergence
+\cite{Chan96overlappingschwarz}, but the affordance of a simple linear
+interpolation prolongation operator is known to produce more robust, more
+efficient, and easier to implement solvers
 \cite{chan2000robust,dickopf2010multilevel}.
 %
 This is particularly important for enforcing Neumann boundary conditions,
