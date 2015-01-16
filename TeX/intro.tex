@@ -1,79 +1,166 @@
 \section{Introduction}
 \label{sec:introduction}
 
-\alec{need to stress generality: multires hierarchies, collision hierarchies,
-cages for deformation, cages for computation}
+As the complexity and size of computational objects continue to grow,
+acceleration algorithms become increasingly important. One powerful technique
+is to decompose a high-resolution mesh into a hierarchy of increasingly coarse
+approximations or \emph{cages}. For example, multiresolution FEM techniques
+efficiently solve Eulerian PDEs on fine meshes with over \alec{XXX} degrees of
+freedom.
+%
+Low frequency residual error disappears quickly on the coarsest levels
+while fine levels smooth away high frequency error.
+%
+Coarse enclosing cages also find use in physical simulation, where deformations
+of the cage are interpolated onto embedded high-resolution geometries; in
+interactive animation, where artists can specify large-scale deformations by
+adjusting the low-dimensional cage; and in collision detection, where conservative
+culling reduces computation time.
+%
+For all these applications, the key to good performance is the ability to
+generate a good-quality multiresolution hierarchy.
 
-As the complexity and size of objects we computationally model continue to
-grow, acceleration algorithms for handling these large become
-increasingly important. One powerful technique for managing this complexity is to decompose the
-high-resolution mesh into a hierarchy of increasingly coarse approximations or
-\emph{cages}: for example, Eulerian PDEs can be solved efficiently on a fine
-mesh using multiresolution FEM techniques, which
-first efficiently solve for a coarse approximate solution on the coarsest levels of the
-hierarchy, and then polishing that solution on successively finer levels.
-Coarse cages also find use in animation, where artist can specify large-scale deformations of
-a character or object by adjusting a coarse cage; and in collision detection, where
-a coarse cage can be used to efficiently but conservatively exclude pairs of
-objects from having collided. For all these applications, the key to good
-performance is the ability to generate a good-quality multiresolution
-hierarchy.
+\paragraph{Desiderata} Although emphasis varies according to application, an
+ideal multiresolution hieraracy possesses several properties useful across a
+broad spectrum of applications (see \reftab{feature-chart}):
 
-\noindent \textbf{Desiderata} Although different applications place different
-emphases on what makes for a desirable multiresolution hierarchy, an ideal hieraracy possess several properties useful across a broad spectrum of applications:
-\begin{itemize}
-\item Each mesh of the hierarchy completely \emph{encloses} the next-finest mesh (as well as all finer
-levels of the hierarchy.) Most algorithms for transferring the
-pose of a deformation cage to a detailed object only guarantee small distortion of the
-object and lack of element-inversion artifacts if the object is entirely
-contained within the cage, for instance. And if the cages are to be used to
-accelerate collision detection, it is essential that the cage conservatively
-enclose the object. Accurate handling of boundary conditions in multigrid FEM simulations often requires that the coarse meshes enclose the fine ones, particularly near Neumann boundaries~\cite{Chan96}.
-\item All levels of the hierarchy respect the \emph{topology} of the finest mesh, and do not introduce
-any large global errors in the object geometry. It is important to
-differentiate between two types of distances when building the hierarchy:
-\emph{embedded distance} in ambient space, and \emph{intrinsic distance}
-between two points: the distance of the shortest path connecting the two points through the material. It is possible for two points that are nearby in
-embedded distance to be very far apart in intrinsic distance: consider, for
-instance, a model of a human leaning over and nearly touching her toes. The
-fingertips and toes are nearby in ambient space but intrinsically are meters
-apart. It is critical for many applications that the coarsening process does
-not fuse together these intrisically-distant parts of an object. In the case of the human model, it
-is unacceptable if trying to animate the model's arm causes the leg to move as
-well. As another example, consider calculating the vibration modes of a broken
-ring; if the coarsening process fuses the ring together, the low-energy modes computed
-will be largely incorrect.
-\item Each mesh in the hierarchy fits \emph{tightly} around the next-finest level of the hierarchy.
-Formally, tightness can be quantified using a user-specified energy that
-minimizes Hausdorff distance between the cage and the fine mesh, or minimizes
-the volume enclosed between the two meshes, etc. A tight fit minimizes the geometric error at the object boundary incurred by simplifying the input mesh.
-\end{itemize}
-Existing popular approaches to building a coarse cage satisfy some, but not
-all, of these three properties. For instance,
-\begin{itemize}
-\item Simple decimation of the original surface mesh yields coarse approximations that fit very
-tightly and preserve a high amount of detail for a given coarsened resolution,
-and can preserve the topology of the original mesh, but there is no guarantee
-that the decimated mesh will enclose the original.
-\item Voxellizing the object to a regular grid is guaranteed to produce an
-enclosing cage, but the fit will not be tight and intrinsically distant
-features can be fused together if the grid is too coarse. Using an adaptive
-grid, octree, etc. can improve the fit and topological fidelity, but unless the
-object contains mostly axis-aligned features the resulting cage will not
-efficiently fit the object.
-\item Level-set methods can find a well-fitting cage that encloses the object,
-but can fuse spatially proximate features, changing the object topology.
-\end{itemize}
+\begin{table}[b]
+\centering
+\ra{1.2}
+\setlength{\tabcolsep}{5.5pt}
+\rowcolors{2}{white}{lightbluishgrey}
+\begin{tabularx}{\linewidth}{X c c c}
+\rowcolor{white}
+\toprule
+Method               & \textsc{Homotopic} & \textsc{Nesting} & \textsc{Tight}\\
+\midrule                                  
+\textbf{Our method}  & \YES               & \YES             & \YES      \\
+\emph{Decimation}                         
+                     & \YES               & \NO              & \YES      \\
+\emph{Voxelization}                       
+                     & \NO                & \YES             & \NO       \\
+\emph{Level-set}                          
+                     & \NO                & \YES             & \NO       \\
+\bottomrule
+\end{tabularx}
+\caption{Hierarchy construction feature chart: Previous techniques fall short
+on one property or another.}
+\label{tab:feature-chart}
+\end{table}
 
-\noindent\textbf{Our Contribution} We propose an algorithm for computing a
-multiresolution hierarchy that satisfy all three of the desired properties. Given the
-mesh $M_i$ for level $i$ of the hierarchy, we compute the next-coarsest level
-$M_{i+1}$ using three steps (see figure XXX): first, we perform
-topology-preserving decimation to get a coarse, but not enclosing, cage
-$C_{i+1}$. We then shrink $M_i$, using a combination of surface-area- and
-distance-minimizing flow (see section XXX) until $M_i$ is completely enclosed
-by $C_{i+1}$. Finally, we rewind the flow, so that the vertices of $M_i$ move back towards
-their original positions. During this reinflation, where the motion of $M_i$ is prescribed, we run a physical simulation to update the position of $C^{i+1}$. Contact forces
-guarantee that $C_{i+1}$ remains an enclosing cage, and a fairness energy
-maximizes the tightness of the fit. The final position of $C_{i+1}$ after this
-simulation becomes the next cage $M_{i+1}$. We demonstrate this method on a wide variety of example meshes with challenging geometry and topology, for which existing methods are ill-suited (see section XXX). 
+\noindent \textsc{Homotopic} All levels of the hierarchy respect the
+\emph{topology} of the original mesh, and do not introduce any large global
+errors in the object geometry. It is important to differentiate between two
+types of distances when building the hierarchy: \emph{embedded distance} in
+ambient space, and \emph{intrinsic distance} within the shape.
+%
+It is possible for two points that are nearby in embedded distance to be very
+far apart in intrinsic distance. Consider a human stretching her hands to
+nearly touch her toes. The fingertips and toes may be within millimeters across
+ambient space but meters apart intrinsically.
+%
+It is critical for many applications that coarse cages do not fuse together
+intrisically-distant parts. It would be unacceptable when animating a 
+human's fingers if the toes moved as well.
+%
+Similarly, when calculating the vibration modes of a broken ring, fusing the
+ring and changing its topology would lead to largely incorrect low energy
+modes.
+
+\noindent \textsc{Nesting}
+%
+Each mesh of the hierarchy completely \emph{encloses} the next-finest mesh, as
+well as all finer meshes.
+%
+Most algorithms for transferring the pose of a deformation cage to a detailed
+object only guarantee small distortion of the object and lack of
+element-inversion artifacts if the object is entirely contained within the cage
+\cite{HarmonicCoodinates07,Ben-Chen:2009:VHM}.
+%
+For accelerating collision detection, it is essential that the cage
+conservatively enclose the object.
+%
+Nesting is not a necessary condition for multiresolution convergence, but the
+affordance of a simple linear interpolation prolongation operator is known to
+produce more robust, more efficient, and easier to implement solvers
+\cite{chan2000robust,dickopf2010multilevel}.
+%
+This is particularly important for enforcing Neumann boundary conditions,
+common to simulation and geometry processing \cite{chan1999boundary}.
+
+\noindent \textsc{Tight}
+%
+Each mesh in the hierarchy fits \emph{tightly} around the next-finest level of
+the hierarchy.
+%
+Tightness can be quantified by the volume or Hausdorff distance between cages.
+%
+Across all applications, a tight fit minimizes the geometric error at the
+object boundary incurred by simplifying the input mesh.
+
+Existing popular approaches to construct coarse cages satisfy some, but not
+all, of these three properties.
+
+\emph{Decimation} of the original surface mesh may yield coarse
+approximations fitting very tightly to the original and preserving detail.
+%
+Constrained decimations also preserve the topology of the original mesh, but in
+general a decimation will intersect the original mesh nearly everywhere, rather
+than encage it.
+
+\emph{Voxelization} of the object to a regular grid is guaranteed to produce
+an enclosing cage, but the fit will not be tight and intrinsically distant
+features can be fused together if the grid is too coarse. Adaptive grids
+(octrees, etc.) improve the fit and topological fidelity, but unless the object
+contains mostly axis-aligned features the resulting cage will not efficiently
+fit the object.
+
+\emph{Level-set} methods can ensure nesting, but can fuse spatially proximate
+features, changing the object topology. Strict nesting, and in turn tightness,
+are also in danger when using standard contouring as output surface meshes will
+cut corners in high curvature areas, leading to intersections with other
+cages.
+
+\alec{need to reference teaser in intro}
+
+\paragraph{Our Contribution}
+%
+We propose an algorithm for computing a
+multiresolution hierarchy that satisfies all three of the desired properties.
+%
+Given an input mesh, we decimate the model to the desired levels while
+preserving its original topology.
+%
+We then recursively deform each fine cage to contain the next finest output
+cage.
+%
+Working with a consecutive pair of cages,
+we shrink the fine cage along a signed-distance-field flow until inside the
+coarse cage.
+%
+We then rewind the flow, returning the fine cage to its original positions.
+During this \emph{re-inflation}, we run collision detection and handling
+\emph{à la} physical simulation to update the positions of the coarse
+containing cage. Contact forces guarantee that the coarse cage always encloses
+the reversing fine mesh at each reverse-flow time step.
+%
+When complete, the output coarse cage takes the role of the fine cage for the
+next coarsest layer.
+
+During re-inflation we optimize the positions of the coarse cage according to
+any problem specific energies: for example, total volume for tight fitting
+cages for efficient multiresolution solvers, as-rigid-as-possible energies for
+minimal distortion for simulation or collision handling, or symmetry and quad
+planarity for automatically computing interactive deformation cages.
+
+% Multiresolution hierarchies
+  % tight fitting, enclosing, same topology
+
+% simulation meshes
+  % respect semantically distant parts
+
+% cages for deformation
+  % symmetric cages for overall symmetric shapes with asymmetric details
+  % planarity, first to show harmonic coordinates using quad cages
+
+% Coarse cages for conservative collision detection
