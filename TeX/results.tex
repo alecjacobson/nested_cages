@@ -142,12 +142,31 @@ results.}
 \input{timings_table}
 
 
-\begin{figure*}
-  \includegraphics[width=\linewidth]{figs/zoo}
-  \caption{Each row shows left to right: input model, slice through all nested
-  layers, and outermost, coarsest layer.}
-  \label{fig:zoo}
-\end{figure*}
+%
+Constructing our nested cages can be considered expensive \emph{precomputation}
+for a multiresolution linear system solver.
+%
+However, once meshes are computed the multigrid solver is sleek and memory
+efficient.
+%
+A single multiresolution V-cycle for a Poisson equation with Dirichlet boundary
+conditions inside the volume of the \emph{Octopus} with over seven million
+vertices, takes 1.4 seconds using 2GB max memory. With 14 more V-cycles the
+solution converges for a total time of 21 seconds (see
+\reffig{octopus-poisson}).
+%
+In contrast, \textsc{Matlab}'s backslash operator thrashes when using over 22GB
+of memory finishing in over 16 minutes.
+%
+\textsc{Cholmod}'s Cholesky factorization with reordering is mildly better than
+\textsc{Matlab}, solving via backsubstitution in 10 minutes, but suffers from
+similar memory issues during the pre-factorization procedures, which takes over
+an hour to complete using 17GB max memory.
+%
+In terms of precomputation, our time consuming cage computation lives at a much
+earlier stage than pre-factorization: before determining constraints or
+boundary conditions and before even choosing the particular system being
+solved.
 
 \begin{wrapfigure}{r}{1.02in}
 %
@@ -156,16 +175,6 @@ results.}
 \includegraphics[width=\linewidth]{figs/pelvis-plot}
 %
 \end{wrapfigure}
-%
-Constructing our nested cages can be considered expensive \emph{precomputation}
-for a multiresolution linear system solver.
-%
-However, 
-% Cholesky is badly memory bound and thrashes if the cache is not large enough
-\alec{List times and memory for octopus}
-%
-Further, the bulk of our precomputation lives at a much earlier stage, before
-constraints, before even choosing the particular system.
 %
 As we do not alter the core iterative nature of multiresolution, we benefit
 from its flexibility. For example, we may quickly change the diffusion rate in
@@ -254,3 +263,10 @@ decimating the input mesh leads to a divergent solver (inset).
 - cage transfer: transfer horse cage to giraffe
 
 \alec{discuss how we chose our default decimation ratio}
+
+\begin{figure*}
+  \includegraphics[width=\linewidth]{figs/zoo}
+  \caption{Each row shows left to right: input model, slice through all nested
+  layers, and outermost, coarsest layer.}
+  \label{fig:zoo}
+\end{figure*}
