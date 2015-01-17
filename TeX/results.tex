@@ -35,7 +35,7 @@ even if the input mesh has a lot of problems, since it is agnostic to input mesh
   of intersecting triangles, 24 non-manifold edges, 51 boundary loops and 51
   connected components. Our shrinking flow to the input overlapping coarse cage
   is robust to such artifacts. Once inside, we re-inflate and produce a fully
-  exterior cage.}
+  exterior cage used to deform the embedded model.}
   \label{fig:swat-cage}
 \end{figure}
 
@@ -83,7 +83,55 @@ To showcase the quality and robustness of our method we present more results
 in Figure~\ref{fig:zoo}. \leo{Comment quality of specific results when the zoo is completely done}.
 Tabel~\ref{tab:timings} present timing data for some of the results. The table shows
 that the most time-consuming part of our pipeline is the physical simulation, as expected.
+
+
+Despite harmonic coordinates being theoretically defined for arbitrary
+polyhedra, previous works implement them only on triangle mesh cages
+\cite{HarmonicCoodinates07}.
+%
+To utilize popular quad-dominant meshes as cages, all faces must be outside the
+input model and \emph{planar}.
+%
+Such cages are difficult to model manually, hence opting to simply triangulate
+any high-order facets \cite{HarmonicCoodinates07}.
+%
+We complement the recent sketch-based quad meshing tool \cite{Takayama:2013},
+post-processing its output to enclose the input model and 
+minimize a planarization energy \cite{poranne2013interactive}.
+%
+Quad-dominant cages are easier to control as their visualization is less
+cluttered (see \reffig{hand-hc}).
+%
+More importantly, harmonic coordinates constructed (via their recursive
+definition) on the planar-quad polyhedron are also higher quality:
+coordinates are smooth functions inside each quad.
+%
+In contrast, coordinates would depend heavily on the chosen triangulation.
+
+\begin{figure}
+  \includegraphics[width=\linewidth]{figs/octopus-poisson}
+  \caption{A single multiresolution v-cycle takes 1.4 secs on this 7M-vertex
+  volumetric Poisson equation in the \emph{Octopus}. With 14 more iterations
+  (21 secs) the residual error matches a direct solver's (11 mins, back
+  substitution only).}
+  \label{fig:octopus-poisson}
+\end{figure}
+
+\begin{figure}
+  \includegraphics[width=\linewidth]{figs/hand-hc}
+  \caption{Left to right: an quad mesh is quickly sketched atop the \emph{Hand}
+  and our pipeline moves it outside the input while planarizing quads. A
+  cage-based deformation is applied via harmonic coordinates computed over the
+  volume inside the planar-quad polyhedron (a few coordinates visualized in
+  pseudocolor). These weights are smooth inside each quad. In contrast,
+  triangulating the quads would lead to non-smooth, meshing-dependent values in
+  each quad (two alternative triangulations).}
+  \label{fig:hand-hc}
+\end{figure}
+
 \leo{Is here a good place for implementation details?}
+\alec{Usually this comes at the end of the method of the beginning of the
+results.}
 
 \leo{To-do: Human inside armour (Leo)}
 
@@ -93,11 +141,53 @@ that the most time-consuming part of our pipeline is the physical simulation, as
 
 \input{timings_table}
 
-\begin{figure}
+
+\begin{figure*}
   \includegraphics[width=\linewidth]{figs/zoo}
   \caption{Each row shows left to right: input model, slice through all nested
   layers, and outermost, coarsest layer.}
   \label{fig:zoo}
+\end{figure*}
+
+\begin{wrapfigure}{r}{1.02in}
+%
+\centering
+%
+\includegraphics[width=\linewidth]{figs/pelvis-plot}
+%
+\end{wrapfigure}
+%
+Constructing our nested cages can be considered expensive \emph{precomputation}
+for a multiresolution linear system solver.
+%
+However, 
+% Cholesky is badly memory bound and thrashes if the cache is not large enough
+\alec{List times and memory for octopus}
+%
+Further, the bulk of our precomputation lives at a much earlier stage, before
+constraints, before even choosing the particular system.
+%
+As we do not alter the core iterative nature of multiresolution, we benefit
+from its flexibility. For example, we may quickly change the diffusion rate in
+a heat equation solved in the volume of the \emph{Pelvis} (see
+\reffig{pelvis-diffusion}). 
+%
+Factorization based solvers, in general scrap previous precomputation after
+such a global change to the system matrix. 
+%
+Multiresolution hardly notices and may even use previous solutions as a warm
+start if changes to the system are slight.
+%
+In this example, we employ Neumann boundary conditions and notice that naively
+decimating the input mesh leads to a divergent solver (inset).
+
+\begin{figure}
+  \includegraphics[width=\linewidth]{figs/pelvis-diffusion}
+  \caption{We solve a diffusion equation $(λ∆+I) x = b$ for various diffusion
+  rates $λ$ with our nested cages in a multiresolution solver (top: surface
+  values via Neumann boundary conditions, bottom: slice through tet-mesh
+  volume).}
+  \label{fig:pelvis-diffusion}
 \end{figure}
 
 \subsection{Needs figures made:}
