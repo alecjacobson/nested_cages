@@ -90,4 +90,4 @@ levels = floor(2.^((-22:2:-2)/3)*size(F0,1));
 write_cages('/Users/leokollersacht/Documents/nested_cages/Meshes/Results/octopus-500k-arap_final/octopus',cages_V,cages_F);
 save('/Users/leokollersacht/Documents/nested_cages/Meshes/Results/octopus-500k-arap_final/timing.mat','timing')
 % Obs.: VARAP: Eltopo stuck at the last step of first layer.
-% Try ARAP now
+% Trying ARAP now.
