@@ -199,70 +199,38 @@ decimating the input mesh leads to a divergent solver (inset).
   \label{fig:pelvis-diffusion}
 \end{figure}
 
-\subsection{Needs figures made:}
-- Zoo:
-  - anchor
-  - arma
-  - bunny
-  - gargo
-  - Model1
-  - Model3
-  - Model6
-  - Model7
-  - Model9
-  - pelvis
-  - octopus
-  - horse
 - couplingdown comparison of decimators
+
 - rampant stress test with small number of layers vs CGAL
-- cgal iso surface generation comparison vs CGAL
+
 - Plain decimation creating bad overlaps
-- kenshi's hand
 
-
-- failure case for simpler flows: mean curvature flow on fine mesh does not
-  go inside coarse mesh, may even intersect itself
-    - pelvis or rampant failing to go inside at all
-    - octopus flowing inside but shrinking too much and puts parts in wrong
-      place
-    - or 2d flow
 - voxelize to get containing shell--> decimate --> run our pipeline to force
   outside: use for volumetric calculations: This has the benefit that the
   containing mesh is nice quality (cf. \cite{Jacobson:WN:2013}) and tightly
   fitting (cf. \cite{Xu:2014:SDF}).
-- didactic 2D figures
-  - flow
-  - expansion
-- rampant 100 layers
-+ swat symmetry cage
-+ Kenshi's hand: planarization energy + arap
-- Kenshi's hand: compute HC and make cage-based deformation
 
 - comparison of volumetric arap, surface arap, volume
-+ bunny: add random noise to initial model and run pipeline
-  + rerun with higher resolution
-- xyz-dragon High resolution stress test
-+ alec: implement multigrid
-  + Multigrid Poisson equation. Show that naive non-nested meshes will have
-    poor/no convergence: alligator teeth, etc.
-      - generic poisson equation in 2d and in 3d
-        + compare to level set decimation
-        + compare to qslim
-      - geodesics in heat 
-  - Multires automatic skinning weights (i.e. QP solve). See Baohua Wu's thesis.
-  - Multi-res ARAP deformation/physical elastics
-  - Bijective mapping (Locally injective mapping of tet mesh conforming to all
-    layers): maintains nesting.
-- beast for zoo
 
-- cartoon heart
-- left atrium
-- flow Model3 (human) inside and inflate Model4 (armour)
-- buddha using open flipper decimation
 - propagate cages along animation sequence (just re-inflation)
+
 - cage transfer: transfer horse cage to giraffe
 
 \alec{discuss how we chose our default decimation ratio}
+
+\paragraph{Limitations}
+%
+
+- too many parameters
+
+- local pairwise subproblems make solution tractable, but could get stuck in an
+  artificial local minimum: ref homer figure. If medium layer collides with
+  self, may pinch blocking subsequent coarse layers. One idea is to cycle
+  through layer optimizations again to make room.
+
+- improve performance of multiresolution solver, consider preconditioners for
+  conjugate gradient and more elaborate boundary conditions where our nesting
+  should have an even greater beneficial effect.
 
 \begin{figure*}
   \includegraphics[width=\linewidth]{figs/zoo}
