@@ -72,13 +72,6 @@ In Figure~\ref{fig:horse-25-layers} we show that our method generates
 are almost indistinguishable and difference can only be seen when
 the figure is zoomed considerably. 
 
-\begin{figure}
-  \includegraphics[width=\linewidth]{figs/horse-25-layers}
-  \caption{Our tight nesting property is robust even when the number of layers
-  is large.}
-  \label{fig:horse-25-layers}
-\end{figure}
-
 To showcase the quality and robustness of our method we present more results 
 in Figure~\ref{fig:zoo}. \leo{Comment quality of specific results when the zoo is completely done}.
 Tabel~\ref{tab:timings} present timing data for some of the results. The table shows
@@ -189,6 +182,16 @@ start if changes to the system are slight.
 %
 In this example, we employ Neumann boundary conditions and notice that naively
 decimating the input mesh leads to a divergent solver (inset).
+
+\begin{figure}
+  \includegraphics[width=\linewidth]{figs/armadillo-heat-plot}
+  \caption{We solve for smooth geodesics via two Poisson equations over a
+  tetrahedal mesh of the \emph{Armadillo}. Multiresolution using naive
+  overlapping and shrinking decimations leads to divergence unless a very large
+  number of relaxation iterations is used in each level in each v-cycle. Ours
+  is always convergent.}
+  \label{fig:armadillo-heat-plot}
+\end{figure}
 
 \begin{figure}
   \includegraphics[width=\linewidth]{figs/pelvis-diffusion}
