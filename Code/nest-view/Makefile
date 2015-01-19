@@ -15,8 +15,10 @@ CFLAGS+=-g -O3 -DNDEBUG
 LIBIGL=/usr/local/igl/libigl/
 LIBIGL_INC=-I$(LIBIGL)/include
 
-IGL_WITH_CSG=0
+IGL_WITH_CSG=1
 ifeq ($(IGL_WITH_CSG),1)
+  CFLAGS+=-DIGL_STATIC_LIBRARY -fopenmp
+	LIBIGL_LIB=-L$(LIBIGL)/lib -ligl -liglboolean -liglcgal
 	CORK=$(LIBIGL)/external/cork/
 	CORK_INC=-I$(CORK)/include/
 	CORK_LIB=-L$(CORK)/lib/ -lcork
@@ -58,6 +60,18 @@ CFLAGS+=-std=c++11
 
 nest_view: obj $(OBJ_FILES)
 	${CXX} $(OPENMP) $(AFLAGS) $(CFLAGS) -o nest_view $(OBJ_FILES) $(LIB)
+
+# If you get this error when launching the app:
+#     The application cannot be opened because its executable is missing.
+# Try running:
+#     /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f contact_2d.app
+NestView.app: nest_view bunny-logo.icns
+	build_app $^ $@
+	dylibbundler -od -b -x ./$@/Contents/MacOS/$< -d ./$@/Contents/libs/
+	mkdir -p ./$@/Contents/Frameworks/
+	cp -r /System/Library/Frameworks/GLUT.framework ./$@/Contents/Frameworks/
+	install_name_tool -change /System/Library/Frameworks/GLUT.framework/Versions/A/GLUT @executable_path/../Frameworks/GLUT.framework/Versions/A/GLUT $@/Contents/MacOS/$<
+	cp bunny_*.obj ./$@/Contents/Resources/
 
 obj:
 	mkdir -p obj

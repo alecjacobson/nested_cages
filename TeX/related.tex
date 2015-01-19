@@ -14,7 +14,7 @@ boundaries.
 %
 To avoid \emph{gluing} together geodesically distant parts of the shape, the
 shape must be modeling in an accommodating pose. If changing the input is not
-possible, then the grid size must be chosen smaller that not just the smallest
+possible, then the grid size must be chosen smaller than not just the smallest
 features but also the \emph{smallest void} between features.
 %
 A hypothetical solution is to duplicate cells in close areas and managing
@@ -26,19 +26,19 @@ This succeeds in the less complicated topologies of 2D cartoons
 %
 Cell duplication is not only difficult to realize robustly, but also riddles
 multigrid numerical methods with expensive, SIMD-breaking boundary handling
-code: detracting from the performance gains of memory-efficient regular grids.
+code: detracting from the performance gains of memory-efficient regular grids
+\cite{Demmel04}.
 
 Multiresolution on unstructured grids or tetrahedral meshes is more
 temperamental than regular grids and constructing each level requires care
 \cite{fish1995efficient}.
 %
 Geometric multiresolution schemes typically coarsen an input tetrahedral mesh
-by removing all but a subset of its vertices and attempting to connect them in
-a reasonable way \cite{guillard1993,Adams:1999:PMS} create each coarser
-tetrahedral. Special care is required to maintain any semblance of the original
-boundary \cite{Brune:2011}, essentially devolving into constrained Delaunay
-tessellation with no guarantee that the coarsening will not \emph{eat away}
-large portions of the domain.
+by removing all but a subset of its vertices, attempting to connect them in a
+reasonable way \cite{guillard1993,Adams:1999:PMS}. Special care is required to
+maintain any semblance of the original boundary \cite{Brune:2011}, essentially
+devolving into constrained Delaunay tessellation with no guarantee that the
+coarsening will not \emph{eat away} large portions of the domain.
 %
 In many scenarios, the boundary of the domain is assumed to be only as
 irregular as the coarsest layer, simplifying level design \cite{feng1997non}.
@@ -116,7 +116,7 @@ will match the desired mesh resolutions.
   \caption{Contouring a shape's distance field requires aggressive spacing
   between isolevels to produce valid nesting. Semantically distant parts
   \emph{fuse} together, destroying the shape-awareness of the volumetric
-  Laplacian.} 
+  Poisson equation solution solved on each level (pseudocolor).} 
   \label{fig:warrior-poisson}
 \end{figure}
 
@@ -149,7 +149,7 @@ intersect the input shape globally, as only local checks are conducted.
 
 \begin{figure}
   \includegraphics[width=\linewidth]{figs/dane-horse-vs-ben-chen}
-  \caption{Methods like \protect\cite{Ben-Chen:2009:SDT} use coarse cages a
+  \caption{Methods like \protect\cite{Ben-Chen:2009:SDT} use coarse cages as
   computational workhorses to reduce complexity. Their iterative offset
   heuristic produces oversmoothed, loosely fitting cages.}
   \label{fig:dane-vs-ben-chen}

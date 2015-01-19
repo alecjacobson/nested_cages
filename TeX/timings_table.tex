@@ -1,29 +1,29 @@
 % !TEX root = winding.tex
-\begin{table*}
+\begin{table}
 \centering
 \ra{1.2}
 \setlength{\tabcolsep}{5.5pt}
 \rowcolors{2}{white}{lightbluishgrey}
 \begin{tabular}{l r r r r r r r r r r r r r r r r r}
 \rowcolor{white}
-Model name  & \#F & Layers' \#F & Avg.\ Shrink & Avg.\ Re-inflate& Energy\\
+Model name  & \#F & k & avg($t_{flow}$) & avg($t_{re}$) & Energy\\
 \midrule
-Anchor & 10,778 & 678 \ 1,068 \ 1,696 \ 2,694 \ 4,276 \ 6,788 & 8s & 34s & Volume \\
-Armadillo & 12,000 & 470 \ 748 \ 1,190 \ 1,888 \ 2,998 \ 4,760 & 27s & 998s & Volumetric ARAP \\
-Gargo & 13,500 & 531 \ 843 \ 1,339 \ 2,126 \ 3,375 \ 5,357 \ 8,504 & 2s & 90s & Volumetric ARAP\\
+Anchor & 10,778 & 6 & 6s & 43s & $E_\text{vol}$ \\
+Armadillo & 12,000 & 6 & 31s & 998s & $E_\text{varap}$ \\
+Gargo & 13,500 & 7 & 2s & 90s & $E_\text{varap}$\\
 % Model9
-Warrior & 26,658 & 1,048 \ 1,666 \ 2,644 \ 4,198 \ 6,664 \ 10,578 \ 16,790 & 37s & 497s & Volume  \\
-Bunny & 34,832 & 1,371 \ 2,177 \ 3,455 \ 5,485 \ 8,708 \ 13,823 & 3s & 95s & Volumetric ARAP \\
-Horse & 39,696 & 1,562 \ 2,480 \ 3,936 \ 6,250 \ 9,922 \ 15,752 \ 25,006 & 12s & 321s & Surface ARAP \\
-Pelvis & 40,316 & 1,586 \ 2,516 \ 3,998 \ 6,346 \ 10,078 \ 15,994 \ 25,394 & 11s & 460s & Volume  \\
-Octopus & 100,000 & 3,936 \ 6,248 \ 9,920 \ 15,748 \ 25,000 \ 39,684 \ 62,994 & 11s & 227s & Volume \\
+Warrior & 26,658 & 7 & 2s & 86s & $E_\text{varap}$  \\
+Hand & 28,690 & 7 & 4s & 261s & $E_\text{varap}$  \\
+Animal & 39,036 & 7 & 9s & 1750s & $E_\text{sarap}$ \\
+Pelvis & 40,316 & 7 & 11s & 460s & $E_\text{vol}$  \\
+Bunny & 52,910 & 7 & 11s & 202s & $E_\text{varap}$ \\
+Mug & 74,720 & 7 & 7s & 54s & $E_\text{vol}$ \\
+Octopus & 100,000 & 7 & 11s & 227s & $E_\text{vol}$ \\
 \bottomrule
 \end{tabular}
 \caption{
-``Avg.\ Shrink'' is the average time to shrink each layer inside the previous.
-``Avg.\ Re-inflate'' is the average time to re-inflate each layer.
-\alec{Let's make this a single column table and remove or abbreviate the
-``Layers' \#F'' column.} \etienne{yes, kill it and replace with no. of layers, and no. of faces in teh coarsest layer.}
-}
+We report the average time per cage to flow each inside the 
+previous ``avg($t_{flow}$),'' and the average time per cage to re-inflate
+``avg($t_{re}$)''.}
 \label{tab:timings}
-\end{table*}
+\end{table}

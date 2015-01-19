@@ -48,7 +48,7 @@ on one property or another.}
 \label{tab:feature-chart}
 \end{table}
 
-\noindent \textsc{Homeomorphic} All levels of the hierarchy respect the
+\noindent \textsc{Homeomorphic}: All levels of the hierarchy respect the
 \emph{topology} of the original mesh, and do not introduce any large global
 errors in the object geometry. It is important to differentiate between two
 types of distances when building the hierarchy: \emph{embedded distance} in
@@ -67,7 +67,7 @@ Similarly, when calculating the vibration modes of a broken ring, fusing the
 ring and changing its topology would lead to largely incorrect low energy
 modes.
 
-\noindent \textsc{Nesting}
+\noindent \textsc{Nesting}:
 %
 Each mesh of the hierarchy completely \emph{encloses} the next-finest mesh, as
 well as all finer meshes.
@@ -89,7 +89,7 @@ efficient, and easier to implement solvers
 This is particularly important for enforcing Neumann boundary conditions,
 common to simulation and geometry processing \cite{chan1999boundary}.
 
-\noindent \textsc{Tight}
+\noindent \textsc{Tight}:
 %
 Each mesh in the hierarchy fits \emph{tightly} around the next-finest level of
 the hierarchy.
