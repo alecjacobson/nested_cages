@@ -1,0 +1,530 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1200</width>
+    <height>800</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Furious Birds</string>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <widget class="GLPanel" name="GLWidget" native="true">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>0</y>
+      <width>731</width>
+      <height>731</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="focusPolicy">
+     <enum>Qt::StrongFocus</enum>
+    </property>
+   </widget>
+   <widget class="QFrame" name="parameterFrame">
+    <property name="geometry">
+     <rect>
+      <x>749</x>
+      <y>-1</y>
+      <width>441</width>
+      <height>731</height>
+     </rect>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::StyledPanel</enum>
+    </property>
+    <property name="frameShadow">
+     <enum>QFrame::Raised</enum>
+    </property>
+    <widget class="QWidget" name="verticalLayoutWidget">
+     <property name="geometry">
+      <rect>
+       <x>9</x>
+       <y>-1</y>
+       <width>431</width>
+       <height>731</height>
+      </rect>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <widget class="QGroupBox" name="simOptionsBox">
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>220</height>
+         </size>
+        </property>
+        <property name="title">
+         <string>Simulation Options</string>
+        </property>
+        <widget class="QWidget" name="horizontalLayoutWidget">
+         <property name="geometry">
+          <rect>
+           <x>9</x>
+           <y>19</y>
+           <width>421</width>
+           <height>181</height>
+          </rect>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout">
+          <item>
+           <widget class="QGroupBox" name="SimulationBox">
+            <property name="title">
+             <string>Simulation Controls</string>
+            </property>
+            <widget class="QPushButton" name="startSimulationButton">
+             <property name="geometry">
+              <rect>
+               <x>10</x>
+               <y>40</y>
+               <width>181</width>
+               <height>27</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Start Simulation</string>
+             </property>
+            </widget>
+           </widget>
+          </item>
+          <item>
+           <widget class="QGroupBox" name="SimParametersBox">
+            <property name="title">
+             <string>Parameters</string>
+            </property>
+            <widget class="QLabel" name="timeStepLabel">
+             <property name="geometry">
+              <rect>
+               <x>10</x>
+               <y>30</y>
+               <width>81</width>
+               <height>21</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Time Step:</string>
+             </property>
+            </widget>
+            <widget class="QLabel" name="newtonTolLabel">
+             <property name="geometry">
+              <rect>
+               <x>10</x>
+               <y>50</y>
+               <width>131</width>
+               <height>21</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Newton Tolerance:</string>
+             </property>
+            </widget>
+            <widget class="QLabel" name="newtonMaxItersLabel">
+             <property name="geometry">
+              <rect>
+               <x>10</x>
+               <y>70</y>
+               <width>131</width>
+               <height>21</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Newton Max Iters:</string>
+             </property>
+            </widget>
+            <widget class="QLineEdit" name="timeStepEdit">
+             <property name="geometry">
+              <rect>
+               <x>140</x>
+               <y>30</y>
+               <width>61</width>
+               <height>21</height>
+              </rect>
+             </property>
+            </widget>
+            <widget class="QLineEdit" name="newtonTolEdit">
+             <property name="geometry">
+              <rect>
+               <x>140</x>
+               <y>50</y>
+               <width>61</width>
+               <height>21</height>
+              </rect>
+             </property>
+            </widget>
+            <widget class="QLineEdit" name="newtonMaxItersEdit">
+             <property name="geometry">
+              <rect>
+               <x>140</x>
+               <y>70</y>
+               <width>61</width>
+               <height>21</height>
+              </rect>
+             </property>
+            </widget>
+            <widget class="QLabel" name="penaltyStiffnessLabel">
+             <property name="geometry">
+              <rect>
+               <x>10</x>
+               <y>90</y>
+               <width>131</width>
+               <height>21</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Penalty Stiffness:</string>
+             </property>
+            </widget>
+            <widget class="QLineEdit" name="penaltyStiffnessEdit">
+             <property name="geometry">
+              <rect>
+               <x>140</x>
+               <y>90</y>
+               <width>61</width>
+               <height>21</height>
+              </rect>
+             </property>
+            </widget>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </widget>
+      </item>
+      <item>
+       <widget class="QGroupBox" name="activeForcesBox">
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>170</height>
+         </size>
+        </property>
+        <property name="title">
+         <string>Active Forces</string>
+        </property>
+        <widget class="QCheckBox" name="gravityCheckBox">
+         <property name="geometry">
+          <rect>
+           <x>30</x>
+           <y>30</y>
+           <width>97</width>
+           <height>21</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Gravity</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="gravityGLabel">
+         <property name="geometry">
+          <rect>
+           <x>230</x>
+           <y>30</y>
+           <width>121</width>
+           <height>21</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Acceleration:</string>
+         </property>
+        </widget>
+        <widget class="QLineEdit" name="gravityGEdit">
+         <property name="geometry">
+          <rect>
+           <x>370</x>
+           <y>30</y>
+           <width>51</width>
+           <height>21</height>
+          </rect>
+         </property>
+        </widget>
+       </widget>
+      </item>
+      <item>
+       <widget class="QGroupBox" name="uiOptionsBox">
+        <property name="title">
+         <string>UI Options</string>
+        </property>
+        <widget class="QWidget" name="layoutWidget">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>20</y>
+           <width>419</width>
+           <height>301</height>
+          </rect>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_2">
+          <item>
+           <widget class="QGroupBox" name="rigidBodyTypeBox">
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>200</height>
+             </size>
+            </property>
+            <property name="title">
+             <string>Rigid Body Type</string>
+            </property>
+            <widget class="QRadioButton" name="sphereButton">
+             <property name="geometry">
+              <rect>
+               <x>10</x>
+               <y>30</y>
+               <width>117</width>
+               <height>21</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Sphere</string>
+             </property>
+            </widget>
+            <widget class="QRadioButton" name="twoByFourButton">
+             <property name="geometry">
+              <rect>
+               <x>10</x>
+               <y>50</y>
+               <width>117</width>
+               <height>21</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Two by Four</string>
+             </property>
+            </widget>
+            <widget class="QRadioButton" name="bunnyButton">
+             <property name="geometry">
+              <rect>
+               <x>10</x>
+               <y>70</y>
+               <width>117</width>
+               <height>21</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Bunny</string>
+             </property>
+            </widget>
+            <widget class="QRadioButton" name="customButton">
+             <property name="geometry">
+              <rect>
+               <x>10</x>
+               <y>90</y>
+               <width>117</width>
+               <height>21</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Octopus</string>
+             </property>
+            </widget>
+            <widget class="QRadioButton" name="planeButton">
+             <property name="geometry">
+              <rect>
+               <x>10</x>
+               <y>110</y>
+               <width>117</width>
+               <height>21</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Plane</string>
+             </property>
+            </widget>
+           </widget>
+          </item>
+          <item>
+           <widget class="QGroupBox" name="launchOptionsBox">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="baseSize">
+             <size>
+              <width>0</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="title">
+             <string>Rigid Body Options</string>
+            </property>
+            <widget class="QLabel" name="launchVelLabel">
+             <property name="geometry">
+              <rect>
+               <x>10</x>
+               <y>50</y>
+               <width>111</width>
+               <height>17</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Launch Velocity:</string>
+             </property>
+            </widget>
+            <widget class="QLineEdit" name="launchVelEdit">
+             <property name="geometry">
+              <rect>
+               <x>130</x>
+               <y>50</y>
+               <width>51</width>
+               <height>21</height>
+              </rect>
+             </property>
+            </widget>
+            <widget class="QCheckBox" name="randomOrienatationCheckBox">
+             <property name="geometry">
+              <rect>
+               <x>10</x>
+               <y>70</y>
+               <width>181</width>
+               <height>22</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Random Orientation</string>
+             </property>
+            </widget>
+            <widget class="QCheckBox" name="randomAngularVelCheckBox">
+             <property name="geometry">
+              <rect>
+               <x>10</x>
+               <y>90</y>
+               <width>171</width>
+               <height>22</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Random Angular Vel</string>
+             </property>
+            </widget>
+            <widget class="QLabel" name="densityLabel">
+             <property name="geometry">
+              <rect>
+               <x>10</x>
+               <y>30</y>
+               <width>111</width>
+               <height>17</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Density:</string>
+             </property>
+            </widget>
+            <widget class="QLineEdit" name="densityEdit">
+             <property name="geometry">
+              <rect>
+               <x>130</x>
+               <y>30</y>
+               <width>51</width>
+               <height>21</height>
+              </rect>
+             </property>
+            </widget>
+            <widget class="QLabel" name="randomVelMagLabel">
+             <property name="geometry">
+              <rect>
+               <x>220</x>
+               <y>90</y>
+               <width>111</width>
+               <height>17</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Magnitude:</string>
+             </property>
+            </widget>
+            <widget class="QLineEdit" name="randomVelMagEdit">
+             <property name="geometry">
+              <rect>
+               <x>310</x>
+               <y>90</y>
+               <width>51</width>
+               <height>21</height>
+              </rect>
+             </property>
+            </widget>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </widget>
+  </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1200</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionExit"/>
+   </widget>
+   <widget class="QMenu" name="menuScene">
+    <property name="title">
+     <string>Scene</string>
+    </property>
+    <addaction name="actionReset"/>
+    <addaction name="actionReset_Everything"/>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuScene"/>
+  </widget>
+  <widget class="QToolBar" name="mainToolBar">
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
+  <action name="actionExit">
+   <property name="text">
+    <string>Exit</string>
+   </property>
+  </action>
+  <action name="actionReset">
+   <property name="text">
+    <string>Clear Scene</string>
+   </property>
+  </action>
+  <action name="actionReset_Everything">
+   <property name="text">
+    <string>Reset Everything</string>
+   </property>
+  </action>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>GLPanel</class>
+   <extends>QWidget</extends>
+   <header>glpanel.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>
