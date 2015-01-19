@@ -66,7 +66,8 @@ function [V_coarse_final,timing,Pall_expansion] = ...
     %   G  #V by 3 list of gradient vectors
     %   cb_data  unused output callback data field (needed to match expected
     %     prototype)
-    G = V0-V;
+%     G = V0-V; %buggy
+    G = V-V0;
     cb_data = [];
   end
   function [E,cb_data] = displacement_energy(V,V0)
