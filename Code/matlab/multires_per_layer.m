@@ -50,6 +50,7 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = multires_per_layer(V0
   smoothing = 0;
   D_CV_MIN = 1e-5;
   BETA_MIN = 1e-3;
+  step_back_every = 1;
 
   % save timings
   timing.decimation = 0.0;
@@ -68,11 +69,11 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = multires_per_layer(V0
     {'QuadratureOrder','StepSize','V_coarse','F_coarse','ExpandEvery', ...
       'ExpansionEnergy','FinalEnergy','EpsExpansion','EpsFinal','BetaInit','Debug','Fquad', ...
       'SkipElTopo','PositiveProjection','PartialPath','Smoothing', ...
-      'D_CV_MIN','FirstOnly','NewFlow','BETA_MIN'}, ...
+      'D_CV_MIN','FirstOnly','NewFlow','BETA_MIN','StepBackEvery'}, ...
     {'quadrature_order','step_size','V_coarse','F_coarse','expand_every', ...
       'energy_expansion','energy_final','eps_distance_expansion','eps_distance_final','beta_init','debug','Fquad', ...
       'skip_el_topo','positive_projection','partial_path','smoothing', ...
-      'D_CV_MIN','first_only','new_flow','BETA_MIN'});
+      'D_CV_MIN','first_only','new_flow','BETA_MIN','step_back_every'});
   v = 1;
   while v <= numel(varargin)
     param_name = varargin{v};
@@ -179,6 +180,9 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = multires_per_layer(V0
 %             Pall(:,:,1:size(Pall_expansion,3)) = Pall_expansion; 
 %         end
 %     end
+    frames = 1:step_back_every:(size(Pall,3)-1);
+    frames = [frames size(Pall,3)];
+    Pall = Pall(:,:,frames);
     Pall_all_times{k} = Pall;
     timing.flow = timing.flow + toc;
 
