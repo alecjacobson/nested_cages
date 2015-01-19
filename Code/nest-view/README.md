@@ -1,5 +1,7 @@
 Small program for view results of the "Nested Cages" SIGGRAPH Submission.
 
+Mac OS X 10.10 only
+
 Double-click on the NestView.app to launch the viewer on a default set of cages
 around the bunny. You'll see the bunny loaded and then the program will pause
 as it creates the "clip surface" between layers. Once finished you can:
