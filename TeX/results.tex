@@ -235,6 +235,19 @@ decimating the input mesh leads to a divergent solver (inset).
   conjugate gradient and more elaborate boundary conditions where our nesting
   should have an even greater beneficial effect.
 
+\begin{figure}
+  \includegraphics[width=\linewidth]{figs/frankenstein-physics}
+  \caption{Extracting an outer hull with \protect\cite{Jacobson:WN:2013} fails
+  to coarsen the domain away from the original discretization (top left), in
+  fact many sliver triangles appear near self-intersections (inset). Contouring
+  the signed distance field \protect\cite{Xu:2014:SDF} achieves true nesting at
+  a large iso-level fusing the legs (top center). Our method fits the input
+  tightly (top right). The coarse mesh provides a low-dimensional domain for
+  real-time physical simulation (middle) and simple interpolation onto the
+  input mesh (bottom). \alec{move bulk of caption to main text}}
+  \label{fig:frankenstein-physics}
+\end{figure}
+
 \begin{figure*}
   \includegraphics[width=\linewidth]{figs/zoo}
   \caption{Each row shows left to right: input model, slice through all nested
