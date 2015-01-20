@@ -1,18 +1,20 @@
 \section{Results and applications}
 \label{sec:results}
 
-We implemented a prototype of our method as a serial \textsc{Matlab} program
+We implemented a prototype of our method as a serial \textsc{Matlab} program.
 %
 We report timings of our unoptimized code for a few representative examples in
-\reftab{timings}.
+\reftab{timings} recorded on an iMac Intel Core i7 3.5GHz computer with 8GB
+memory.
 %
 As expected the bottleneck is the collision-free re-inflation step.
 %
 We experimented with a wide variety of shapes, ranging from CAD models,
 characters, and scanned objects (see \reffig{zoo}). By default we compute
-layers so that each coarser layer has $2^{-\frac{2}{3}}\times$ as many facets as
+layers so that each coarser layer has $2^{-\frac{2}{3}}$ times as many facets as
 the previous finer layer. This ratio is chosen so that a resulting tetrahedral
-mesh of the volume will have approximately $8\times$ fewer elements. For most
+mesh of the volume will have approximately $8$ times fewer elements
+\alec{double-check}. For most
 meshes we compute seven layers, with fewer for lower resolution inputs.
 %
 In our supplemental material, we attach all input models, corresponding output
@@ -26,7 +28,7 @@ decimator.
 %
 \reffig{decimations}
 compares using the regular mesh inducing decimator in \cite{cgal} (default for
-all our other examples) and the feature-adaptive decimator of \cite{openmesh}.
+all remaining examples) and the feature-adaptive decimator of \cite{openmesh}.
 % Meshfix is mentioned at beginning of method.tex
 
 \begin{figure}
@@ -36,7 +38,7 @@ all our other examples) and the feature-adaptive decimator of \cite{openmesh}.
   \label{fig:decimations}
 \end{figure}
 
-\alec{INSERT ENERGY COMPARISON HERE}
+%\alec{INSERT ENERGY COMPARISON HERE}
 %
 %
 %\begin{figure}
@@ -48,14 +50,14 @@ all our other examples) and the feature-adaptive decimator of \cite{openmesh}.
 %  \label{fig:energies}
 %\end{figure}
 
-To test the robustness of our method with respect to noise in the input model,
+To test robustness with respect to noise in the input model,
 we compare computing seven nested cages on the \emph{Bunny} and the same model
 corrupted with noise in the normal direction (see \reffig{noisy-bunny}). The
 resulting layers tightly hug both shapes, producing similar outermost cages.
 
 \begin{figure}
   \includegraphics[width=\linewidth]{figs/noisy-bunny}
-  \caption{Noise add in the normal direction to the input bunny does not
+  \caption{Noise added in the normal direction to the input bunny does not
   affect our ability to generate seven quality outer layers.}
   \label{fig:noisy-bunny}
 \end{figure}
@@ -73,7 +75,7 @@ efficient.
 %
 A single multiresolution V-cycle for a Poisson equation with homogeneous
 Dirichlet boundary conditions inside the volume of the \emph{Octopus} with over
-seven million vertices, takes 1.4 seconds using 2GB max memory. With 14 more
+seven million vertices takes 1.4 seconds using 2GB max memory. With 14 more
 V-cycles the solution converges for a total time of 21 seconds (see
 \reffig{octopus-poisson}).
 %
@@ -117,7 +119,7 @@ Factorization based solvers, in general scrap previous precomputation after
 such a global change to the system matrix. 
 %
 Multiresolution hardly notices and may even use previous solutions as a warm
-start if changes to the system are slight.
+start.
 %
 In this example, we employ Neumann boundary conditions and notice that naively
 decimating the input mesh leads to a divergent solver (inset).
@@ -127,7 +129,7 @@ decimating the input mesh leads to a divergent solver (inset).
   \caption{We solve a diffusion equation $(λ∆+I) x = b$ for various diffusion
   rates $λ$ with our nested cages in a multiresolution solver (top: surface
   values via Neumann boundary conditions, bottom: slice through tet-mesh
-  volume).}
+  volumes).}
   \label{fig:pelvis-diffusion}
 \end{figure}
 
@@ -159,16 +161,16 @@ A single enclosing cage is useful for creating a lower dimensional volumetric
 domain for elastic simulations of input models that are either too high
 resolution or complicated by meshing imperfections \cite{Xu:2014:SDF}.
 %
-In \reffig{frankenstein}, we compare to extracting the outer hull of the
-multi-component and self-intersecting \emph{Frankenstein} using
+In \reffig{frankenstein-physics}, we compare to extracting the outer hull of
+the multi-component and self-intersecting \emph{Frankenstein} using
 \cite{Jacobson:WN:2013}.
 %
-While technically a ``perfect fit'' in terms of tightness, this cage fails to
-coarsen the domain and meshing near intersection creates sliver triangles
-problematic for numerical simulations.
+While technically a ``perfectly tight fit'', this cage fails to coarsen the
+domain and meshing near intersection creates sliver triangles problematic for
+numerical simulations.
 %
-We also compare to contouring the signed distance field \cite{Xu:2014:SDF},
-this produces a coarse manifold mesh, but its loose fit joins the legs near the
+We also compare to contouring the signed distance field \cite{Xu:2014:SDF}.
+This produces a coarse manifold mesh, but its loose fit joins the legs near the
 knees.
 %
 With the same vertex count, our cage is a tight fit making it especially
@@ -195,13 +197,14 @@ A single very coarse cage is needed for interactive deformation with
 generalized barycentric coordinates or other ``cage-based'' methods.
 %
 In \reffig{dane-vs-ben-chen}, we compare to the automatic cage creation
-heuristic in \cite{Ben-Chen:2009:SDT} and see much tighter fits for the same
+heuristic in \cite{Ben-Chen:2009:SDT} and see much tighter fits for matching
 vertex counts.
 
 The ability to customize our optimization energy enables not just better cages,
-but better generalized barycentric coordinates. In particular, harmonic
+but also better generalized barycentric coordinates. In particular, harmonic
 coordinates are theoretically defined for arbitrary polyhedra, yet previous
-works implement them inside triangle-mesh cages \cite{HarmonicCoodinates07}.
+works implement them inside triangle-mesh cages only
+\cite{HarmonicCoodinates07}.
 %
 To utilize popular quad-dominant meshes as cages, all faces must be outside the
 input model and \emph{planar}.
@@ -221,7 +224,7 @@ definition) on the planar-quad polyhedron are also higher quality: coordinates
 are smooth functions inside each quad.
 %
 In contrast, coordinates of a triangulated cage would depend heavily on the
-choice of diagonals used in each quad.
+choice of diagonals splitting each quad.
 
 \begin{figure}
   \includegraphics[width=\linewidth]{figs/hand-hc}
@@ -241,8 +244,8 @@ maintain the reflectional symmetry of the coarse input cage.
 The input \emph{S.W.A.T.\ man} mesh is riddled with meshing artifacts, but we
 may still flow it inside the coarse mesh.
 %
-When re-inflating, the asymmetric details of expanding input mesh are corrected
-by adding an energy term to encourage maintaining symmetry.
+Though details on the expanding input mesh are asymmetric (see hip pockets or
+hands), the energy minimization keeps the cage symmetric.
 
 \begin{figure}
   \includegraphics[width=\linewidth]{figs/swat-cage}
