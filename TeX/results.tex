@@ -199,15 +199,7 @@ linear interpolation to the embedded mesh.
 %
 \end{wrapfigure}
 %
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc sapien magna,
-venenatis tristique faucibus at, pellentesque nec velit. Curabitur consectetur
-dignissim ultricies. Donec vel nisl nec enim convallis mollis eget at neque. Ut
-enim magna, placerat sit amet luctus sagittis, tristique at dui. Vestibulum
-tristique nulla vitae sapien molestie facilisis. In tempor diam non mattis
-mattis. Donec id lorem at mi sodales gravida. Vivamus eros mi, ultrices et
-metus vel, malesuada placerat neque. Mauris cursus ipsum augue, a facilisis
-tortor pellentesque id. Pellentesque eget aliquam tellus. Nulla orci augue,
-tempus sit amet vehicula id, elementum in risus.
+Another application area for nested cages is collision detection: if an object does not collide against a surface enclosing a second object, this certifies that the two objects do not collide either. Bounding sphere, cubes, and higher-degree polytopes are often used to quick-reject candidate collisions for this reason, but these convex cages lose effectiveness when objects are concave or have holes and cavities. On the other hand, a coarse nested cage is ideal for this purpose, since the nesting property guarantees correctness and the tight fit allows the coarse cage to efficiently reject nearly all false positives during collision detection. As a proof of concept, we simulated dropping eighteen instances of the octopus mesh (figure~\ref{fig:zoo}, top-middle) one by one into a narrow tank, where they collide with each other and the tank walls nearly elastically (coefficient of restitution $0.99$) using continuous-time collision detection (see inset). We compared the performance of two different broad phase strategies for collision detection: in the first, bounding cubes around swept spacetime volumes are used to prune distant pairs of objects from consideration, then kDOP bounding volume hierarchies are built to find candidate colliding vertex-face pairs, which are then passed to the continuous-time narrow phase. In the second strategy we do the same, except that we first check if the octopus's coarse cage is colliding, before building the BVH on the octopus itself. We found that the latter strategy is about $8\times$ faster than the former, for intuitive reasons: the octopus's many protruding arms causes it to easily nestle near other copies of itself, so that their convex hulls overlap but our tight, coarse cage does not.
 
 A single very coarse cage is needed for interactive deformation with
 generalized barycentric coordinates or other ``cage-based'' methods.
