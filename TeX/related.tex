@@ -1,3 +1,4 @@
+
 \section{Related work}
 \label{sec:related}
 
@@ -12,20 +13,19 @@ elastic charaters \shortcite{McAdams:2011}.
 The main downside of grid-based methods is their handling of irregular
 boundaries.
 %
-To avoid \emph{gluing} together geodesically distant parts of the shape, the
-shape must be modeled in an accommodating pose. If changing the input is not
-possible, then the grid size must be chosen smaller than not just the smallest
+To avoid \emph{fusing} together geodesically distant parts, the
+shape must be modeled in an accommodating pose. If remodeling is not
+possible, the grid size must be chosen smaller than not just the smallest
 features but also the \emph{smallest void} between features.
 %
-A hypothetical solution is to duplicate cells in close areas and manage
-adjacencies when two or more duplicated patches merge and split.
+A hypothetical solution is to replicate cells in close areas and manage
+adjacencies when two or more replicated patches merge and split.
 %
-This succeeds in the less complicated topologies of 2D cartoons
+This succeeds for the less complicated topologies of 2D cartoons
 \cite{Sykora09}, but is avoided in 3D: Wojtan et al.
-\shortcite{wojtan2011liquid} opt for dynamic mesh \emph{surgery} to avoid the
-need for duplication.
+\shortcite{wojtan2011liquid} opt for dynamic mesh \emph{surgery} instead.
 %
-Cell duplication is not only difficult to realize robustly, but also riddles
+Cell replication is not only difficult to realize robustly, but also riddles
 multigrid numerical methods with expensive, SIMD-breaking boundary handling
 code: detracting from the performance gains of memory-efficient regular grids
 \cite{Demmel04}.
@@ -43,6 +43,15 @@ coarsening will not \emph{eat away} large portions of the domain.
 %
 In many scenarios, the boundary of the domain is assumed to be only as
 irregular as the coarsest layer, simplifying level design \cite{feng1997non}.
+
+\begin{figure}[b]
+  \includegraphics[width=\linewidth]{figs/warrior-poisson-vs-cgal}
+  \caption{Contouring requires aggressive spacing between distance-field
+  isolevels to produce valid nesting. Semantically distant parts \emph{fuse}
+  together, destroying shape-awareness, visualized by a pseudocoloring of a
+  Poisson solution computed on each level.} 
+  \label{fig:warrior-poisson}
+\end{figure}
 
 %\cite{fish1995efficient} just an example of a (nonlinear) multigrid solver
 %which expects the user to provide (nested?) tetrahedral meshes as input.
@@ -73,15 +82,6 @@ surfaces.
 This method combines the elegance of algebraic techniques with some geometric
 information derived from the characteristics of the Laplacian matrix, but is
 limited to special problems.
-
-\begin{figure}
-  \includegraphics[width=\linewidth]{figs/warrior-poisson-vs-cgal}
-  \caption{Contouring requires aggressive spacing between distance-field
-  isolevels to produce valid nesting. Semantically distant parts \emph{fuse}
-  together, destroying shape-awareness, visualized by a pseudocoloring of a
-  Poisson solution on each level.} 
-  \label{fig:warrior-poisson}
-\end{figure}
 
 \paragraph{Offset surfaces for simulation meshes}
 In addition to multiresolution layers, our method is suitable for creating a
@@ -165,13 +165,13 @@ intersect the input shape globally, as only local checks are conducted.
 
 \paragraph{Decimation}
 %
-The majority of work on surface mesh decimation aims to preserve outward
+The majority of surface mesh decimation techniques aim to preserve outward
 appearance with lower and lower mesh resolution
 \cite{Hoppe:1996:PM,Garland:1997:SSU,Melax98}.
 %
-Along these lines, Gumhold et al.\ \shortcite{gumhold2003intersection} output decimations free of
-\emph{self-}intersections, ensuring for example that a character's clothing
-stays outside its body after decimation.
+Along these lines, Gumhold et al.\ \shortcite{gumhold2003intersection} output
+decimations free of \emph{self-}intersections, ensuring for example that a
+character's clothing stays outside its body.
 %
 In contrast, our method assumes self-intersection free input decimations and
 transforms them into nested layers, with no intersections \emph{across}
@@ -209,7 +209,7 @@ task.
 In this task, our novel flow is essential for finding a feasible starting
 state.
 %
-Without it, untangling the overlapping closed meshes could result in incorrect
+Without it, untangling the overlapping input cages could result in incorrect
 ordering \cite{Baraff:2003:UC}.
 %
 With our feasible state, the volume minimization of

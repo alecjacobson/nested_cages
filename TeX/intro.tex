@@ -17,11 +17,11 @@ meshes by moving up and down the hierarchy; low frequency residual error
 disappears quickly on the coarsest levels while fine levels smooth away high
 frequency error. Coarse enclosing cages also find use in physical simulation,
 where deformations of the cage are interpolated onto embedded high-resolution
-geometries; in interactive animation, where artists can specify large-scale
+geometries; in interactive animation, where artists specify large-scale
 deformations by adjusting the low-dimensional cage; and in collision detection,
 where conservative culling reduces computation time. For all these
-applications, the key to good performance is the ability to generate a
-good-quality multiresolution hierarchy.
+applications, the key to high performance is the ability to generate a quality
+multiresolution hierarchy.
 
 \paragraph{Desiderata} Although emphasis varies according to application, an
 ideal multiresolution hierarchy possesses several properties useful across a
@@ -35,15 +35,15 @@ broad spectrum of applications (see \reftab{feature-chart}):
 \begin{tabularx}{\linewidth}{X c c c}
 \rowcolor{white}
 \toprule
-Method               & \textsc{Homeomorphic} & \textsc{Tight} & \textsc{Nesting}\\
-\midrule                                                     
-\textbf{Our method}  & \YES                  & \YES           & \YES            \\
-\emph{Voxelization}                                           
-                     & \NO                   & \NO            & \YES            \\
-\emph{Level-set}                                              
-                     & \NO                   & \NO            & \YES            \\
-\emph{Decimation}                                             
-                     & \YES                  & \YES           & \NO             \\
+Method               & \textsc{Homeomorphic} & \textsc{Nesting}& \textsc{Tight} \\
+\midrule                                                                       
+\textbf{Our method}  & \YES                  & \YES            & \YES           \\
+\emph{Decimation}                                                               
+                     & \YES                  & \NO             & \YES           \\
+\emph{Voxelization}                                                             
+                     & \NO                   & \YES            & \NO            \\
+\emph{Level-set}                                                                
+                     & \NO                   & \YES            & \NO            \\
 \bottomrule
 \end{tabularx}
 \caption{Hierarchy construction feature chart: Previous techniques fall short
@@ -54,7 +54,7 @@ on one property or another.}
 \noindent \textsc{Homeomorphic}: All levels of the hierarchy respect the
 \emph{topology} of the original mesh, and do not introduce any large global
 errors in the object geometry. It is important to differentiate between two
-types of distances when building the hierarchy: \emph{embedded distance} in
+types of distances: \emph{embedded distance} in
 ambient space, and \emph{intrinsic distance} within the shape.
 %
 It is possible for two points that are nearby in embedded distance to be very
@@ -80,14 +80,13 @@ object only guarantee small distortion of the object and lack of
 element-inversion artifacts if the object is entirely contained within the cage
 \cite{HarmonicCoodinates07,Ben-Chen:2009:VHM}.
 %
-For accelerating collision detection, it is essential that the cage
-conservatively enclose the object.
+Strict nesting is essential for accelerating collision detection
+\emph{conservatively}.
 %
 Nesting is not a necessary condition for multiresolution convergence
-\cite{Chan96overlappingschwarz}, but the ability to use simple linear interpolation
-for prolongation is known to produce more robust, more
-efficient, and easier to implement solvers
-\cite{chan2000robust,dickopf2010multilevel}.
+\cite{Chan96overlappingschwarz}, but the ability to use simple linear
+interpolation for prolongation is known to produce more robust, more efficient,
+and easier to implement solvers \cite{chan2000robust,dickopf2010multilevel}.
 %
 This is particularly important for enforcing Neumann boundary conditions,
 common to simulation and geometry processing \cite{chan1999boundary}.
@@ -127,18 +126,17 @@ cages.
 
 \paragraph{Our Contribution}
 %
-We propose an algorithm for computing a
-multiresolution hierarchy that satisfies all three of the desired properties.
+We propose an algorithm for computing a multiresolution hierarchy that
+satisfies all three of the desired properties.
 %
 Given an input mesh, we decimate the model to the desired levels while
 preserving its original topology.
 %
-We then recursively deform each fine cage to contain the next finest output
+We then recursively deform each cage to contain the next finest output
 cage.
 %
-Working with a consecutive pair of cages,
-we shrink the fine cage along a signed-distance-field flow until inside the
-coarse cage.
+Working with a consecutive pair of cages, we shrink the finer output cage along
+a signed-distance-field flow until inside the coarse cage.
 %
 We then rewind the flow, returning the fine cage to its original positions.
 During this \emph{re-inflation}, we run collision detection and handling
