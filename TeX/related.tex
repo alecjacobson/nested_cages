@@ -73,6 +73,15 @@ This method combines the elegance of algebraic techniques with some geometric
 information derived from the characteristics of the Laplacian matrix, but is
 limited to special problems.
 
+\begin{figure}
+  \includegraphics[width=\linewidth]{figs/warrior-poisson-vs-cgal}
+  \caption{Contouring requires aggressive spacing between distance-field
+  isolevels to produce valid nesting. Semantically distant parts \emph{fuse}
+  together, destroying the shape-awareness of the volumetric Poisson equation
+  solution solved on each level (pseudocolor).} 
+  \label{fig:warrior-poisson}
+\end{figure}
+
 \paragraph{Offset surfaces for simulation meshes}
 In addition to multiresolution layers, our method is suitable for creating a
 single-layer ``simulation mesh'' for physically based animation.
@@ -112,12 +121,11 @@ By deforming input decimations, we constrain our pipeline to ensure its output
 will match the desired mesh resolutions. 
 
 \begin{figure}
-  \includegraphics[width=\linewidth]{figs/warrior-poisson-vs-cgal}
-  \caption{Contouring a shape's distance field requires aggressive spacing
-  between isolevels to produce valid nesting. Semantically distant parts
-  \emph{fuse} together, destroying the shape-awareness of the volumetric
-  Poisson equation solution solved on each level (pseudocolor).} 
-  \label{fig:warrior-poisson}
+  \includegraphics[width=\linewidth]{figs/dane-horse-vs-ben-chen}
+  \caption{Methods like \protect\cite{Ben-Chen:2009:SDT} use coarse cages as
+  computational workhorses to reduce complexity. Their iterative offset
+  heuristic produces oversmoothed, loosely fitting cages.}
+  \label{fig:dane-vs-ben-chen}
 \end{figure}
 
 \paragraph{Automatic cages for deformation}
@@ -147,14 +155,6 @@ on-surface triangulations of feature curves \shortcite{Xian:2013}.
 These cages are often dense or loose fitting and may still self-intersect or
 intersect the input shape globally, as only local checks are conducted.
 
-\begin{figure}
-  \includegraphics[width=\linewidth]{figs/dane-horse-vs-ben-chen}
-  \caption{Methods like \protect\cite{Ben-Chen:2009:SDT} use coarse cages as
-  computational workhorses to reduce complexity. Their iterative offset
-  heuristic produces oversmoothed, loosely fitting cages.}
-  \label{fig:dane-vs-ben-chen}
-\end{figure}
-
 %Alternatives to geometric multigrid: algebraic multi-grid (cite Brandt) or
 %algebraic techniques for special problem \cite{Krishnan:2013:EPL} (doesn't
 %generalize beyond ``M-matrices'')
@@ -168,7 +168,7 @@ The majority of work on surface mesh decimation aims to preserve outward
 appearance with lower and lower mesh resolution
 \cite{Hoppe:1996:PM,Garland:1997:SSU,Melax98}.
 %
-Along these lines, Gumhold et al.\ output decimations free of
+Along these lines, Gumhold et al.\ \shortcite{gumhold2003intersection} output decimations free of
 \emph{self-}intersections, ensuring for example that a character's clothing
 stays outside its body after decimation.
 %
@@ -199,12 +199,18 @@ decimation and works as a post process to nest each layer.
 
 %\cite{Tagliasacchi:2012:MCS} coerces flow toward the medial axis
 
-\alec{\cite{ContactAwareModeling:2011} introduces contact handling to geometric
-modeling, and inspired us to consider the contanct and collisions toolset familiar
-to physically based simulation to our geometry processing task.}
-
-\alec{Relationship to David's penetration depth energy: needs intersection free
-state; and Untangling Cloths' volume minimization: might push coarse mesh
-\emph{inside} fine mesh instead.}
-
-%\alec{Need to address: ``why not try avoid collisions during decimation?''}
+We credit Harmon et al.\ \shortcite{ContactAwareModeling:2011} for their
+ground-breaking introduction of contact handling to mainstream geometry
+processing. Their work inspires us to consider the contact and collisions
+tool-set familiar to physically based simulation in our geometry processing
+task.
+%
+In this task, our novel flow is essential for finding a feasible starting
+state.
+%
+Without it, untangling the overlapping closed meshes could result in incorrect
+ordering \cite{Baraff:2003:UC}.
+%
+With our feasible state, the volume minimization of
+\cite{ContactAwareModeling:2011} could then be an alternative to our use of
+constraint satisfaction to resolve collisions.
