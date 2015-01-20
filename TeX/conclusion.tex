@@ -1,4 +1,4 @@
-\section{Future work}
+\section{Future work \& Conclusion}
 \label{sec:conclusion}
 %
 In future, we plan to optimize the performance of both the signed distance
@@ -18,17 +18,17 @@ One solution is to iterate through the fine layers to make sufficient room in
 these problem areas, but defining this relaxation direction is not obvious.
 
 In cases where the input coarse cage begins too far away from the fine mesh,
-the signed distance flow will fail: for example, by placing vertices of a
-triangle inside opposite parts of the coarse mesh. 
+the signed-distance flow will fail: for example, by flowing vertices of a
+triangle into opposite parts of the coarse mesh. 
 %
 Adding a small amount of smoothing on the flowing fine mesh or expanding the
 coarse mesh alleviates some of these problems, but a general solution is
 allusive.
 %
 The correct assignment seems related to correctly matching medial axes of both
-meshes, perhaps this is an avenue of future improvement.
+meshes. Perhaps this is an avenue of future improvement.
 
-Though we are pleased with the performance of our multiresolution solver, 
+Though we are delighted with the performance of our multiresolution solver, 
 we would like to further improve it. We believe there are even more gains to be
 made by parameter tuning and experimenting with different coarsening
 gradations. We would also like to consider using our meshes to build
@@ -37,15 +37,15 @@ multiresolution proconditioners for conjugate gradient solvers.
 We expect that higher order PDEs with more involved boundary conditions will
 receive an even greater benefit from our nested cages.
 
-It would be interesting to formal analyze convergence of our nested cages along
-the lines of \cite{chan1996convergence} who consider the then-available
+It would be interesting to analyze formally the convergence of our nested cages
+along the lines of \cite{chan1996convergence} who consider the then-available
 non-nested hierarchies.
 
 
 In conclusion, nested cages prove to be a powerful tool in a variety of
 applications. 
 %
-Our signed distance flow consistently finds initial feasible states for our
+Our signed-distance flow consistently finds initial feasible states for our
 constraint-based optimization.
 %
 By leveraging state-of-the-art collision handling tools from physically based

@@ -7,22 +7,23 @@
 Methods based on regular grids or lattices naturally support multiresolution numerical methods.
 %
 McAdams et al.\ successfully employ multgrid on voxelized shapes to animate
-elastic charaters \cite{McAdams:2011}.
+elastic charaters \shortcite{McAdams:2011}.
 %
-The main downside of grid based methods is their handling of irregular
+The main downside of grid-based methods is their handling of irregular
 boundaries.
 %
 To avoid \emph{gluing} together geodesically distant parts of the shape, the
-shape must be modeling in an accommodating pose. If changing the input is not
+shape must be modeled in an accommodating pose. If changing the input is not
 possible, then the grid size must be chosen smaller than not just the smallest
 features but also the \emph{smallest void} between features.
 %
-A hypothetical solution is to duplicate cells in close areas and managing
+A hypothetical solution is to duplicate cells in close areas and manage
 adjacencies when two or more duplicated patches merge and split.
 %
 This succeeds in the less complicated topologies of 2D cartoons
-\cite{Sykora09}, but is avoided in 3D: Wojtan et al. 2011 opt for dynamic mesh
-\emph{surgery} to avoid the need for duplication \cite{wojtan2011liquid}.
+\cite{Sykora09}, but is avoided in 3D: Wojtan et al.
+\shortcite{wojtan2011liquid} opt for dynamic mesh \emph{surgery} to avoid the
+need for duplication.
 %
 Cell duplication is not only difficult to realize robustly, but also riddles
 multigrid numerical methods with expensive, SIMD-breaking boundary handling
@@ -58,7 +59,7 @@ Such non-nested cages require extrapolation or one-to-many mappings to
 \emph{prolongate} solutions on the coarse levels to finer levels.
 %
 We show cases where this fails to converge for common linear systems on
-irregular domains and better convergence for strictly nesting cages where
+irregular domains, and we show better convergence for strictly nesting cages where
 prolongation is a purely linear interpolation.
 
 Algebraic alternatives to geometric remeshing also exist,
@@ -77,8 +78,8 @@ limited to special problems.
   \includegraphics[width=\linewidth]{figs/warrior-poisson-vs-cgal}
   \caption{Contouring requires aggressive spacing between distance-field
   isolevels to produce valid nesting. Semantically distant parts \emph{fuse}
-  together, destroying the shape-awareness of the volumetric Poisson equation
-  solution solved on each level (pseudocolor).} 
+  together, destroying shape-awareness, visualized by a pseudocoloring of a
+  Poisson solution on each level.} 
   \label{fig:warrior-poisson}
 \end{figure}
 
@@ -104,9 +105,9 @@ guarantee non-intersection with the input.
 %
 Similarly, Shen et al.\ \shortcite{Shen:2004:IAI} iteratively refine a moving
 least squares iso-surface to enclose an existing model tightly via a global
-scaling parameter. Like the signed distance function, though the continuous
-iso-surface may not intersect the input model, this is invalidating during
-generic contouring.
+scaling parameter. Though the \emph{continuous}
+isosurface may not intersect the input model, generic contouring invalidates
+this.
 %
 A large enough iso-value or small-enough resolution tolerance must always be
 chosen to ensure non-intersection after contouring.
@@ -147,8 +148,8 @@ Deng et al.\ attempt to keep coarse meshes exterior during decimation and
 resort to post-hoc global intersection resolution to repair invalid output
 cages \shortcite{Deng:2011vr}.
 %
-Xian et al.\ construct automatic cages via simplifying dense voxelization of
-the input shape \shortcite{Xian:2009}, stitching oriented bounding boxes
+Xian et al.\ construct automatic cages by simplifying dense voxelizations
+\shortcite{Xian:2009}, stitching oriented bounding boxes
 around vertex clusters \shortcite{Xian:2012tv}, or by offsetting coarse
 on-surface triangulations of feature curves \shortcite{Xian:2013}.
 %
@@ -183,8 +184,8 @@ Otaduy et al.\ also demonstrate how to combine mesh decimations and bounding
 volume hierarchies to achieve faster collision detection and handle without
 affecting visual appearance \shortcite{Otaduy:2003:CDH}.
 %
-Our nested cages could be used to create hierarchical decimations strictly
-containing the input shape, ensuring strictly conservative collision detection.
+Our nested cages are hierarchical decimations strictly containing the input
+shape, ensuring strictly conservative collision detection.
 %
 Rather than work against the staggering quality of existing shape decimation
 techniques, we complement them. Our method takes as input an arbitrary
