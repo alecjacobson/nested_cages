@@ -132,10 +132,14 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = multires_per_layer(V0
     if (~decimation_given)
       tic
       ratio = levels(k)/size(F_coarse{k+1},1);
-%       [V_coarse{k},F_coarse{k}] = ...
-%         decimate_cgal(cages_V{k+1},cages_F{k+1},ratio);
-      [V_coarse{k},F_coarse{k}] = ...
-       cgal_simplification(cages_V{k+1},cages_F{k+1},levels(k));
+      switch char(java.lang.System.getProperty('user.name'))
+      case 'ajx'
+        [V_coarse{k},F_coarse{k}] = ...
+          decimate_cgal(cages_V{k+1},cages_F{k+1},ratio);
+      otherwise
+        [V_coarse{k},F_coarse{k}] = ...
+          cgal_simplification(cages_V{k+1},cages_F{k+1},levels(k));
+      end
       [~,~,siIF] = selfintersect( ...
         V_coarse{k},F_coarse{k},'DetectOnly',true,'FirstOnly',true);
       if exist('meshfix','file')
