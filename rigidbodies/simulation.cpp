@@ -12,6 +12,7 @@
 #include "mesh.h"
 #include "quadprog/eiquadprog.hpp"
 #include "rigidbodyctcd.h"
+#include <Eigen/SPQRSupport>
 
 const double PI = 3.1415926535898;
 
@@ -206,6 +207,7 @@ void Simulation::takeSimulationStep()
         int numconstraints = contacts.size();
         VectorXd rhs(numconstraints);
         SparseMatrix<double> M(numconstraints, numconstraints);
+        vector<Tr> Mcoeffs;
         for(int i=0; i<numconstraints; i++)
         {
             ContactInfo &ci = contacts[i];
@@ -233,40 +235,44 @@ void Simulation::takeSimulationStep()
             if(ci.body2 != -1)
                 impulsew2 = Rtheta2*MI2.inverse()*ci.pt2.cross(Rtheta2.transpose()*-ci.n)/bodies_[ci.body2]->density;
 
+
             for(int j=0; j<numconstraints; j++)
             {
                 if(ci.body1 == contacts[j].body1)
                 {
                     double val = ci.n.dot(contacts[j].n)/m1;
-                    val += impulsew1.cross(Rtheta1*contacts[j].pt1).dot(contacts[j].n);
-                    M.coeffRef(j,i) += val;
+              //      val += impulsew1.cross(Rtheta1*contacts[j].pt1).dot(contacts[j].n);
+                    Mcoeffs.push_back(Tr(j,i,val));
                 }
                 if(ci.body1 == contacts[j].body2)
                 {
                     double val = ci.n.dot(-contacts[j].n)/m1;
-                    val += impulsew1.cross(Rtheta1*contacts[j].pt2).dot(-contacts[j].n);
-                    M.coeffRef(j,i) += val;
+                //    val += impulsew1.cross(Rtheta1*contacts[j].pt2).dot(-contacts[j].n);
+                    Mcoeffs.push_back(Tr(j,i,val));
                 }
                 if(ci.body2 != -1)
                 {
                     if(ci.body2 == contacts[j].body1)
                     {
                         double val = -ci.n.dot(contacts[j].n)/m2;
-                        val += impulsew2.cross(Rtheta2*contacts[j].pt1).dot(contacts[j].n);
-                        M.coeffRef(j,i) += val;
+                        //val += impulsew2.cross(Rtheta2*contacts[j].pt1).dot(contacts[j].n);
+                        Mcoeffs.push_back(Tr(j,i,val));
                     }
                     if(ci.body2 == contacts[j].body2)
                     {
                         double val = -ci.n.dot(-contacts[j].n)/m2;
-                        val += impulsew2.cross(Rtheta2*contacts[j].pt2).dot(-contacts[j].n);
-                        M.coeffRef(j,i) += val;
+                        //val += impulsew2.cross(Rtheta2*contacts[j].pt2).dot(-contacts[j].n);
+                        Mcoeffs.push_back(Tr(j,i,val));
                     }
                 }
             }
         }
-        M.makeCompressed();
-        SparseQR<SparseMatrix<double>, COLAMDOrdering<int> > solver(M);
-        VectorXd lambdas = solver.solve(rhs);
+        M.setFromTriplets(Mcoeffs.begin(), Mcoeffs.end());
+        SparseMatrix<double> normaleq = M.transpose()*M;
+        SPQR<SparseMatrix<double> > solver(normaleq);
+        VectorXd Mrhs = M.transpose()*rhs;
+        VectorXd lambdas = solver.solve(Mrhs);
+        std::cout << (M.transpose()*M*lambdas-M.transpose()*rhs).norm() << std::endl;
         for(int i=0; i<(int)bodies_.size(); i++)
         {
             newcvel[i] = bodies_[i]->cvel;
@@ -291,13 +297,13 @@ void Simulation::takeSimulationStep()
                 MI2 = bodies_[ci.body2]->getTemplate().getInertiaTensor();
 
             Vector3d impulsew1 = Rtheta1*MI1.inverse()*ci.pt1.cross(Rtheta1.transpose()*ci.n)/bodies_[ci.body1]->density;
-            neww[ci.body1] += impulsew1*lambdas[i];
+            //neww[ci.body1] += impulsew1*lambdas[i];
             newcvel[ci.body1] += ci.n/m1*lambdas[i];
 
             if(ci.body2 != -1)
             {
                 Vector3d impulsew2 = Rtheta2*MI2.inverse()*ci.pt2.cross(Rtheta2.transpose()*-ci.n)/bodies_[ci.body2]->density;
-                neww[ci.body2] -= impulsew2*lambdas[i];
+                //neww[ci.body2] -= impulsew2*lambdas[i];
                 newcvel[ci.body2] -= ci.n/m2*lambdas[i];
             }
         }
@@ -355,7 +361,10 @@ void Simulation::takeSimulationStep()
     if(spawnTime_ < time_)
     {
         spawnTime_ += 0.5;
-        Vector3d spawnpos(0,0,5.0);
+        Vector3d spawnpos(
+                    4.0*VectorMath::randomUnitIntervalReal()-2.0,
+                    4.0*VectorMath::randomUnitIntervalReal()-2.0,
+                    5.0);
         Vector3d orient;
         for(int i=0; i<3; i++)
             orient[i] = 2.0*VectorMath::randomUnitIntervalReal()-1.0;
@@ -370,6 +379,7 @@ void Simulation::takeSimulationStep()
 
 void Simulation::clearScene()
 {
+    srand(10);
     time_ = 0;
     spawnTime_ = 0;
     renderLock_.lock();

@@ -19,3 +19,4 @@ TeX/nested.fdb_latexmk
 TeX/nested.fls
 *.mexa64
 *~
+build*

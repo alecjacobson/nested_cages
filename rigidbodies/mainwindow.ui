@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Furious Birds</string>
+   <string>Collision Test</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <widget class="GLPanel" name="GLWidget" native="true">
