@@ -11,13 +11,13 @@ As expected the bottleneck is the collision-free re-inflation step.
 %
 We experimented with a wide variety of shapes, ranging from CAD models,
 characters, and scanned objects (see \reffig{zoo}). By default we compute
-layers so that each coarser layer has $2^{-\frac{2}{3}}$ times as many facets as
-the previous finer layer. This ratio is chosen so that a resulting tetrahedral
-mesh of the volume will have approximately $8$ times fewer elements. For most
+layers so that each coarser layer has $2^{-\sfrac{2}{3}}$ times as many facets as
+the previous finer layer, a ratio chosen so that resulting tetrahedral
+meshes will have approximately $8$ times fewer elements. For most
 meshes we compute seven layers, with fewer for lower resolution inputs.
 %
 In our supplemental material, we attach all input models, corresponding output
-cages, and a small program to visualize slices through the cages.
+cages, and a small program to visualize volumetric slices.
 
 \input{timings_table}
 
@@ -49,10 +49,10 @@ all remaining examples) and the feature-adaptive decimator of \cite{openmesh}.
 %  \label{fig:energies}
 %\end{figure}
 
-To test robustness with respect to noise in the input model,
-we compare computing seven nested cages on the \emph{Bunny} and the same model
-corrupted with noise in the normal direction (see \reffig{noisy-bunny}). The
-resulting layers tightly hug both shapes, producing similar outermost cages.
+To test robustness, we compare computing seven nested cages on the \emph{Bunny}
+and the same model corrupted with noise in the normal direction (see
+\reffig{noisy-bunny}). The resulting layers tightly hug both shapes, producing
+similar outermost cages.
 
 \begin{figure}
   \includegraphics[width=\linewidth]{figs/noisy-bunny}
@@ -105,7 +105,7 @@ solved.
 %
 \centering
 %
-\includegraphics[width=\linewidth]{figs/pelvis-plot}
+\includegraphics[trim=0 0 0 3mm,width=\linewidth]{figs/pelvis-plot}
 %
 \end{wrapfigure}
 %
@@ -117,11 +117,10 @@ a heat equation solved in the volume of the \emph{Pelvis} (see
 Factorization based solvers, in general scrap previous precomputation after
 such a global change to the system matrix. 
 %
-Multiresolution hardly notices and may even use previous solutions as a warm
-start.
+Multiresolution hardly notices, and previous solutions become warm starts.
 %
-In this example, we employ Neumann boundary conditions and notice that naively
-decimating the input mesh leads to a divergent solver (inset).
+We employ Neumann boundary conditions and notice that naively decimating the
+input mesh leads to a divergent solver (inset).
 
 \begin{figure}
   \includegraphics[width=\linewidth]{figs/pelvis-diffusion}
@@ -169,7 +168,7 @@ single relaxation iteration with our meshes.
 \end{figure}
 
 A single enclosing cage is useful for creating a lower dimensional volumetric
-domain for elastic simulations of input models that are either too high
+domain for elastic simulation of an input model that is either too high
 resolution or complicated by meshing imperfections \cite{Xu:2014:SDF}.
 %
 In \reffig{frankenstein-physics}, we compare to extracting the outer hull of
@@ -177,15 +176,14 @@ the multi-component and self-intersecting \emph{Frankenstein} using
 \cite{Jacobson:WN:2013}.
 %
 While technically a ``perfectly tight fit'', this cage fails to coarsen the
-domain and meshing near intersection creates sliver triangles problematic for
-numerical simulations.
+domain and meshing near intersections creates sliver triangles problematic for
+numerics.
 %
-We also compare to contouring the signed distance field \cite{Xu:2014:SDF}.
-This produces a coarse manifold mesh, but its loose fit joins the legs near the
-knees.
+We also compare to signed-distance field contouring \cite{Xu:2014:SDF}, which
+creates a loose fit joining the legs near the knees.
 %
 With the same vertex count, our cage is a tight fit making it especially
-suitable for elastic simulation with collision detection and response.
+suitable for elastic simulation with collision handling.
 %
 The deformation of the volume inside the coarse cage is then propagated via
 linear interpolation to the embedded mesh.

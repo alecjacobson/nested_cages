@@ -8,9 +8,9 @@ Collision detection and handling dominates running time and our prototype
 naively recomputes acceleration data-structures rather than updating them while
 the meshes change dynamically.
 
-Our insight to break the many-layer nesting problem into pairwise subproblems
-makes the problem tractable, but in some cases leads to converging to an
-``artificial local minimum''. If a coarse cage collides with itself during
+Our insight to break the multi-layer nesting problem into pairwise subproblems
+ensures tractability, but in some cases leads to converging at an
+``artificial local minimum.'' If a coarse cage collides with itself during
 inflation then it may create a pinch that blocks inflation of subsequent coarse
 layers (see \reffig{homer}).
 %
@@ -56,9 +56,9 @@ Our signed-distance flow consistently finds initial feasible states for our
 constraint-based optimization.
 %
 By leveraging state-of-the-art collision handling tools from physically based
-simulation, we are able to generate meshes which in turn enable faster physical
-simulations, linear system solvers and better real-time deformation user
-interfaces.
+simulation, we are able to generate cages that in turn enable faster physical
+simulations, more-efficient linear system solvers and better real-time
+deformation user interfaces.
 %
 We hope that our algorithm's success encourages more multiresolution volumetric
 methods using unstructured meshes in geometry processing, computer graphics,
