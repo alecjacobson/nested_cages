@@ -13,8 +13,7 @@ We experimented with a wide variety of shapes, ranging from CAD models,
 characters, and scanned objects (see \reffig{zoo}). By default we compute
 layers so that each coarser layer has $2^{-\frac{2}{3}}$ times as many facets as
 the previous finer layer. This ratio is chosen so that a resulting tetrahedral
-mesh of the volume will have approximately $8$ times fewer elements
-\alec{double-check}. For most
+mesh of the volume will have approximately $8$ times fewer elements. For most
 meshes we compute seven layers, with fewer for lower resolution inputs.
 %
 In our supplemental material, we attach all input models, corresponding output
@@ -157,6 +156,18 @@ single relaxation iteration with our meshes.
   \label{fig:armadillo-heat-plot}
 \end{figure}
 
+\begin{figure}
+  \includegraphics[width=\linewidth]{figs/frankenstein-physics}
+  \caption{Extracting an outer hull with \protect\cite{Jacobson:WN:2013} fails
+  to coarsen the domain away from the original discretization (top left). Contouring
+  the signed distance field \protect\cite{Xu:2014:SDF} achieves true nesting at
+  a large iso-level fusing the legs (top center). Our method fits the input
+  tightly (top right). The coarse mesh provides a low-dimensional domain for
+  real-time physical simulation (middle) and simple interpolation onto the
+  input mesh (bottom).}
+  \label{fig:frankenstein-physics}
+\end{figure}
+
 A single enclosing cage is useful for creating a lower dimensional volumetric
 domain for elastic simulations of input models that are either too high
 resolution or complicated by meshing imperfections \cite{Xu:2014:SDF}.
@@ -179,19 +190,24 @@ suitable for elastic simulation with collision detection and response.
 The deformation of the volume inside the coarse cage is then propagated via
 linear interpolation to the embedded mesh.
 
-\begin{figure}
-  \includegraphics[width=\linewidth]{figs/frankenstein-physics}
-  \caption{Extracting an outer hull with \protect\cite{Jacobson:WN:2013} fails
-  to coarsen the domain away from the original discretization (top left). Contouring
-  the signed distance field \protect\cite{Xu:2014:SDF} achieves true nesting at
-  a large iso-level fusing the legs (top center). Our method fits the input
-  tightly (top right). The coarse mesh provides a low-dimensional domain for
-  real-time physical simulation (middle) and simple interpolation onto the
-  input mesh (bottom).}
-  \label{fig:frankenstein-physics}
-\end{figure}
-
-\alec{INSERT COLLISION DETECTION RESULT}
+%
+\begin{wrapfigure}{l}{1.02in}
+%
+\centering
+%
+\includegraphics[width=\linewidth]{figs/octopi-collisions}
+%
+\end{wrapfigure}
+%
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc sapien magna,
+venenatis tristique faucibus at, pellentesque nec velit. Curabitur consectetur
+dignissim ultricies. Donec vel nisl nec enim convallis mollis eget at neque. Ut
+enim magna, placerat sit amet luctus sagittis, tristique at dui. Vestibulum
+tristique nulla vitae sapien molestie facilisis. In tempor diam non mattis
+mattis. Donec id lorem at mi sodales gravida. Vivamus eros mi, ultrices et
+metus vel, malesuada placerat neque. Mauris cursus ipsum augue, a facilisis
+tortor pellentesque id. Pellentesque eget aliquam tellus. Nulla orci augue,
+tempus sit amet vehicula id, elementum in risus.
 
 A single very coarse cage is needed for interactive deformation with
 generalized barycentric coordinates or other ``cage-based'' methods.
@@ -256,10 +272,3 @@ hands), the energy minimization keeps the cage symmetric.
   fully exterior cage used to deform the embedded model.}
   \label{fig:swat-cage}
 \end{figure}
-
-\begin{figure*}
-  \includegraphics[width=\linewidth]{figs/zoo}
-  \caption{Each triplet shows: input model, slice through all nested
-  layers, and outermost, coarsest layer.}
-  \label{fig:zoo}
-\end{figure*}
