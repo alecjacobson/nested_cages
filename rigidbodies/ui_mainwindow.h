@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'mainwindow.ui'
 **
-** Created: Mon Jan 19 00:36:18 2015
+** Created: Mon Jan 19 20:26:05 2015
 **      by: Qt User Interface Compiler version 4.8.1
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
@@ -63,6 +63,9 @@ public:
     QCheckBox *gravityCheckBox;
     QLabel *gravityGLabel;
     QLineEdit *gravityGEdit;
+    QGroupBox *cageBox;
+    QRadioButton *cageNever;
+    QRadioButton *cageAlways;
     QGroupBox *uiOptionsBox;
     QWidget *layoutWidget;
     QVBoxLayout *verticalLayout_2;
@@ -185,6 +188,15 @@ public:
         gravityGEdit = new QLineEdit(activeForcesBox);
         gravityGEdit->setObjectName(QString::fromUtf8("gravityGEdit"));
         gravityGEdit->setGeometry(QRect(370, 30, 51, 21));
+        cageBox = new QGroupBox(activeForcesBox);
+        cageBox->setObjectName(QString::fromUtf8("cageBox"));
+        cageBox->setGeometry(QRect(0, 90, 411, 80));
+        cageNever = new QRadioButton(cageBox);
+        cageNever->setObjectName(QString::fromUtf8("cageNever"));
+        cageNever->setGeometry(QRect(30, 20, 116, 22));
+        cageAlways = new QRadioButton(cageBox);
+        cageAlways->setObjectName(QString::fromUtf8("cageAlways"));
+        cageAlways->setGeometry(QRect(30, 40, 116, 22));
 
         verticalLayout->addWidget(activeForcesBox);
 
@@ -297,6 +309,9 @@ public:
         activeForcesBox->setTitle(QApplication::translate("MainWindow", "Active Forces", 0, QApplication::UnicodeUTF8));
         gravityCheckBox->setText(QApplication::translate("MainWindow", "Gravity", 0, QApplication::UnicodeUTF8));
         gravityGLabel->setText(QApplication::translate("MainWindow", "Acceleration:", 0, QApplication::UnicodeUTF8));
+        cageBox->setTitle(QApplication::translate("MainWindow", "Cage Options", 0, QApplication::UnicodeUTF8));
+        cageNever->setText(QApplication::translate("MainWindow", "Use Never", 0, QApplication::UnicodeUTF8));
+        cageAlways->setText(QApplication::translate("MainWindow", "Use Always", 0, QApplication::UnicodeUTF8));
         uiOptionsBox->setTitle(QApplication::translate("MainWindow", "UI Options", 0, QApplication::UnicodeUTF8));
         rigidBodyTypeBox->setTitle(QApplication::translate("MainWindow", "Rigid Body Type", 0, QApplication::UnicodeUTF8));
         sphereButton->setText(QApplication::translate("MainWindow", "Sphere", 0, QApplication::UnicodeUTF8));

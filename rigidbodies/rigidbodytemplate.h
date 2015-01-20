@@ -10,10 +10,12 @@ class SignedDistanceField;
 class RigidBodyTemplate
 {
 public:
-    RigidBodyTemplate(std::string &meshFilename);
+    RigidBodyTemplate(std::string &meshFilename, std::string &cageFilename);
     ~RigidBodyTemplate();
 
     const Mesh &getMesh() const {return *m_;}
+    const Mesh &getCageMesh() const {return *cageMesh_;}
+    const Mesh &selectMesh(bool cage) const {return cage ? *cageMesh_ : *m_;}
     double getVolume() const {return volume_;}
     const Eigen::Vector3d getPrincipleAxis(int axis) const {return principAxes_[axis];}
 
@@ -31,6 +33,7 @@ private:
     void computeInertiaTensor();
 
     Mesh *m_;
+    Mesh *cageMesh_;
 
     double volume_;
     Eigen::Matrix3d inertiaTensor_;

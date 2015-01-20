@@ -56,6 +56,17 @@ public:
                                const Eigen::Vector3d &q3end,
                                double eta,
                                double &t);
+    // As above, but perfroms collision detection rather than interference detection. It's also less robust; it does not
+    // handle the coplanar case.
+    static bool vertexFaceCTCD(const Eigen::Vector3d &q0start,
+                               const Eigen::Vector3d &q1start,
+                               const Eigen::Vector3d &q2start,
+                               const Eigen::Vector3d &q3start,
+                               const Eigen::Vector3d &q0end,
+                               const Eigen::Vector3d &q1end,
+                               const Eigen::Vector3d &q2end,
+                               const Eigen::Vector3d &q3end,
+                               double &t);
 
     // Looks for the degenerate case of collisions between the vertex q0start and the edge (q1start, s2start) as they
     // move towards q0end and (q1end, q2end). Returns true if the vertex and edge ever come closer than a distance

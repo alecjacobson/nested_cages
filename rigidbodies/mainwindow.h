@@ -65,6 +65,10 @@ private slots:
 
     void on_planeButton_clicked();
 
+    void on_cageNever_clicked();
+
+    void on_cageAlways_clicked();
+
 private:
     Controller &cont_;
     Ui::MainWindow *ui;
