@@ -287,6 +287,19 @@
            <string>Use Always</string>
           </property>
          </widget>
+         <widget class="QRadioButton" name="cageBroad">
+          <property name="geometry">
+           <rect>
+            <x>30</x>
+            <y>60</y>
+            <width>116</width>
+            <height>22</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Broad Phase</string>
+          </property>
+         </widget>
         </widget>
        </widget>
       </item>

@@ -8,6 +8,7 @@
 #include <QMutex>
 #include "simparameters.h"
 #include <QGLWidget>
+#include <QElapsedTimer>
 
 class RigidBodyTemplate;
 class RigidBodyInstance;
@@ -66,6 +67,8 @@ private:
     std::vector<RigidBodyInstance *> bodies_;
 
     std::vector<Plane> planes_;
+
+    QElapsedTimer timer_;
 };
 
 #endif // SIMULATION_H

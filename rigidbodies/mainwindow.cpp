@@ -64,6 +64,8 @@ void MainWindow::setParametersFromUI()
         params.useCage = SimParameters::C_NEVER;
     else if(ui->cageAlways->isChecked())
         params.useCage = SimParameters::C_ALWAYS;
+    else if(ui->cageBroad->isChecked())
+        params.useCage = SimParameters::C_BROADPHASE;
 
 
     setUIFromParameters(params);
@@ -120,6 +122,8 @@ void MainWindow::setUIFromParameters(const SimParameters &params)
     case SimParameters::C_ALWAYS:
         ui->cageAlways->setChecked(true);
         break;
+    case SimParameters::C_BROADPHASE:
+        ui->cageBroad->setChecked(true);
     }
 
     ui->launchVelEdit->setText(QString::number(params.launchVel));
@@ -236,6 +240,11 @@ void MainWindow::on_cageNever_clicked()
 }
 
 void MainWindow::on_cageAlways_clicked()
+{
+    setParametersFromUI();
+}
+
+void MainWindow::on_cageBroad_clicked()
 {
     setParametersFromUI();
 }

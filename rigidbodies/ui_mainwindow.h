@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'mainwindow.ui'
 **
-** Created: Tue Jan 20 05:09:02 2015
+** Created: Tue Jan 20 07:42:26 2015
 **      by: Qt User Interface Compiler version 4.8.1
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
@@ -66,6 +66,7 @@ public:
     QGroupBox *cageBox;
     QRadioButton *cageNever;
     QRadioButton *cageAlways;
+    QRadioButton *cageBroad;
     QGroupBox *uiOptionsBox;
     QWidget *layoutWidget;
     QVBoxLayout *verticalLayout_2;
@@ -197,6 +198,9 @@ public:
         cageAlways = new QRadioButton(cageBox);
         cageAlways->setObjectName(QString::fromUtf8("cageAlways"));
         cageAlways->setGeometry(QRect(30, 40, 116, 22));
+        cageBroad = new QRadioButton(cageBox);
+        cageBroad->setObjectName(QString::fromUtf8("cageBroad"));
+        cageBroad->setGeometry(QRect(30, 60, 116, 22));
 
         verticalLayout->addWidget(activeForcesBox);
 
@@ -312,6 +316,7 @@ public:
         cageBox->setTitle(QApplication::translate("MainWindow", "Cage Options", 0, QApplication::UnicodeUTF8));
         cageNever->setText(QApplication::translate("MainWindow", "Use Never", 0, QApplication::UnicodeUTF8));
         cageAlways->setText(QApplication::translate("MainWindow", "Use Always", 0, QApplication::UnicodeUTF8));
+        cageBroad->setText(QApplication::translate("MainWindow", "Broad Phase", 0, QApplication::UnicodeUTF8));
         uiOptionsBox->setTitle(QApplication::translate("MainWindow", "UI Options", 0, QApplication::UnicodeUTF8));
         rigidBodyTypeBox->setTitle(QApplication::translate("MainWindow", "Rigid Body Type", 0, QApplication::UnicodeUTF8));
         sphereButton->setText(QApplication::translate("MainWindow", "Sphere", 0, QApplication::UnicodeUTF8));

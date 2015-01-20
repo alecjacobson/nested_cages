@@ -24,11 +24,13 @@ bool RigidBodyCTCD::detectCollisions(const std::vector<RigidBodyInstance *> &bod
     for(int i=0; i<numbodies; i++)
     {
         RigidBodyInstance &body = *bodies[i];
-        int nverts = body.getTemplate().selectMesh(useCage == SimParameters::C_ALWAYS).getNumVerts();
+        bool cage = useCage == SimParameters::C_ALWAYS || useCage == SimParameters::C_BROADPHASE;
+        int nverts = body.getTemplate().selectMesh(cage).getNumVerts();
+        bool repeat = false;
         for(int j=0; j<nverts; j++)
         {
-            Vector3d oldpos = body.c + VectorMath::rotationMatrix(body.theta)*body.getTemplate().selectMesh(useCage == SimParameters::C_ALWAYS).getVert(j);
-            Vector3d newpos = newc[i] + VectorMath::rotationMatrix(newtheta[i])*body.getTemplate().selectMesh(useCage == SimParameters::C_ALWAYS).getVert(j);
+            Vector3d oldpos = body.c + VectorMath::rotationMatrix(body.theta)*body.getTemplate().selectMesh(cage).getVert(j);
+            Vector3d newpos = newc[i] + VectorMath::rotationMatrix(newtheta[i])*body.getTemplate().selectMesh(cage).getVert(j);
 
             for(int p=0; p<planes.size(); p++)
             {
@@ -38,14 +40,48 @@ bool RigidBodyCTCD::detectCollisions(const std::vector<RigidBodyInstance *> &bod
                 double t= num/denom;
                 if(t >= 0 && t < 1)
                 {
-                    ContactInfo ci;
-                    ci.body1 = i;
-                    ci.n = planes[p].normal;
-                    ci.body2 = -1;
-                    ci.pt1 = body.getTemplate().selectMesh(useCage == SimParameters::C_ALWAYS).getVert(j);
-                    candidates.push_back(pair<int, ContactInfo>(t, ci));
+                    if(useCage == SimParameters::C_BROADPHASE)
+                    {
+                        repeat = true;
+                    }
+                    else
+                    {
+                        ContactInfo ci;
+                        ci.body1 = i;
+                        ci.n = planes[p].normal;
+                        ci.body2 = -1;
+                        ci.pt1 = body.getTemplate().selectMesh(cage).getVert(j);
+                        candidates.push_back(pair<int, ContactInfo>(t, ci));
+                    }
                 }
             }
+        }
+        if(repeat)
+        {
+            nverts = body.getTemplate().selectMesh(false).getNumVerts();
+            for(int j=0; j<nverts; j++)
+            {
+                Vector3d oldpos = body.c + VectorMath::rotationMatrix(body.theta)*body.getTemplate().selectMesh(false).getVert(j);
+                Vector3d newpos = newc[i] + VectorMath::rotationMatrix(newtheta[i])*body.getTemplate().selectMesh(false).getVert(j);
+
+                for(int p=0; p<planes.size(); p++)
+                {
+
+                    double num = (planes[p].pos - oldpos).dot(planes[p].normal);
+                    double denom = (newpos-oldpos).dot(planes[p].normal);
+                    double t= num/denom;
+                    if(t >= 0 && t < 1)
+                    {
+                        ContactInfo ci;
+                        ci.body1 = i;
+                        ci.n = planes[p].normal;
+                        ci.body2 = -1;
+                        ci.pt1 = body.getTemplate().selectMesh(false).getVert(j);
+                        candidates.push_back(pair<int, ContactInfo>(t, ci));
+                    }
+                }
+            }
+
         }
 
         for(int k=i+1; k<numbodies; k++)
@@ -56,6 +92,35 @@ bool RigidBodyCTCD::detectCollisions(const std::vector<RigidBodyInstance *> &bod
             RigidBodyInstance &target = *bodies[k];
             set<VertexFaceStencil> vfs;
             KDOPBroadPhase broad;
+            bool check = true;
+            if(useCage == SimParameters::C_BROADPHASE)
+            {
+                check = false;
+                broad.findCollisionCandidates(body, target, newc[i], newc[k], newtheta[i], newtheta[k], vfs, true);
+                for(set<VertexFaceStencil>::iterator it = vfs.begin(); it != vfs.end(); ++it)
+                {
+                    int body1 = (it->body == 0 ? i : k);
+                    int body2 = (it->body == 0 ? k : i);
+
+                    Vector3d starts[3];
+                    Vector3d ends[3];
+                    Vector3i verts = bodies[body2]->getTemplate().selectMesh(true).getFace(it->face);
+
+                    Vector3d vertp1 = bodies[body1]->c + VectorMath::rotationMatrix(bodies[body1]->theta)*bodies[body1]->getTemplate().selectMesh(true).getVert(it->vert);
+                    Vector3d vertp2 = newc[body1] + VectorMath::rotationMatrix(newtheta[body1])*bodies[body1]->getTemplate().selectMesh(true).getVert(it->vert);
+
+                    for(int n=0; n<3; n++)
+                    {
+                        starts[n] = bodies[body2]->c + VectorMath::rotationMatrix(bodies[body2]->theta)*bodies[body2]->getTemplate().selectMesh(true).getVert(verts[n]);
+                        ends[n] = bodies[body2]->c + VectorMath::rotationMatrix(bodies[body2]->theta)*bodies[body2]->getTemplate().selectMesh(true).getVert(verts[n]);
+                    }
+                    double t;
+                    if(CTCD::vertexFaceCTCD(vertp1, starts[0], starts[1], starts[2], vertp2, ends[0], ends[1], ends[2], t))
+                        check = true;
+                }
+            }
+            if(!check)
+                continue;
             broad.findCollisionCandidates(body, target, newc[i], newc[k], newtheta[i], newtheta[k], vfs, useCage == SimParameters::C_ALWAYS);
 
             //std::cout << "found " << vfs.size() << " candidates" << std::endl;

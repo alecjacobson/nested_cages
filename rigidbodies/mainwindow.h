@@ -69,6 +69,8 @@ private slots:
 
     void on_cageAlways_clicked();
 
+    void on_cageBroad_clicked();
+
 private:
     Controller &cont_;
     Ui::MainWindow *ui;

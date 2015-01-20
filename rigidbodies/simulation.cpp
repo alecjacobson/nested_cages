@@ -216,8 +216,8 @@ void Simulation::takeSimulationStep()
             Vector3d relvel = bodies_[ci.body1]->cvel + (bodies_[ci.body1]->w).cross(Rtheta1*ci.pt1);
             if(ci.body2 != -1)
                 relvel = relvel - bodies_[ci.body2]->cvel - (bodies_[ci.body2]->w).cross(Rtheta2*ci.pt2);
-            std::cout << "rel vel before " << relvel.dot(ci.n) << std::endl;
-            rhs[i] = fabs(2.0*relvel.dot(ci.n));
+            //std::cout << "rel vel before " << relvel.dot(ci.n) << std::endl;
+            rhs[i] = fabs(1.99*relvel.dot(ci.n));
 
             double m1 = bodies_[ci.body1]->density * bodies_[ci.body1]->getTemplate().getVolume();
             double m2;
@@ -267,12 +267,12 @@ void Simulation::takeSimulationStep()
             }
         }
         M.setFromTriplets(Mcoeffs.begin(), Mcoeffs.end());
-        MatrixXd dense(M);
-        std::cout << "the matrix:" << std::endl;
-        std::cout << dense << std::endl;
+        //MatrixXd dense(M);
+        //std::cout << "the matrix:" << std::endl;
+        //std::cout << dense << std::endl;
         SparseQR<SparseMatrix<double>, COLAMDOrdering<int> > solver(M);
         VectorXd lambdas = solver.solve(rhs);
-        std::cout << (M.transpose()*M*lambdas-M.transpose()*rhs).norm() << std::endl;
+        //std::cout << (M.transpose()*M*lambdas-M.transpose()*rhs).norm() << std::endl;
         for(int i=0; i<(int)bodies_.size(); i++)
         {
             newcvel[i] = bodies_[i]->cvel;
@@ -308,18 +308,18 @@ void Simulation::takeSimulationStep()
             }
         }
 
-        for(int i=0; i<numconstraints; i++)
-        {
-            ContactInfo &ci = contacts[i];
-            Matrix3d Rtheta1 = VectorMath::rotationMatrix(bodies_[ci.body1]->theta);
-            Matrix3d Rtheta2;
-            if(ci.body2 != -1)
-                Rtheta2 = VectorMath::rotationMatrix(bodies_[ci.body2]->theta);
-            Vector3d relvel = newcvel[ci.body1] + (neww[ci.body1]).cross(Rtheta1*ci.pt1);
-            if(ci.body2 != -1)
-                relvel = relvel - newcvel[ci.body2] - (neww[ci.body2]).cross(Rtheta2*ci.pt2);
-            std::cout << "rel vel after " << relvel.dot(ci.n) << std::endl;
-        }
+//        for(int i=0; i<numconstraints; i++)
+//        {
+//            ContactInfo &ci = contacts[i];
+//            Matrix3d Rtheta1 = VectorMath::rotationMatrix(bodies_[ci.body1]->theta);
+//            Matrix3d Rtheta2;
+//            if(ci.body2 != -1)
+//                Rtheta2 = VectorMath::rotationMatrix(bodies_[ci.body2]->theta);
+//            Vector3d relvel = newcvel[ci.body1] + (neww[ci.body1]).cross(Rtheta1*ci.pt1);
+//            if(ci.body2 != -1)
+//                relvel = relvel - newcvel[ci.body2] - (neww[ci.body2]).cross(Rtheta2*ci.pt2);
+//            std::cout << "rel vel after " << relvel.dot(ci.n) << std::endl;
+//        }
     }
 
     for(int bodyidx=0; bodyidx < (int)bodies_.size(); bodyidx++)
@@ -373,11 +373,12 @@ void Simulation::takeSimulationStep()
 
     if(spawnTime_ < time_)
     {
+        std::cout << time_ << " " << timer_.elapsed() << std::endl;
         spawnTime_ += 0.5;
         Vector3d spawnpos(
-                    4.0*VectorMath::randomUnitIntervalReal()-2.0,
-                    4.0*VectorMath::randomUnitIntervalReal()-2.0,
-                    5.0);
+                    2.0*VectorMath::randomUnitIntervalReal()-1.0,
+                    2.0*VectorMath::randomUnitIntervalReal()-1.0,
+                    2.0 + 2.0*time_);
         Vector3d orient;
         for(int i=0; i<3; i++)
             orient[i] = 2.0*VectorMath::randomUnitIntervalReal()-1.0;
@@ -393,6 +394,7 @@ void Simulation::takeSimulationStep()
 void Simulation::clearScene()
 {
     srand(10);
+    timer_.start();
     time_ = 0;
     spawnTime_ = 0;
     renderLock_.lock();
@@ -407,19 +409,19 @@ void Simulation::clearScene()
         planes_.push_back(groundPlane);
 
         Plane side;
-        side.pos << 3,0,0;
+        side.pos << 2,0,0;
         side.normal << -1,0,0.1;
         planes_.push_back(side);
 
-        side.pos << -3,0,0;
+        side.pos << -2,0,0;
         side.normal << 1,0,0.1;
         planes_.push_back(side);
 
-        side.pos << 0,3,0;
+        side.pos << 0,2,0;
         side.normal << 0,-1,0.1;
         planes_.push_back(side);
 
-        side.pos << 0,-3,0;
+        side.pos << 0,-2,0;
         side.normal << 0,1,0.1;
         planes_.push_back(side);
     }
