@@ -1,8 +1,58 @@
-
-\section{Conclusion}
+\section{Future work}
 \label{sec:conclusion}
+%
+In future, we plan to optimize the performance of both the signed distance
+field flow and the re-inflation steps.
+%
+Collision detection and handling dominates running time and our prototype
+naively recomputes acceptation data-structures rather than updating the with
+the dynamically changing meshes.
+
+Our insight to break the many-layer nesting problem into pairwise subproblems
+makes the problem tractable, but in some cases leads to converging to an
+``artificial local minimum''. If a coarse cage collides with itself during
+inflation then it may create a pinch that blocks inflation of subsequent coarse
+layers (see \reffig{homer}).
+%
+One solution is to iterate through the fine layers to make sufficient room in
+these problem areas, but defining this relaxation direction is not obvious.
+
+In cases where the input coarse cage begins too far away from the fine mesh,
+the signed distance flow will fail: for example, by placing vertices of a
+triangle inside opposite parts of the coarse mesh. 
+%
+Adding a small amount of smoothing on the flowing fine mesh or expanding the
+coarse mesh alleviates some of these problems, but a general solution is
+allusive.
+%
+The correct assignment seems related to correctly matching medial axes of both
+meshes, perhaps this is an avenue of future improvement.
+
+Though we are pleased with the performance of our multiresolution solver, 
+we would like to further improve it. We believe there are even more gains to be
+made by parameter tuning and experimenting with different coarsening
+gradations. We would also like to consider using our meshes to build
+multiresolution proconditioners for conjugate gradient solvers.
+%
+We expect that higher order PDEs with more involved boundary conditions will
+receive an even greater benefit from our nested cages.
 
 It would be interesting to formal analyze convergence of our nested cages along
-the lines of \cite{chan1996convergence} who consider the then-available non-nested hierarchies.
+the lines of \cite{chan1996convergence} who consider the then-available
+non-nested hierarchies.
 
 
+In conclusion, nested cages prove to be a powerful tool in a variety of
+applications. 
+%
+Our signed distance flow consistently finds initial feasible states for our
+constraint-based optimization.
+%
+By leveraging state-of-the-art collision handling tools from physically based
+simulation, we are able to generate meshes which in turn enable faster physical
+simulations, linear system solvers and better real-time deformation user
+interfaces.
+%
+We hope that our algorithm's success encourages more multiresolution volumetric
+methods using unstructured meshes in geometry processing, computer graphics,
+and beyond.
