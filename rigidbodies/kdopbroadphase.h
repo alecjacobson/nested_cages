@@ -77,11 +77,11 @@ class KDOPBroadPhase
 public:
   KDOPBroadPhase();
 
-  void findCollisionCandidates(const RigidBodyInstance &body1, const RigidBodyInstance &body2, const Eigen::Vector3d &newc1, const Eigen::Vector3d &newc2, const Eigen::Vector3d &newtheta1, const Eigen::Vector3d &newtheta2, std::set<VertexFaceStencil> &vfs);
+  void findCollisionCandidates(const RigidBodyInstance &body1, const RigidBodyInstance &body2, const Eigen::Vector3d &newc1, const Eigen::Vector3d &newc2, const Eigen::Vector3d &newtheta1, const Eigen::Vector3d &newtheta2, std::set<VertexFaceStencil> &vfs, bool useCage);
  private:
-  KDOPNode *buildKDOPTree(int bodyid, const RigidBodyInstance &body, const Eigen::Vector3d &newc, const Eigen::Vector3d &newtheta);
+  KDOPNode *buildKDOPTree(int bodyid, const RigidBodyInstance &body, const Eigen::Vector3d &newc, const Eigen::Vector3d &newtheta, bool useCage);
   KDOPNode *buildKDOPInterior(std::vector<KDOPNode *> &children);
-  void intersect(KDOPNode *left, KDOPNode *right, const RigidBodyInstance &body1, const RigidBodyInstance &body2, std::set<VertexFaceStencil> &vfs);
+  void intersect(KDOPNode *left, KDOPNode *right, const RigidBodyInstance &body1, const RigidBodyInstance &body2, std::set<VertexFaceStencil> &vfs, bool useCage);
 
   std::vector<Eigen::Vector3d> DOPaxis;
 };

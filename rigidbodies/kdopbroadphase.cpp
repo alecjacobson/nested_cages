@@ -32,20 +32,20 @@ KDOPBroadPhase::KDOPBroadPhase()
     }
 }
 
-void KDOPBroadPhase::findCollisionCandidates(const RigidBodyInstance &body1, const RigidBodyInstance &body2, const Vector3d &newc1, const Vector3d &newc2, const Vector3d &newtheta1, const Vector3d &newtheta2, set<VertexFaceStencil> &vfs)
+void KDOPBroadPhase::findCollisionCandidates(const RigidBodyInstance &body1, const RigidBodyInstance &body2, const Vector3d &newc1, const Vector3d &newc2, const Vector3d &newtheta1, const Vector3d &newtheta2, set<VertexFaceStencil> &vfs, bool useCage)
 {
     vfs.clear();
-    KDOPNode *tree1 = buildKDOPTree(0, body1, newc1, newtheta1);
-    KDOPNode *tree2 = buildKDOPTree(1, body2, newc2, newtheta2);
-    intersect(tree1, tree2, body1, body2, vfs);
+    KDOPNode *tree1 = buildKDOPTree(0, body1, newc1, newtheta1, useCage);
+    KDOPNode *tree2 = buildKDOPTree(1, body2, newc2, newtheta2, useCage);
+    intersect(tree1, tree2, body1, body2, vfs, useCage);
     delete tree1;
     delete tree2;
 }
 
-KDOPNode *KDOPBroadPhase::buildKDOPTree(int bodyid, const RigidBodyInstance &body, const Eigen::Vector3d &newc, const Eigen::Vector3d &newtheta)
+KDOPNode *KDOPBroadPhase::buildKDOPTree(int bodyid, const RigidBodyInstance &body, const Eigen::Vector3d &newc, const Eigen::Vector3d &newtheta, bool useCage)
 {
   vector<KDOPNode *> leaves;
-  int nfaces = body.getTemplate().getMesh().getNumFaces();
+  int nfaces = body.getTemplate().selectMesh(useCage).getNumFaces();
   for(int i=0; i<nfaces; i++)
   {
       KDOPLeafNode *node = new KDOPLeafNode;
@@ -54,7 +54,7 @@ KDOPNode *KDOPBroadPhase::buildKDOPTree(int bodyid, const RigidBodyInstance &bod
       int verts[3];
       for(int j=0; j<3; j++)
       {
-        verts[j] = body.getTemplate().getMesh().getFace(i)[j];
+        verts[j] = body.getTemplate().selectMesh(useCage).getFace(i)[j];
       }
       for(int j=0; j<K; j++)
       {
@@ -63,13 +63,13 @@ KDOPNode *KDOPBroadPhase::buildKDOPTree(int bodyid, const RigidBodyInstance &bod
       }
       for(int j=0; j<3; j++)
       {
-        Vector3d oldpos = body.c + VectorMath::rotationMatrix(body.theta)*body.getTemplate().getMesh().getVert(verts[j]);
+        Vector3d oldpos = body.c + VectorMath::rotationMatrix(body.theta)*body.getTemplate().selectMesh(useCage).getVert(verts[j]);
         for(int k=0; k<K; k++)
             {
               node->mins[k] = min(oldpos.dot(DOPaxis[k]), node->mins[k]);
               node->maxs[k] = max(oldpos.dot(DOPaxis[k]), node->maxs[k]);
             }
-        Vector3d newpos = newc + VectorMath::rotationMatrix(newtheta)*body.getTemplate().getMesh().getVert(verts[j]);
+        Vector3d newpos = newc + VectorMath::rotationMatrix(newtheta)*body.getTemplate().selectMesh(useCage).getVert(verts[j]);
         for(int k=0; k<K; k++)
             {
               node->mins[k] = min(newpos.dot(DOPaxis[k]), node->mins[k]);
@@ -135,7 +135,7 @@ KDOPNode *KDOPBroadPhase::buildKDOPInterior(vector<KDOPNode *> &children)
     return node;
 }
 
-void KDOPBroadPhase::intersect(KDOPNode *left, KDOPNode *right, const RigidBodyInstance &body1, const RigidBodyInstance &body2, std::set<VertexFaceStencil> &vfs)
+void KDOPBroadPhase::intersect(KDOPNode *left, KDOPNode *right, const RigidBodyInstance &body1, const RigidBodyInstance &body2, std::set<VertexFaceStencil> &vfs, bool useCage)
 {
     for(int axis=0; axis<K; axis++)
     {
@@ -146,14 +146,14 @@ void KDOPBroadPhase::intersect(KDOPNode *left, KDOPNode *right, const RigidBodyI
     if(!left->isLeaf())
     {
         KDOPInteriorNode *ileft = (KDOPInteriorNode *)left;
-        intersect(ileft->left, right, body1, body2, vfs);
-        intersect(ileft->right, right, body1, body2, vfs);
+        intersect(ileft->left, right, body1, body2, vfs, useCage);
+        intersect(ileft->right, right, body1, body2, vfs, useCage);
     }
     else if(!right->isLeaf())
     {
         KDOPInteriorNode *iright = (KDOPInteriorNode *)right;
-        intersect(left, iright->left, body1, body2, vfs);
-        intersect(left, iright->right, body1, body2, vfs);
+        intersect(left, iright->left, body1, body2, vfs, useCage);
+        intersect(left, iright->right, body1, body2, vfs, useCage);
     }
     else
     {
@@ -165,13 +165,13 @@ void KDOPBroadPhase::intersect(KDOPNode *left, KDOPNode *right, const RigidBodyI
         {
             VertexFaceStencil lefts;
             lefts.body = lleft->body;
-            lefts.vert = body1.getTemplate().getMesh().getFace(lleft->face)[i];
+            lefts.vert = body1.getTemplate().selectMesh(useCage).getFace(lleft->face)[i];
             lefts.face = lright->face;
             vfs.insert(lefts);
 
             VertexFaceStencil rights;
             rights.body = lright->body;
-            rights.vert = body2.getTemplate().getMesh().getFace(lright->face)[i];
+            rights.vert = body2.getTemplate().selectMesh(useCage).getFace(lright->face)[i];
             rights.face = lleft->face;
             vfs.insert(rights);
         }

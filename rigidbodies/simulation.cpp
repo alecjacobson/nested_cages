@@ -42,9 +42,10 @@ void Simulation::loadRigidBodies()
 {
     const int numobjs = 4;
     string objNames[numobjs] = {"resources/sphere.obj", "resources/2by4.obj", "resources/bunny.obj", "resources/octopus.obj"};
+    string cageObjNames[numobjs] = {"resources/sphere.obj", "resources/2by4.obj", "resources/bunny.obj", "resources/octopus_cage.obj"};
     for(int i=0; i<numobjs; i++)
     {
-        RigidBodyTemplate *rbt = new RigidBodyTemplate(objNames[i]);
+        RigidBodyTemplate *rbt = new RigidBodyTemplate(objNames[i], cageObjNames[i]);
         templates_.push_back(rbt);
     }
 }
@@ -194,7 +195,7 @@ void Simulation::takeSimulationStep()
             Matrix3d Rtheta = VectorMath::rotationMatrix(newtheta[bodyidx]);
             newtheta[bodyidx] = VectorMath::axisAngle(Rhw*Rtheta);
 
-            newcollisions |= RigidBodyCTCD::detectCollisions(bodies_, planes_, newc, newtheta, contacts);
+            newcollisions |= RigidBodyCTCD::detectCollisions(bodies_, planes_, newc, newtheta, contacts, params_.useCage);
         }
 
         if(!newcollisions)
@@ -242,13 +243,24 @@ void Simulation::takeSimulationStep()
                 }
                 if(ci.body1 == contacts[j].body2)
                 {
-                    double val = ci.n.dot(contacts[j].n)/m1;
-                    val += impulsew1.cross(Rtheta1*contacts[j].pt1).dot(contacts[j].n);
-                    M.coeffRef(j,i) -= val;
+                    double val = ci.n.dot(-contacts[j].n)/m1;
+                    val += impulsew1.cross(Rtheta1*contacts[j].pt2).dot(-contacts[j].n);
+                    M.coeffRef(j,i) += val;
                 }
                 if(ci.body2 != -1)
                 {
-                    // TODO
+                    if(ci.body2 == contacts[j].body1)
+                    {
+                        double val = -ci.n.dot(contacts[j].n)/m2;
+                        val += impulsew2.cross(Rtheta2*contacts[j].pt1).dot(contacts[j].n);
+                        M.coeffRef(j,i) += val;
+                    }
+                    if(ci.body2 == contacts[j].body2)
+                    {
+                        double val = -ci.n.dot(-contacts[j].n)/m2;
+                        val += impulsew2.cross(Rtheta2*contacts[j].pt2).dot(-contacts[j].n);
+                        M.coeffRef(j,i) += val;
+                    }
                 }
             }
         }

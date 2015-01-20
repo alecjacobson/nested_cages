@@ -6,9 +6,10 @@
 using namespace std;
 using namespace Eigen;
 
-RigidBodyTemplate::RigidBodyTemplate(std::string &meshFilename) : volume_(0)
+RigidBodyTemplate::RigidBodyTemplate(std::string &meshFilename, string &cageFilename) : volume_(0)
 {
     m_ = new Mesh(meshFilename);
+    cageMesh_ = new Mesh(cageFilename);
     inertiaTensor_.setZero();
     for(int i=0; i<3; i++)
         principAxes_[i].setZero();
@@ -16,8 +17,10 @@ RigidBodyTemplate::RigidBodyTemplate(std::string &meshFilename) : volume_(0)
     computeVolume();
     Vector3d cm = computeCenterOfMass();
     m_->translate(-cm);
+    cageMesh_->translate(-cm);
     double r = boundingSphereRadius();
     m_->scale(1.0/r);
+    cageMesh_->scale(1.0/r);
     volume_ /= r*r*r;
     computeInertiaTensor();    
 }
@@ -25,6 +28,7 @@ RigidBodyTemplate::RigidBodyTemplate(std::string &meshFilename) : volume_(0)
 RigidBodyTemplate::~RigidBodyTemplate()
 {
     delete m_;
+    delete cageMesh_;
 }
 
 void RigidBodyTemplate::computeVolume()

@@ -1,5 +1,5 @@
 #include "rigidbodyctcd.h"
-#include "CTCD.h"
+#include "collisions/CTCD.h"
 #include "rigidbodyinstance.h"
 #include "rigidbodytemplate.h"
 #include "mesh.h"
@@ -14,7 +14,7 @@ RigidBodyCTCD::RigidBodyCTCD()
 {
 }
 
-bool RigidBodyCTCD::detectCollisions(const std::vector<RigidBodyInstance *> &bodies, std::vector<Plane> &planes, std::vector<Eigen::Vector3d> &newc, std::vector<Eigen::Vector3d> &newtheta, std::vector<ContactInfo> &contacts)
+bool RigidBodyCTCD::detectCollisions(const std::vector<RigidBodyInstance *> &bodies, std::vector<Plane> &planes, std::vector<Eigen::Vector3d> &newc, std::vector<Eigen::Vector3d> &newtheta, std::vector<ContactInfo> &contacts, SimParameters::UseCage  useCage)
 {
     int numbodies = bodies.size();
     vector<pair<int, ContactInfo> > candidates;
@@ -22,11 +22,11 @@ bool RigidBodyCTCD::detectCollisions(const std::vector<RigidBodyInstance *> &bod
     for(int i=0; i<numbodies; i++)
     {
         RigidBodyInstance &body = *bodies[i];
-        int nverts = body.getTemplate().getMesh().getNumVerts();
+        int nverts = body.getTemplate().selectMesh(useCage == SimParameters::C_ALWAYS).getNumVerts();
         for(int j=0; j<nverts; j++)
         {
-            Vector3d oldpos = body.c + VectorMath::rotationMatrix(body.theta)*body.getTemplate().getMesh().getVert(j);
-            Vector3d newpos = newc[i] + VectorMath::rotationMatrix(newtheta[i])*body.getTemplate().getMesh().getVert(j);
+            Vector3d oldpos = body.c + VectorMath::rotationMatrix(body.theta)*body.getTemplate().selectMesh(useCage == SimParameters::C_ALWAYS).getVert(j);
+            Vector3d newpos = newc[i] + VectorMath::rotationMatrix(newtheta[i])*body.getTemplate().selectMesh(useCage == SimParameters::C_ALWAYS).getVert(j);
 
             for(int p=0; p<planes.size(); p++)
             {
@@ -40,7 +40,7 @@ bool RigidBodyCTCD::detectCollisions(const std::vector<RigidBodyInstance *> &bod
                     ci.body1 = i;
                     ci.n = planes[p].normal;
                     ci.body2 = -1;
-                    ci.pt1 = body.getTemplate().getMesh().getVert(j);
+                    ci.pt1 = body.getTemplate().selectMesh(useCage == SimParameters::C_ALWAYS).getVert(j);
                     candidates.push_back(pair<int, ContactInfo>(t, ci));
                 }
             }
@@ -54,7 +54,7 @@ bool RigidBodyCTCD::detectCollisions(const std::vector<RigidBodyInstance *> &bod
             RigidBodyInstance &target = *bodies[k];
             set<VertexFaceStencil> vfs;
             KDOPBroadPhase broad;
-            broad.findCollisionCandidates(body, target, newc[i], newc[k], newtheta[i], newtheta[k], vfs);
+            broad.findCollisionCandidates(body, target, newc[i], newc[k], newtheta[i], newtheta[k], vfs, useCage == SimParameters::C_ALWAYS);
 
             std::cout << "found " << vfs.size() << " candidates" << std::endl;
             for(set<VertexFaceStencil>::iterator it = vfs.begin(); it != vfs.end(); ++it)
@@ -64,18 +64,18 @@ bool RigidBodyCTCD::detectCollisions(const std::vector<RigidBodyInstance *> &bod
 
                 Vector3d starts[3];
                 Vector3d ends[3];
-                Vector3i verts = bodies[body2]->getTemplate().getMesh().getFace(it->face);
+                Vector3i verts = bodies[body2]->getTemplate().selectMesh(useCage == SimParameters::C_ALWAYS).getFace(it->face);
 
-                Vector3d vertp1 = bodies[body1]->c + VectorMath::rotationMatrix(bodies[body1]->theta)*bodies[body1]->getTemplate().getMesh().getVert(it->vert);
-                Vector3d vertp2 = newc[body1] + VectorMath::rotationMatrix(newtheta[body1])*bodies[body1]->getTemplate().getMesh().getVert(it->vert);
+                Vector3d vertp1 = bodies[body1]->c + VectorMath::rotationMatrix(bodies[body1]->theta)*bodies[body1]->getTemplate().selectMesh(useCage == SimParameters::C_ALWAYS).getVert(it->vert);
+                Vector3d vertp2 = newc[body1] + VectorMath::rotationMatrix(newtheta[body1])*bodies[body1]->getTemplate().selectMesh(useCage == SimParameters::C_ALWAYS).getVert(it->vert);
 
                 for(int n=0; n<3; n++)
                 {
-                    starts[n] = bodies[body2]->c + VectorMath::rotationMatrix(bodies[body2]->theta)*bodies[body2]->getTemplate().getMesh().getVert(verts[n]);
-                    ends[n] = bodies[body2]->c + VectorMath::rotationMatrix(bodies[body2]->theta)*bodies[body2]->getTemplate().getMesh().getVert(verts[n]);
+                    starts[n] = bodies[body2]->c + VectorMath::rotationMatrix(bodies[body2]->theta)*bodies[body2]->getTemplate().selectMesh(useCage == SimParameters::C_ALWAYS).getVert(verts[n]);
+                    ends[n] = bodies[body2]->c + VectorMath::rotationMatrix(bodies[body2]->theta)*bodies[body2]->getTemplate().selectMesh(useCage == SimParameters::C_ALWAYS).getVert(verts[n]);
                 }
                 double t;
-                if(CTCD::vertexFaceCTCD(vertp1, starts[0], starts[1], starts[2], vertp2, ends[0], ends[1], ends[2], 1e-8, t))
+                if(CTCD::vertexFaceCTCD(vertp1, starts[0], starts[1], starts[2], vertp2, ends[0], ends[1], ends[2], t))
                 {
                     Vector3d mids[3];
                     for(int n=0; n<3; n++)
@@ -85,10 +85,10 @@ bool RigidBodyCTCD::detectCollisions(const std::vector<RigidBodyInstance *> &bod
                     ci.body2 = body2;
                     ci.n = (mids[1]-mids[0]).cross(mids[2]-mids[0]);
                     ci.n /= ci.n.norm();
-                    ci.pt1 = bodies[body1]->getTemplate().getMesh().getVert(it->vert);
+                    ci.pt1 = bodies[body1]->getTemplate().selectMesh(useCage == SimParameters::C_ALWAYS).getVert(it->vert);
                     ci.pt2.setZero();
                     for(int n=0; n<3; n++)
-                        ci.pt2 += bodies[body2]->getTemplate().getMesh().getVert(verts[n]);
+                        ci.pt2 += bodies[body2]->getTemplate().selectMesh(useCage == SimParameters::C_ALWAYS).getVert(verts[n]);
                     ci.pt2 *= 1.0/3.0;
                     candidates.push_back(pair<int, ContactInfo>(t, ci));
                 }

@@ -60,6 +60,12 @@ void MainWindow::setParametersFromUI()
     params.randomLaunchOrientation = ui->randomOrienatationCheckBox->isChecked();
     params.randomLaunchVelMagnitude = ui->randomVelMagEdit->text().toDouble();
 
+    if(ui->cageNever->isChecked())
+        params.useCage = SimParameters::C_NEVER;
+    else if(ui->cageAlways->isChecked())
+        params.useCage = SimParameters::C_ALWAYS;
+
+
     setUIFromParameters(params);
     QMetaObject::invokeMethod(&cont_, "updateParameters", Q_ARG(SimParameters, params));
 }
@@ -103,6 +109,16 @@ void MainWindow::setUIFromParameters(const SimParameters &params)
         break;
     case SimParameters::R_PLANE:
         ui->planeButton->setChecked(true);
+        break;
+    }
+
+    switch(params.useCage)
+    {
+    case SimParameters::C_NEVER:
+        ui->cageNever->setChecked(true);
+        break;
+    case SimParameters::C_ALWAYS:
+        ui->cageAlways->setChecked(true);
         break;
     }
 
@@ -210,6 +226,16 @@ void MainWindow::on_penaltyStiffnessEdit_editingFinished()
 }
 
 void MainWindow::on_planeButton_clicked()
+{
+    setParametersFromUI();
+}
+
+void MainWindow::on_cageNever_clicked()
+{
+    setParametersFromUI();
+}
+
+void MainWindow::on_cageAlways_clicked()
 {
     setParametersFromUI();
 }

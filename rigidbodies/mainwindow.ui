@@ -249,6 +249,45 @@
           </rect>
          </property>
         </widget>
+        <widget class="QGroupBox" name="cageBox">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>90</y>
+           <width>411</width>
+           <height>80</height>
+          </rect>
+         </property>
+         <property name="title">
+          <string>Cage Options</string>
+         </property>
+         <widget class="QRadioButton" name="cageNever">
+          <property name="geometry">
+           <rect>
+            <x>30</x>
+            <y>20</y>
+            <width>116</width>
+            <height>22</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Use Never</string>
+          </property>
+         </widget>
+         <widget class="QRadioButton" name="cageAlways">
+          <property name="geometry">
+           <rect>
+            <x>30</x>
+            <y>40</y>
+            <width>116</width>
+            <height>22</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Use Always</string>
+          </property>
+         </widget>
+        </widget>
        </widget>
       </item>
       <item>

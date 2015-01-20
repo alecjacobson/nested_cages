@@ -13,6 +13,8 @@ struct SimParameters
     const static int R_CUSTOM  = 3;
     const static int R_PLANE   = 4;
 
+    enum UseCage {C_NEVER, C_ALWAYS};
+
     bool simRunning;
     double timeStep;
     double NewtonTolerance;
@@ -29,6 +31,8 @@ struct SimParameters
 
     bool randomLaunchAngVel;
     double randomLaunchVelMagnitude;
+
+    UseCage useCage;
 };
 
 #endif // SIMPARAMETERS_H

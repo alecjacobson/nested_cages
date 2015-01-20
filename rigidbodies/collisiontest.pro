@@ -11,7 +11,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = collisiontest
 TEMPLATE = app
 
-INCLUDEPATH += $$_PRO_FILE_PWD_/eigen_3.2.2/ $$_PRO_FILE_PWD_/SOIL/src ../../collisiondetection/include
+INCLUDEPATH += $$_PRO_FILE_PWD_/eigen_3.2.2/ $$_PRO_FILE_PWD_/SOIL/src
 LIBS += -lGLU -L$$_PRO_FILE_PWD_/SOIL/lib -lSOIL
 
 QMAKE_CXXFLAGS += -g
