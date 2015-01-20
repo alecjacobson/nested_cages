@@ -11,14 +11,17 @@
 As the complexity and size of computational objects continue to grow,
 acceleration algorithms become increasingly important. One powerful technique
 is to decompose a high-resolution mesh into a hierarchy of increasingly coarse
-approximations or \emph{cages}. For example, multiresolution FEM techniques
-efficiently solve Eulerian PDEs on very fine meshes by moving up and down the hierarchy; low frequency residual error disappears quickly on the coarsest levels
-while fine levels smooth away high frequency error. Coarse enclosing cages also find use in physical simulation, where deformations
-of the cage are interpolated onto embedded high-resolution geometries; in
-interactive animation, where artists can specify large-scale deformations by
-adjusting the low-dimensional cage; and in collision detection, where conservative
-culling reduces computation time. For all these applications, the key to good performance is the ability to
-generate a good-quality multiresolution hierarchy.
+approximations or \emph{cages} (see \reffig{teaser}). For example,
+multiresolution FEM techniques efficiently solve Eulerian PDEs on very fine
+meshes by moving up and down the hierarchy; low frequency residual error
+disappears quickly on the coarsest levels while fine levels smooth away high
+frequency error. Coarse enclosing cages also find use in physical simulation,
+where deformations of the cage are interpolated onto embedded high-resolution
+geometries; in interactive animation, where artists can specify large-scale
+deformations by adjusting the low-dimensional cage; and in collision detection,
+where conservative culling reduces computation time. For all these
+applications, the key to good performance is the ability to generate a
+good-quality multiresolution hierarchy.
 
 \paragraph{Desiderata} Although emphasis varies according to application, an
 ideal multiresolution hierarchy possesses several properties useful across a
@@ -92,7 +95,7 @@ common to simulation and geometry processing \cite{chan1999boundary}.
 \noindent \textsc{Tight}:
 %
 Each mesh in the hierarchy fits \emph{tightly} around the next-finest level of
-the hierarchy.
+the hierarchy (see \reffig{horse-25-layers}).
 %
 Tightness can be quantified by the volume or Hausdorff distance between cages.
 %
@@ -121,8 +124,6 @@ features, changing the object topology. Strict nesting, and in turn tightness,
 are also in danger when using standard contouring as output surface meshes will
 cut corners in high curvature areas, leading to intersections with other
 cages.
-
-\alec{need to reference teaser in intro}
 
 \paragraph{Our Contribution}
 %
