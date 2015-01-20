@@ -16,7 +16,7 @@ RigidBodyCTCD::RigidBodyCTCD()
 {
 }
 
-bool RigidBodyCTCD::detectCollisions(const std::vector<RigidBodyInstance *> &bodies, std::vector<Plane> &planes, std::vector<Eigen::Vector3d> &newc, std::vector<Eigen::Vector3d> &newtheta, std::vector<ContactInfo> &contacts, SimParameters::UseCage  useCage)
+bool RigidBodyCTCD::detectCollisions(const std::vector<RigidBodyInstance *> &bodies, std::vector<Plane> &planes, std::vector<Eigen::Vector3d> &newc, std::vector<Eigen::Vector3d> &newtheta, std::vector<Eigen::Vector3d> &newcvel, std::vector<Eigen::Vector3d> &neww,std::vector<ContactInfo> &contacts, SimParameters::UseCage  useCage)
 {
     int numbodies = bodies.size();
     vector<pair<int, ContactInfo> > candidates;
@@ -92,7 +92,17 @@ bool RigidBodyCTCD::detectCollisions(const std::vector<RigidBodyInstance *> &bod
                     for(int n=0; n<3; n++)
                         ci.pt2 += bodies[body2]->getTemplate().selectMesh(useCage == SimParameters::C_ALWAYS).getVert(verts[n]);
                     ci.pt2 *= 1.0/3.0;
-                    candidates.push_back(pair<int, ContactInfo>(t, ci));
+                    {
+                        Matrix3d Rtheta1 = VectorMath::rotationMatrix(bodies[ci.body1]->theta);
+                        Matrix3d Rtheta2;
+                        if(ci.body2 != -1)
+                            Rtheta2 = VectorMath::rotationMatrix(bodies[ci.body2]->theta);
+                        Vector3d relvel = newcvel[ci.body1] + (neww[ci.body1]).cross(Rtheta1*ci.pt1);
+                        if(ci.body2 != -1)
+                            relvel = relvel - newcvel[ci.body2] - (neww[ci.body2]).cross(Rtheta2*ci.pt2);
+                        if(relvel.dot(ci.n) < 0)
+                            candidates.push_back(pair<int, ContactInfo>(t, ci));
+                    }
                 }
             }
         }

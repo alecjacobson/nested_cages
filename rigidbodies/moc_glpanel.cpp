@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'glpanel.h'
 **
-** Created: Mon Jan 19 00:36:38 2015
+** Created: Tue Jan 20 05:12:35 2015
 **      by: The Qt Meta Object Compiler version 63 (Qt 4.8.1)
 **
 ** WARNING! All changes made in this file will be lost!

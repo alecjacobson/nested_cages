@@ -13,7 +13,7 @@ struct SimParameters
     const static int R_CUSTOM  = 3;
     const static int R_PLANE   = 4;
 
-    enum UseCage {C_NEVER, C_ALWAYS};
+    enum UseCage {C_NEVER, C_ALWAYS, C_BROADPHASE};
 
     bool simRunning;
     double timeStep;

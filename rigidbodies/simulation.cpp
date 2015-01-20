@@ -12,7 +12,6 @@
 #include "mesh.h"
 #include "quadprog/eiquadprog.hpp"
 #include "rigidbodyctcd.h"
-#include <Eigen/SPQRSupport>
 
 const double PI = 3.1415926535898;
 
@@ -185,8 +184,7 @@ void Simulation::takeSimulationStep()
     }
     vector<ContactInfo> contacts;
     while(true)
-    {
-        bool newcollisions = false;
+    {        
         // step
         for(int bodyidx=0; bodyidx < (int)bodies_.size(); bodyidx++)
         {
@@ -194,10 +192,10 @@ void Simulation::takeSimulationStep()
             newc[bodyidx] = body.c + params_.timeStep*newcvel[bodyidx];
             Matrix3d Rhw = VectorMath::rotationMatrix(params_.timeStep*neww[bodyidx]);
             Matrix3d Rtheta = VectorMath::rotationMatrix(newtheta[bodyidx]);
-            newtheta[bodyidx] = VectorMath::axisAngle(Rhw*Rtheta);
-
-            newcollisions |= RigidBodyCTCD::detectCollisions(bodies_, planes_, newc, newtheta, contacts, params_.useCage);
+            newtheta[bodyidx] = VectorMath::axisAngle(Rhw*Rtheta);            
         }
+
+        bool newcollisions = RigidBodyCTCD::detectCollisions(bodies_, planes_, newc, newtheta, newcvel, neww, contacts, params_.useCage);
 
         if(!newcollisions)
             break;
@@ -218,6 +216,7 @@ void Simulation::takeSimulationStep()
             Vector3d relvel = bodies_[ci.body1]->cvel + (bodies_[ci.body1]->w).cross(Rtheta1*ci.pt1);
             if(ci.body2 != -1)
                 relvel = relvel - bodies_[ci.body2]->cvel - (bodies_[ci.body2]->w).cross(Rtheta2*ci.pt2);
+            std::cout << "rel vel before " << relvel.dot(ci.n) << std::endl;
             rhs[i] = fabs(2.0*relvel.dot(ci.n));
 
             double m1 = bodies_[ci.body1]->density * bodies_[ci.body1]->getTemplate().getVolume();
@@ -268,10 +267,11 @@ void Simulation::takeSimulationStep()
             }
         }
         M.setFromTriplets(Mcoeffs.begin(), Mcoeffs.end());
-        SparseMatrix<double> normaleq = M.transpose()*M;
-        SPQR<SparseMatrix<double> > solver(normaleq);
-        VectorXd Mrhs = M.transpose()*rhs;
-        VectorXd lambdas = solver.solve(Mrhs);
+        MatrixXd dense(M);
+        std::cout << "the matrix:" << std::endl;
+        std::cout << dense << std::endl;
+        SparseQR<SparseMatrix<double>, COLAMDOrdering<int> > solver(M);
+        VectorXd lambdas = solver.solve(rhs);
         std::cout << (M.transpose()*M*lambdas-M.transpose()*rhs).norm() << std::endl;
         for(int i=0; i<(int)bodies_.size(); i++)
         {
@@ -306,6 +306,19 @@ void Simulation::takeSimulationStep()
                 //neww[ci.body2] -= impulsew2*lambdas[i];
                 newcvel[ci.body2] -= ci.n/m2*lambdas[i];
             }
+        }
+
+        for(int i=0; i<numconstraints; i++)
+        {
+            ContactInfo &ci = contacts[i];
+            Matrix3d Rtheta1 = VectorMath::rotationMatrix(bodies_[ci.body1]->theta);
+            Matrix3d Rtheta2;
+            if(ci.body2 != -1)
+                Rtheta2 = VectorMath::rotationMatrix(bodies_[ci.body2]->theta);
+            Vector3d relvel = newcvel[ci.body1] + (neww[ci.body1]).cross(Rtheta1*ci.pt1);
+            if(ci.body2 != -1)
+                relvel = relvel - newcvel[ci.body2] - (neww[ci.body2]).cross(Rtheta2*ci.pt2);
+            std::cout << "rel vel after " << relvel.dot(ci.n) << std::endl;
         }
     }
 
