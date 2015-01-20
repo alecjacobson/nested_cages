@@ -58,6 +58,7 @@ private:
     QMutex renderLock_;
 
     double time_;
+    double spawnTime_;
     GLuint floorTex_;
     GLuint wallTex_;
 

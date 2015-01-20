@@ -56,7 +56,7 @@ bool RigidBodyCTCD::detectCollisions(const std::vector<RigidBodyInstance *> &bod
             KDOPBroadPhase broad;
             broad.findCollisionCandidates(body, target, newc[i], newc[k], newtheta[i], newtheta[k], vfs, useCage == SimParameters::C_ALWAYS);
 
-            std::cout << "found " << vfs.size() << " candidates" << std::endl;
+            //std::cout << "found " << vfs.size() << " candidates" << std::endl;
             for(set<VertexFaceStencil>::iterator it = vfs.begin(); it != vfs.end(); ++it)
             {
                 int body1 = (it->body == 0 ? i : k);

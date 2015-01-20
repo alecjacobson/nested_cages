@@ -84,7 +84,7 @@ void Simulation::renderPlanes(bool transparent)
     if(transparent)
     {
         glCullFace(GL_FRONT);
-        glColor4f(1.0, 1.0, 1.0, 0.5);
+        glColor4f(1.0, 1.0, 1.0, 0.1);
     }
     else
     {
@@ -351,10 +351,27 @@ void Simulation::takeSimulationStep()
         body.w = newwguess;
     }
 
+
+    if(spawnTime_ < time_)
+    {
+        spawnTime_ += 0.5;
+        Vector3d spawnpos(0,0,5.0);
+        Vector3d orient;
+        for(int i=0; i<3; i++)
+            orient[i] = 2.0*VectorMath::randomUnitIntervalReal()-1.0;
+
+        RigidBodyInstance *newbody = new RigidBodyInstance(*templates_[SimParameters::R_CUSTOM], spawnpos, orient, params_.bodyDensity);
+        newbody->cvel.setZero();
+        newbody->w.setZero();
+
+        bodies_.push_back(newbody);
+    }
 }
 
 void Simulation::clearScene()
 {
+    time_ = 0;
+    spawnTime_ = 0;
     renderLock_.lock();
     {
         for(vector<RigidBodyInstance *>::iterator it = bodies_.begin(); it != bodies_.end(); ++it)
@@ -367,19 +384,19 @@ void Simulation::clearScene()
         planes_.push_back(groundPlane);
 
         Plane side;
-        side.pos << 5,0,0;
+        side.pos << 3,0,0;
         side.normal << -1,0,0.1;
         planes_.push_back(side);
 
-        side.pos << -5,0,0;
+        side.pos << -3,0,0;
         side.normal << 1,0,0.1;
         planes_.push_back(side);
 
-        side.pos << 0,5,0;
+        side.pos << 0,3,0;
         side.normal << 0,-1,0.1;
         planes_.push_back(side);
 
-        side.pos << 0,-5,0;
+        side.pos << 0,-3,0;
         side.normal << 0,1,0.1;
         planes_.push_back(side);
     }
