@@ -122,7 +122,7 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = matrioshka_dolls(V0,F
           end
           fprintf('Removing %d skinny facets...\n',nnz(small_angles));
           F_coarse{2*k} = F_coarse{2*k}(~small_angles,:);
-          [V_coarse{2*k},F_coarse{2*k}] = meshfix(V_coarse{k},F_coarse{k});
+          [V_coarse{2*k},F_coarse{2*k}] = meshfix(V_coarse{2*k},F_coarse{2*k});
         end
       else
           error('Decimation contains self-intersections, but no meshfix');
