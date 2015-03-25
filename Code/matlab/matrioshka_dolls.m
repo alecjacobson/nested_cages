@@ -28,50 +28,54 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = matrioshka_dolls(V0,F
   %   timing:   struct with timing.decim, timing.flow and 
   %             timing.simulation
   
-  % Computes area-weighted (unnormalized) sum of face-normals incident on each
-% vertex:
-%
-% Inputs:
-%   CV  #CV by 3 list of mesh vertex positions
-%   CF  #CF by 3 list of mesh triangle indices into CV
-% Outputs:
-%   grad_vol  #CV by 3 area-weight normal sums
-function grad_vol = area_weighted_normal(CV,CF)
-  % "un-normalized" normals are in fact unit normals times twice the faces area
-  % (result of cross product) thus we just need to divide by 2 here
-  N = normals(CV,CF)/2;
-  grad_vol = full(sparse( ...
-    repmat(CF(:),1,3),repmat(1:3,numel(CF),1),repmat(N,3,1),size(CV,1),3));
-end
   
+  energy_expansion = 'displacement_step';
+  energy_final = 'volume';
   quadrature_order = 2;
   V_coarse = [];
   F_coarse = [];
   Pall = [];
-  % below parameter only used for ElTopo
-  beta_init = 1e-1;
-  
+  beta_init = 1e-2;
+  step_size = 1e-3;
+  % coarse mesh expansion (during flow)
+  expand_every = 0;
+  Fquad = [];
+  partial_path = 'partial.mat';
+  smoothing = 0;
+  D_CV_MIN = 1e-5;
+  BETA_MIN = 1e-3;
+
   % save timings
   timing.decimation = 0.0;
   timing.flow = 0.0;
-  timing.simulation = 0.0;
-  
-    % Parsing arguments
-  ii = 1;
-  while ii < numel(varargin)
-      switch varargin{ii}
-          case 'quadrature_order'
-              assert(ii+1<=numel(varargin));
-              ii = ii+1;
-              quadrature_order = varargin{ii};
-          case 'beta_init'
-              assert(ii+1<=numel(varargin));
-              ii = ii+1;
-              beta_init = varargin{ii};
-          otherwise
-              error('Unsupported parameter: %s',varargin{ii});
-      end
-      ii = ii+1;
+  timing.expansion = 0.0;
+  timing.etienne = 0; % not exactly timing, but let's put in this struct
+  timing.final_energy = 0.0;
+  debug = true;
+  first_only = false;
+
+  % Map of parameter names to variable names
+  params_to_variables = containers.Map( ...
+    {'QuadratureOrder','StepSize','V_coarse','F_coarse','ExpandEvery', ...
+      'ExpansionEnergy','FinalEnergy','BetaInit','Debug','Fquad', ...
+      'PartialPath','Smoothing', ...
+      'D_CV_MIN','FirstOnly','BETA_MIN'}, ...
+    {'quadrature_order','step_size','V_coarse','F_coarse','expand_every', ...
+      'energy_expansion','energy_final','beta_init','debug','Fquad', ...
+      'partial_path','smoothing', ...
+      'D_CV_MIN','first_only','BETA_MIN'});
+  v = 1;
+  while v <= numel(varargin)
+    param_name = varargin{v};
+    if isKey(params_to_variables,param_name)
+      assert(v+1<=numel(varargin));
+      v = v+1;
+      % Trick: use feval on anonymous function to use assignin to this workspace 
+      feval(@()assignin('caller',params_to_variables(param_name),varargin{v}));
+    else
+      error('Unsupported parameter: %s',varargin{v});
+    end
+    v=v+1;
   end
   
   % number of levels
@@ -84,7 +88,6 @@ end
   cages_V{2*num_levels+1} = V0;
   cages_F{2*num_levels+1} = F0;
   
-  % loop over different levels
   for k=num_levels:-1:1
       
       tic
@@ -92,300 +95,105 @@ end
       [V_coarse{2*k},F_coarse{2*k}] = meshfix(V_coarse{2*k},F_coarse{2*k});
       timing.decimation = timing.decimation + toc;
       
-      
-      cla;
-      % shirnk fine mesh
       tic
-      [Pall,~,F_exp,~] = shrink_fine_expand_coarse_3D(cages_V{2*k+1},cages_F{2*k+1},...
-          V_coarse{2*k},F_coarse{2*k},'quadrature_order',quadrature_order,'step_size',5e-1);
-      timing.flow = timing.flow + toc;
-      Pall_all_times{2*k} = Pall;
-      
-      % push coarse mesh with physical simulation to obtain the cages
-      tic
-      % first expand
-      pc = [];
-      pv = [];
-      V = Pall(:,:,end);
-      F = cages_F{2*k+1};
-      CV = V_coarse{2*k};
-      CF = F_coarse{2*k};
-      F_all = [F;size(V,1)+CF];
-      V_eltopo = [V;CV];
-      for j=1:size(Pall,3)-1
-          V_all_prev = V_eltopo;
-          V = Pall(:,:,end-j);
-          fprintf('number of known vertices: %d\n',size(V,1));
-          disp('Eltopo expanding with 2*eps')
-          [V_eltopo,rest_dt] = collide_eltopo_mex(V_all_prev,F_all,[V;CV],size(V,1),2*sep_thick,1e-1);
-          if (rest_dt>0.0)
-              disp('ElTopo could not handle it, switching to velocityfilter')
-              V_all_prev = inflate_mex(V_all_prev,F_all,size(V,1),eps_proximity);
-              V_eltopo = velocity_filter_mex(V_all_prev,[V;CV],F_all,size(V,1),sep_thick,0.01*sep_thick);
-          end
-          
-          CV = V_eltopo(size(V,1)+1:end,:);
-          % plot partial results
-          cla;
-          hold on;
-          pc = trisurf(CF,CV(1:end,1),CV(1:end,2),CV(1:end,3),'FaceColor',[0.0 0.0 0.0],'FaceAlpha',0.1);
-          pv = trisurf(F,V(:,1,end),V(:,2,end),V(:,3,end),'FaceColor',[0.0 0.0 0.8],'FaceAlpha',0.2);
-          title(sprintf(' flow step: %d/%d', ...
-              j, size(Pall,3)-1));
-          drawnow;
+      ratio = levels(k)/size(F_coarse{2*k+1},1);
+      switch char(java.lang.System.getProperty('user.name'))
+      case 'ajx'
+        [V_coarse{2*k},F_coarse{2*k}] = ...
+          decimate_cgal(cages_V{2*k+1},cages_F{2*k+1},ratio);
+      otherwise
+        [V_coarse{2*k},F_coarse{2*k}] = ...
+          cgal_simplification(cages_V{2*k+1},cages_F{2*k+1},levels(k));
       end
-      fprintf('max difference between simulation and constrained mesh: %g %g %g\n',max(abs(V_eltopo(1:size(V,1),:)-V)));
-      disp('done expanding')
-      
-      % if separation was not achieved, inflate mesh
-      V_eltopo = inflate_mex(V_eltopo,F_all,size(V,1),sep_thick);
-%       fprintf('distance between meshes before minimization = %g\n', self_distance_mex(V_eltopo,F_all,size(V,1)));
-      disp('done inflating')
-      
-      % now volume minimization
-      beta = beta_init;
-      
-      % configuration is already feasible
-      CV = V_eltopo(size(V,1)+1:end,:);
-      [~,min_energy] = centroid(CV,CF);
-      CV_opt = CV;
-      fprintf('initial energy = %g\n', min_energy);
-      
-      while(beta>0.01*beta_init)
-%       while(false)
-          
-          V_all_prev = V_eltopo;
-          
-%           areas = doublearea(CV,CF)/2;
-%           N = normalizerow(normals(CV,CF));
-%           grad_vol = zeros(size(CV));
-%           for i=1:size(CV,1)
-%               face_idx = mod(find(CF==i)-1,size(CF,1))+1;
-%               grad_vol(i,:) = sum([areas(face_idx) areas(face_idx) areas(face_idx)].*N(face_idx,:));
-%           end
-          grad_vol = area_weighted_normal(CV,CF);
-          
-          fprintf('number of known vertices: %d\n',size(V,1));
-          %                 fprintf('distance between meshes before simulation = %g\n', self_distance_mex(V_all_prev,F_all,size(V,1)));
-          %                 input('')
-          % step+project
-          [Z,rest_dt] = collide_eltopo_mex(V_all_prev,F_all,[V;CV-beta*grad_vol],size(V,1),sep_thick,1e-1);
-          if (rest_dt>0.0)
-              disp('ElTopo could not handle it, switching to velocityfilter')
-              if (~inflated)
-                  V_all_prev = inflate_mex(V_all_prev,F_all,size(V,1),sep_thick);
-                  % also has to re-calculate the step towards
-                  % gradient direction
-                  CV_inf = V_all_prev(size(V,1)+1:end,:);
-                  areas = doublearea(CV_inf,CF)/2;
-                  N = normalizerow(normals(CV_inf,CF));
-                  grad_vol = zeros(size(CV_inf));
-                  for i=1:size(CV_inf,1)
-                      face_idx = mod(find(CF==i)-1,size(CF,1))+1;
-                      grad_vol(i,:) = sum([areas(face_idx) areas(face_idx) areas(face_idx)].*N(face_idx,:));
-                  end
-                  inflated = 1;
-              end
-              disp('Running velocity_filter_mex');
-              Z = velocity_filter_mex(V_all_prev,[V;CV_inf-beta*grad_vol],F_all,size(V,1),sep_thick,0.01*sep_thick);
+      [~,~,siIF] = selfintersect( ...
+        V_coarse{2*k},F_coarse{2*k},'DetectOnly',true,'FirstOnly',true);
+      if exist('meshfix','file')
+        % Also remove triangles with tiny angles
+        for iter = 1:100
+          % 1*needed for multiplying
+          A = 1*facet_adjacency_matrix(F_coarse{2*k});
+          small_angles = ...
+            min(internalangles(V_coarse{2*k},F_coarse{2*k}),[],2)<(5/180*pi); %5??
+          if ~any(small_angles)
+            break;
           end
-          
-          % if separation was not achieved, inflate mesh
-          Z = inflate_mex(Z,F_all,size(V,1),sep_thick);
-%           fprintf('distance between meshes before minimization = %g\n', self_distance_mex(Z,F_all,size(V,1)));
-          disp('done inflating')
-          
-          gamma = 1;
-          CV_attempt = CV+gamma*(Z(size(V,1)+1:end,:)-CV);
-          
-          [~,cur_energy] = centroid(CV_attempt,CF);
-          
-          % if energy decreased, 'save' this state
-          if (cur_energy<min_energy)
-              % update meshes
-              V_eltopo = Z;
-              CV = CV_attempt;
-              % save optimal result to output
-              CV_opt = CV;
-              min_energy = cur_energy;
-              beta = beta_init;
-              inflated = 0;
-              fprintf('energy decreased: energy = %g\n', cur_energy);
-          else
-              beta = 0.5*beta;
-              fprintf('energy increased to energy = %g. Changing beta = %g\n', cur_energy, beta);
+          for grow = 1:iter-1
+            small_angles = (A*small_angles)~=0;
           end
-          % plot partial results
-          cla;
-          hold on;
-          pc = trisurf(CF,CV(1:end,1),CV(1:end,2),CV(1:end,3),'FaceColor',[0.0 0.0 0.0],'FaceAlpha',0.1);
-          pv = trisurf(F,V(:,1,end),V(:,2,end),V(:,3,end),'FaceColor',[0.0 0.0 0.8],'FaceAlpha',0.2);
-          title(sprintf('Volume minimization'));
-          
-          drawnow;
-                    
+          fprintf('Removing %d skinny facets...\n',nnz(small_angles));
+          F_coarse{2*k} = F_coarse{2*k}(~small_angles,:);
+          [V_coarse{2*k},F_coarse{2*k}] = meshfix(V_coarse{2*k},F_coarse{2*k});
+        end
+      else
+          error('Decimation contains self-intersections, but no meshfix');
       end
-      timing.simulation = timing.simulation + toc;
+      timing.decimation = timing.decimation + toc;
       
-      % output level
-      cages_F{2*k} = F_exp;
-      cages_V{2*k} = CV_opt;
-      V_coarse{2*k} = cages_V{2*k};
-      F_coarse{2*k} = cages_F{2*k};
-      
-      % save partial
-      save('matrioshka_partial.mat','Pall','cages_V','cages_F');
-      
-      fprintf('done generated layer. Now generation of the wall');
-      % first copy layer
-      V_coarse{2*k-1} = V_coarse{2*k};
-      F_coarse{2*k-1} = F_coarse{2*k};
-      % shirnk fine mesh
-      cla;
+      % flow
       tic
-      [Pall,~,F_exp,~] = shrink_fine_expand_coarse_3D(cages_V{2*k},cages_F{2*k},...
-          V_coarse{2*k-1}+1e-6*randn(size(V_coarse{2*k-1})),F_coarse{2*k-1},'quadrature_order',quadrature_order,'step_size',5e-1);
-      timing.flow = timing.flow + toc;
-      Pall_all_times{2*k-1} = Pall;
+      [Pall,Pall_coarse] = shrink_fine_expand_coarse_3D(cages_V{2*k+1},cages_F{2*k+1},...
+          V_coarse{2*k},F_coarse{2*k},'quadrature_order',quadrature_order,...
+          'step_size',step_size,'expand_every',expand_every, ...
+          'smoothing',smoothing,'FirstOnly',first_only);
+      Pall_all_times{k} = Pall;
       timing.flow = timing.flow + toc;
       
-      % push coarse mesh with physical simulation to obtain the cages
-      tic
-      % first expand
-      pc = [];
-      pv = [];
-      V = Pall(:,:,end);
-      F = cages_F{2*k};
-      CV = V_coarse{2*k-1};
-      CF = F_coarse{2*k-1};
-      F_all = [F;size(V,1)+CF];
-      V_eltopo = [V;CV];
-      for j=1:size(Pall,3)-1
-          V_all_prev = V_eltopo;
-          V = Pall(:,:,end-j);
-          fprintf('number of known vertices: %d\n',size(V,1));
-          disp('Eltopo expanding with 2*eps')
-          [V_eltopo,rest_dt] = collide_eltopo_mex(V_all_prev,F_all,[V;CV],size(V,1),2*wall_thick,1e-1);
-          if (rest_dt>0.0)
-              disp('ElTopo could not handle it, switching to velocityfilter')
-              V_all_prev = inflate_mex(V_all_prev,F_all,size(V,1),wall_thick);
-              V_eltopo = velocity_filter_mex(V_all_prev,[V;CV],F_all,size(V,1),wall_thick,0.01*wall_thick);
-          end
-          
-          CV = V_eltopo(size(V,1)+1:end,:);
-          % plot partial results
-          cla;
-          hold on;
-          pc = trisurf(CF,CV(1:end,1),CV(1:end,2),CV(1:end,3),'FaceColor',[0.0 0.0 0.0],'FaceAlpha',0.1);
-          pv = trisurf(F,V(:,1,end),V(:,2,end),V(:,3,end),'FaceColor',[0.0 0.0 0.8],'FaceAlpha',0.2);
-          title(sprintf(' flow step: %d/%d', ...
-              j, size(Pall,3)-1));
-          drawnow;
-      end
-      fprintf('max difference between simulation and constrained mesh: %g %g %g\n',max(abs(V_eltopo(1:size(V,1),:)-V)));
-      disp('done expanding')
-      
-      % if separation was not achieved, inflate mesh
-      V_eltopo = inflate_mex(V_eltopo,F_all,size(V,1),wall_thick);
-%       fprintf('distance between meshes before minimization = %g\n', self_distance_mex(V_eltopo,F_all,size(V,1)));
-      disp('done inflating')
-      
-      % now volume minimization
-      beta = beta_init;
-      
-      % configuration is already feasible
-      CV = V_eltopo(size(V,1)+1:end,:);
-      [~,min_energy] = centroid(CV,CF);
-      CV_opt = CV;
-      fprintf('initial energy = %g\n', min_energy);
-      
-      while(beta>0.01*beta_init)
-%       while(false)
-          
-          V_all_prev = V_eltopo;
-          
-%           areas = doublearea(CV,CF)/2;
-%           N = normalizerow(normals(CV,CF));
-%           grad_vol = zeros(size(CV));
-%           for i=1:size(CV,1)
-%               face_idx = mod(find(CF==i)-1,size(CF,1))+1;
-%               grad_vol(i,:) = sum([areas(face_idx) areas(face_idx) areas(face_idx)].*N(face_idx,:));
-%           end
-          grad_vol = area_weighted_normal(CV,CF);
-          
-          fprintf('number of known vertices: %d\n',size(V,1));
-          %                 fprintf('distance between meshes before simulation = %g\n', self_distance_mex(V_all_prev,F_all,size(V,1)));
-          %                 input('')
-          % step+project
-          [Z,rest_dt] = collide_eltopo_mex(V_all_prev,F_all,[V;CV-beta*grad_vol],size(V,1),wall_thick,1e-1);
-          if (rest_dt>0.0)
-              disp('ElTopo could not handle it, switching to velocityfilter')
-              if (~inflated)
-                  V_all_prev = inflate_mex(V_all_prev,F_all,size(V,1),wall_thick);
-                  % also has to re-calculate the step towards
-                  % gradient direction
-                  CV_inf = V_all_prev(size(V,1)+1:end,:);
-                  areas = doublearea(CV_inf,CF)/2;
-                  N = normalizerow(normals(CV_inf,CF));
-                  grad_vol = zeros(size(CV_inf));
-                  for i=1:size(CV_inf,1)
-                      face_idx = mod(find(CF==i)-1,size(CF,1))+1;
-                      grad_vol(i,:) = sum([areas(face_idx) areas(face_idx) areas(face_idx)].*N(face_idx,:));
-                  end
-                  inflated = 1;
-              end
-              disp('Running velocity_filter_mex');
-              Z = velocity_filter_mex(V_all_prev,[V;CV_inf-beta*grad_vol],F_all,size(V,1),wall_thick,0.01*wall_thick);
-          end
-          
-          % if separation was not achieved, inflate mesh
-          Z = inflate_mex(Z,F_all,size(V,1),wall_thick);
-%           fprintf('distance between meshes before minimization = %g\n', self_distance_mex(Z,F_all,size(V,1)));
-          disp('done inflating')
-          
-          gamma = 1;
-          CV_attempt = CV+gamma*(Z(size(V,1)+1:end,:)-CV);
-          
-          [~,cur_energy] = centroid(CV_attempt,CF);
-          
-          % if energy decreased, 'save' this state
-          if (cur_energy<min_energy)
-              % update meshes
-              V_eltopo = Z;
-              CV = CV_attempt;
-              % save optimal result to output
-              CV_opt = CV;
-              min_energy = cur_energy;
-              beta = beta_init;
-              inflated = 0;
-              fprintf('energy decreased: energy = %g\n', cur_energy);
-          else
-              beta = 0.5*beta;
-              fprintf('energy increased to energy = %g. Changing beta = %g\n', cur_energy, beta);
-          end
-          
-          % plot partial results
-          hold on;
-          cla;
-          pc = trisurf(CF,CV(1:end,1),CV(1:end,2),CV(1:end,3),'FaceColor',[0.0 0.0 0.0],'FaceAlpha',0.1);
-          pv = trisurf(F,V(:,1,end),V(:,2,end),V(:,3,end),'FaceColor',[0.0 0.0 0.8],'FaceAlpha',0.2);
-          title(sprintf('Volume minimization'));
-          
-          drawnow;
-                    
-      end
-      timing.simulation = timing.simulation + toc;
-      
-      % output level
-      cages_F{2*k-1} = F_exp;
-      cages_V{2*k-1} = CV_opt;
-      V_coarse{2*k-1} = cages_V{2*k-1};
-      F_coarse{2*k-1} = cages_F{2*k-1};
-      
-      % save partial
-      save('matrioshka_partial.mat','Pall','cages_V','cages_F');
-            
+    % push coarse mesh with physical simulation to obtain the cages
+    [V_coarse_new,timing.per_layer{k},~] = ...
+      combined_step_project( ...
+        Pall,cages_F{2*k+1},...
+        Pall_coarse(:,:,end),F_coarse{2*k}, ...
+        'RefCage',V_coarse{2*k}, ...
+        'ExpansionEnergy',energy_expansion, ...
+        'FinalEnergy',energy_final, ...
+        'EpsExpansion',sep_thick, ...
+        'EpsFinal',sep_thick, ...
+        'BetaInit',beta_init, ...
+        'SkipElTopo',true, ...
+        'Debug',debug,...
+        'Fquad',Fquad,...
+        'D_CV_MIN',D_CV_MIN,...
+        'BETA_MIN',BETA_MIN);
+    
+    % output level
+    cages_F{2*k} = F_coarse{2*k};
+    cages_V{2*k} = V_coarse_new;
+    save(partial_path,'cages_V','cages_F','timing');
+    
+    fprintf('done generated layer. Now generation of the wall');
+    % first copy layer
+    V_coarse{2*k-1} = V_coarse{2*k};
+    F_coarse{2*k-1} = F_coarse{2*k};
+    
+    % flow
+    tic
+    [Pall,Pall_coarse] = shrink_fine_expand_coarse_3D(cages_V{2*k},cages_F{2*k},...
+        V_coarse{2*k-1},F_coarse{2*k-1},'quadrature_order',quadrature_order,...
+        'step_size',step_size,'expand_every',expand_every, ...
+        'smoothing',smoothing,'FirstOnly',first_only);
+    Pall_all_times{k} = Pall;
+    timing.flow = timing.flow + toc;
+    
+    % push coarse mesh with physical simulation to obtain the cages
+    [V_coarse_new,timing.per_layer{k},~] = ...
+      combined_step_project( ...
+        Pall,cages_F{2*k},...
+        Pall_coarse(:,:,end),F_coarse{2*k-1}, ...
+        'RefCage',V_coarse{2*k-1}, ...
+        'ExpansionEnergy',energy_expansion, ...
+        'FinalEnergy',energy_final, ...
+        'EpsExpansion',wall_thick, ...
+        'EpsFinal',wall_thick, ...
+        'BetaInit',beta_init, ...
+        'SkipElTopo',true, ...
+        'Debug',debug,...
+        'Fquad',Fquad,...
+        'D_CV_MIN',D_CV_MIN,...
+        'BETA_MIN',BETA_MIN);
+    
+    % output level
+    cages_F{2*k-1} = F_coarse{2*k-1};
+    cages_V{2*k-1} = V_coarse_new;
+    save(partial_path,'cages_V','cages_F','timing');
       
   end
-  
-end
