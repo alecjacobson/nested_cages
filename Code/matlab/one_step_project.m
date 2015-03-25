@@ -52,16 +52,17 @@ function [CV_filtered,timing] = ...
   beta_init = 1e-2;
   tol_dt = 1e-1;
   plot_info = [];
-  plot_info.t = 0;
-  plot_info.energy = 'unknown';
+  %plot_info.t = 0;
+  %plot_info.energy = 'unknown';
   debug = true;
   skip_el_topo = false;
   D_CV_MIN = 1e-5;
   BETA_MIN = 1e-3;
+  render_data = [];
   % Map of parameter names to variable names
   params_to_variables = containers.Map( ...
-    {  'SkipElTopo','Eps','BetaInit','Tol','PlotInfo','Debug','D_CV_MIN','BETA_MIN'}, ...
-    {'skip_el_topo','eps_distance','beta_init','tol_dt','plot_info','debug','D_CV_MIN','BETA_MIN'});
+    {  'SkipElTopo','Eps','BetaInit','Tol','PlotInfo','Debug','D_CV_MIN','BETA_MIN','RenderData'}, ...
+    {'skip_el_topo','eps_distance','beta_init','tol_dt','plot_info','debug','D_CV_MIN','BETA_MIN','render_data'});
   v = 1;
   while v <= numel(varargin)
     param_name = varargin{v};
@@ -109,6 +110,7 @@ function [CV_filtered,timing] = ...
   %D_CV_MIN = 1e-6;
   CV_prev = CV_filtered;
   while true
+    %render_data.update(V_prev,F,CV_prev,CF);
     % Update gradient on coarse mesh
     [CV_grad,cb_data] = energy_gradient(CV_prev,cb_data);
     %[dbE] = energy_value(CV_prev-beta*CV_grad,cb_data);
@@ -123,13 +125,13 @@ function [CV_filtered,timing] = ...
 
 
       if max(abs(CV_grad(:)))>1
-        cla;
-        hold on;
-        tsurf(CF,CV_prev, ...
-            'FaceColor',[0.5 0.0 0.0],'FaceAlpha',0.2,'EdgeAlpha',0.2);
-        tsurf(CF,CV_prev-CV_grad, ...
-            'FaceColor',[0.0 0.5 0.0],'FaceAlpha',0.2,'EdgeAlpha',0.2);
-        hold off;
+        %cla;
+        %hold on;
+        %tsurf(CF,CV_prev, ...
+        %    'FaceColor',[0.5 0.0 0.0],'FaceAlpha',0.2,'EdgeAlpha',0.2);
+        %tsurf(CF,CV_prev-CV_grad, ...
+        %    'FaceColor',[0.0 0.5 0.0],'FaceAlpha',0.2,'EdgeAlpha',0.2);
+        %hold off;
       end
       assert(max(abs(CV_grad(:)))<1,'Gradient is too big. Aborting...');
 
@@ -197,20 +199,20 @@ function [CV_filtered,timing] = ...
     %assert(isempty(intersect_other(V,F,CV_filtered,CF,'FirstOnly',true)));
 
     if debug
-      hold on;
-        axis equal;
-        % delete previous plot
-%         delete(pc);
-%         delete(pv);
-        cla;
-        % trisurf maintains previous axes, while tsuyrf doesn't
-        pv = trisurf(F,V(:,1),V(:,2),V(:,3),...
-            'FaceColor',[0.0 0.0 0.8],'FaceAlpha',0.2,'EdgeAlpha',0.2);
-        pc = trisurf(CF,CV_filtered(:,1),CV_filtered(:,2),CV_filtered(:,3),...
-            'FaceColor',[0.5 0.0 0.0],'FaceAlpha',0.1,'EdgeAlpha',0.2);
-        title(sprintf('energy: %s, t: %d',plot_info.energy,plot_info.t),'FontSize',20,'Interpreter','none');
-        drawnow;
-      hold off;
+      %hold on;
+      %  axis equal;
+      %  % delete previous plot
+%     %    delete(pc);
+%     %    delete(pv);
+      %  cla;
+      %  % trisurf maintains previous axes, while tsuyrf doesn't
+      %  pv = trisurf(F,V(:,1),V(:,2),V(:,3),...
+      %      'FaceColor',[0.0 0.0 0.8],'FaceAlpha',0.2,'EdgeAlpha',0.2);
+      %  pc = trisurf(CF,CV_filtered(:,1),CV_filtered(:,2),CV_filtered(:,3),...
+      %      'FaceColor',[0.5 0.0 0.0],'FaceAlpha',0.1,'EdgeAlpha',0.2);
+      %  title(sprintf('energy: %s, t: %d',plot_info.energy,plot_info.t),'FontSize',20,'Interpreter','none');
+      %  drawnow;
+      %hold off;
     end
 
     % Stop if the change in positions is tiny
