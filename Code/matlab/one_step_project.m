@@ -117,7 +117,7 @@ function [CV_filtered,timing] = ...
     %[cb_data.E dbE]
     %error
 
-    assert(isempty(intersect_other(V_prev,F,CV_prev,CF,'FirstOnly',true)));
+%     assert(isempty(intersect_other(V_prev,F,CV_prev,CF,'FirstOnly',true)));
     [~,~,siIF] = selfintersect(CV_prev,CF,'DetectOnly',true,'FirstOnly',true);
     assert(isempty(siIF));
 
@@ -125,13 +125,13 @@ function [CV_filtered,timing] = ...
 
 
       if max(abs(CV_grad(:)))>1
-        %cla;
-        %hold on;
-        %tsurf(CF,CV_prev, ...
-        %    'FaceColor',[0.5 0.0 0.0],'FaceAlpha',0.2,'EdgeAlpha',0.2);
-        %tsurf(CF,CV_prev-CV_grad, ...
-        %    'FaceColor',[0.0 0.5 0.0],'FaceAlpha',0.2,'EdgeAlpha',0.2);
-        %hold off;
+        cla;
+        hold on;
+        tsurf(CF,CV_prev, ...
+           'FaceColor',[0.5 0.0 0.0],'FaceAlpha',0.2,'EdgeAlpha',0.2);
+        tsurf(CF,CV_prev-CV_grad, ...
+           'FaceColor',[0.0 0.5 0.0],'FaceAlpha',0.2,'EdgeAlpha',0.2);
+        hold off;
       end
       assert(max(abs(CV_grad(:)))<1,'Gradient is too big. Aborting...');
 
@@ -203,20 +203,20 @@ function [CV_filtered,timing] = ...
     %assert(isempty(intersect_other(V,F,CV_filtered,CF,'FirstOnly',true)));
 
     if debug
-      %hold on;
-      %  axis equal;
-      %  % delete previous plot
-%     %    delete(pc);
-%     %    delete(pv);
-      %  cla;
-      %  % trisurf maintains previous axes, while tsuyrf doesn't
-      %  pv = trisurf(F,V(:,1),V(:,2),V(:,3),...
-      %      'FaceColor',[0.0 0.0 0.8],'FaceAlpha',0.2,'EdgeAlpha',0.2);
-      %  pc = trisurf(CF,CV_filtered(:,1),CV_filtered(:,2),CV_filtered(:,3),...
-      %      'FaceColor',[0.5 0.0 0.0],'FaceAlpha',0.1,'EdgeAlpha',0.2);
-      %  title(sprintf('energy: %s, t: %d',plot_info.energy,plot_info.t),'FontSize',20,'Interpreter','none');
-      %  drawnow;
-      %hold off;
+      hold on;
+       axis equal;
+       % delete previous plot
+    %    delete(pc);
+    %    delete(pv);
+       cla;
+       % trisurf maintains previous axes, while tsuyrf doesn't
+       pv = trisurf(F,V(:,1),V(:,2),V(:,3),...
+           'FaceColor',[0.0 0.0 0.8],'FaceAlpha',0.2,'EdgeAlpha',0.2);
+       pc = trisurf(CF,CV_filtered(:,1),CV_filtered(:,2),CV_filtered(:,3),...
+           'FaceColor',[0.5 0.0 0.0],'FaceAlpha',0.1,'EdgeAlpha',0.2);
+       title(sprintf('energy: %s, t: %d',plot_info.energy,plot_info.t),'FontSize',20,'Interpreter','none');
+       drawnow;
+      hold off;
     end
 
     % Stop if the change in positions is tiny
