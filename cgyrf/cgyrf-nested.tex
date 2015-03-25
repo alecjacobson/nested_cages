@@ -62,18 +62,19 @@ Existing techniques such as surface mesh decimation \cite{Hoppe:1996:PM},
 voxelization \cite{Xian:2009}, or
 contouring distance level sets \cite{Shen:2004:IAI}, violate one or more of three characterstics:
 strict nesting, homeomorphic topology and geometric closeness
-(Table~\ref{tab:feature-chart}).  Instead, our methods successively constructs
+(Table~\ref{tab:feature-chart}).  Instead, our method successively constructs
 each next-coarsest level of the hierarchy, using a sequence of decimation,
 flow, and contact-aware optimization steps.  From coarse to fine, each layer
 then fully encages the next while retaining a snug fit and respecting the
 original surface topology.
 
 \begin{figure}[t]
-  \includegraphics[width=\linewidth]{figs/bunny-shelf-teaser}
+  \includegraphics[width=\linewidth]{figs/bunny-shelf-teaser} 
+  \vspace*{-2em}
   \caption{Given an input shape (top left), our method constructs \emph{nested} cages:
 each subsequent mesh is coarser than the last and fully encloses it without
 intersections. A slice through all layers (right), shows a tightly
-encaged \emph{Bunny}.\vspace*{-1em}
+encaged \emph{Bunny}. 
   }
   \label{fig:bunny-shelf-teaser}
 \end{figure}
@@ -97,6 +98,7 @@ Method               & \textsc{Homeom.} & \textsc{Nesting}& \textsc{Tight} \\
                      & \NO                   & \YES            & \NO            \\
 \bottomrule
 \end{tabularx}
+\vspace*{-1em}
 \caption{
 %Hierarchy construction feature chart: 
 Previous techniques fall short
