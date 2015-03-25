@@ -14,7 +14,7 @@
 \newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
 \newcommand{\NO}{{\color{red}\textsf{X}}}
 \newcommand{\YES}{$\bullet$}
-\newcommand{\alec}[1]{{\bf\textcolor[rgb]{0.2,0.8,0.2}{Alec: #1}}}
+\newcommand{\alec}[1]{{\textcolor[rgb]{0.1,0.6,0.1}{\textbf{Alec:} #1}}}
 
 
 %----------------------- Title -------------------------------------------
@@ -37,8 +37,8 @@ multiresolution hierarchies: efficient PDE solving, collision detection
 culling, physically based simulation, and cage-based geometric modeling. We
 propose an algorithm to generate coarse domain approximations that satisfy
 several desiderata for efficient and accurate multiresolution algorithms: the
-coarsened domains respect the original topology, enclose the original object,
-yet fit as tightly as possible.
+coarsened domains respect the original topology, strictly enclose the original
+object, yet fit as tightly as possible.
 \end{abstract}
 
 \section{Introduction}
@@ -68,7 +68,11 @@ original surface topology.
 \begin{figure}[t]
   \includegraphics[width=\linewidth]{figs/horse-25-layers}
   \caption{We generate 25 homeomorphic tight nesting cages 
-  for the \emph{Horse} mesh.}
+  for the \emph{Horse} mesh.
+  \alec{I'd replace this with the bunny teaser (shrunk to single column). You
+  have the Max Planck later.  It might be confusing to show so many layers on
+  the first image.}
+  }
   \label{fig:horse}
 \end{figure}
 
@@ -96,18 +100,29 @@ on one property or another, while ours satisfies all of them.}
 \label{tab:feature-chart}
 \end{table}
 
+\alec{In the introduction you could a few references to previous work. It feels
+a little weird to have no citations.}
+
 \section{Method}
 
+\alec{Comb through the notation and remove any unnecessary decorations:
+$\overline{\mathbf{F}} \rightarrow \mathbf{F}$. You did a good job simplifying
+the explanation, and the notation can now be simplified, too.}
+
 The input to our method is a sequence of decimations of the original mesh which
-match its topology, but, in general, overlap. The output is a new embedding for
-each mesh (i.e. new vertex positions) such that each tightly contains all finer
-meshes. Our approach works pairwise, from the finest layer to coarsest. Each
+match its topology, but, in general, overlap \alec{(e.g.\ from
+citeQslim/CGAL or OpenFlipper)}. The output is a new embedding for
+each mesh (i.e.\ new vertex positions) such that each tightly contains all finer
+meshes. Our approach works pairwise, from finest to coarsest. Each
 inductively contains all finer layers.
 
+\alec{Haven't explained what ``the fine mesh'' and ``the coarse mesh'' are yet.
+Somehow the division into consecutive pairs didn't come across well.}
 The pairwise problem is broken down into two stages: \emph{flow} the fine mesh
 inside the coarse mesh  (Figure~\ref{fig:swat}) and then \emph{re-inflate} the
-fine mesh to its original position while pushing the coarse mesh outward.\\ \\
-\textbf{Flow:} We first find new positions $\overline{\mathbf{F}}$ for the fine
+fine mesh to its original position while pushing the coarse mesh outward.
+
+\noindent \textbf{Flow:} We first find new positions $\overline{\mathbf{F}}$ for the fine
 mesh that minimize total signed distance to $\hat{C}$ integrated over all
 deforming surface points $\overline{\textbf{p}} \in F$ \begin{equation}
 \Phi(\overline{\mathbf{F}}) = \int_F s(\overline{\mathbf{p}})
@@ -147,15 +162,19 @@ for each point $\overline{\textbf{p}}$ we freeze its associated closest point
 on $\hat{C}$, therefore linearizing its signed distance gradient direction. We
 continue along this flow until the fine mesh is full inside the coarse mesh. In
 contrast to normal flows, this flow guides the fine mesh toward the medial axis
-of the coarse mesh. \\ \\ \textbf{Re-inflation:} Next we reverse the flow,
+of the coarse mesh.
+
+\noindent \textbf{Re-inflation:} Next we reverse the flow,
 marching the fine mesh back along its path, but now we resolve collisions with
 the coarse mesh \emph{\`{a} la} physically based simulation. There are many
 feasible embeddings for the coarse mesh so we regularize, treating the problem
 as a constrained optimization:
-\begin{equation}
-\min_{\mathbf{C}} E(\mathbf{C}),
-\end{equation}
-subject to $C$ does not intersect itself or $\overline{F}$.
+\begin{align}
+\min_{\mathbf{C}}  &\quad E(\mathbf{C}),\\
+\text{subject to:} &\quad \text{$C$ does not intersect itself or $\overline{F}$}.
+\end{align}
+\alec{From this equation, it's not clear that we're doing this for every
+reverse step of the flow. Maybe use $C(t)$ notation...}
 
 In physics parlance, we find a static solution for each reverse time step as
 $\overline{F}$ moves like an infinite mass obstacle toward its original
