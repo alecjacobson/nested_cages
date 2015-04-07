@@ -12,6 +12,7 @@
 // Inputs:
 //   e  index into E of edge to try to collapse. E(e,:) = [s d] or [d s] so
 //     that s<d, then d is collapsed to s.
+///  p  dim list of vertex position where to place merged vertex
 // Inputs/Outputs:
 //   V  #V by dim list of vertex positions, lesser index of E(e,:) will be set
 //     to midpoint of edge.
@@ -31,6 +32,7 @@
 #define COLLAPSE_EDGE_NULL 0
 bool collapse_edge(
   const int e,
+  const Eigen::RowVectorXd & p,
   Eigen::MatrixXd & V,
   Eigen::MatrixXi & F,
   Eigen::MatrixXi & E,
@@ -43,6 +45,7 @@ bool collapse_edge(
   int & f2);
 bool collapse_edge(
   const int e,
+  const Eigen::RowVectorXd & p,
   Eigen::MatrixXd & V,
   Eigen::MatrixXi & F,
   Eigen::MatrixXi & E,

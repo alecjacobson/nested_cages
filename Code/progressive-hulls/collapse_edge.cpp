@@ -5,6 +5,7 @@
 
 bool collapse_edge(
   const int e,
+  const Eigen::RowVectorXd & p,
   Eigen::MatrixXd & V,
   Eigen::MatrixXi & F,
   Eigen::MatrixXi & E,
@@ -38,9 +39,8 @@ bool collapse_edge(
   // The following implementation strongly relies on s<d
   assert(s<d && "s should be less than d");
   // move source and destination to midpoint
-  const RowVectorXd mid = (V.row(s) + V.row(d))*0.5;
-  V.row(s) = mid;
-  V.row(d) = mid;
+  V.row(s) = p;
+  V.row(d) = p;
 
   // Helper function to replace edge and associate information with NULL
   const auto & kill_edge = [&E,&EI,&EF](const int e)
@@ -136,6 +136,7 @@ bool collapse_edge(
 
 bool collapse_edge(
   const int e,
+  const Eigen::RowVectorXd & p,
   Eigen::MatrixXd & V,
   Eigen::MatrixXi & F,
   Eigen::MatrixXi & E,
@@ -144,5 +145,5 @@ bool collapse_edge(
   Eigen::MatrixXi & EI)
 {
   int e1,e2,f1,f2;
-  return collapse_edge(e,V,F,E,EMAP,EF,EI,e1,e2,f1,f2);
+  return collapse_edge(e,p,V,F,E,EMAP,EF,EI,e1,e2,f1,f2);
 }
