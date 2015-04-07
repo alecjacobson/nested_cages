@@ -6,7 +6,7 @@
 #include <igl/colon.h>
 
 #define LINPROG_VERBOSE
-bool linprog_standard_form(
+bool linprog(
   const Eigen::VectorXd & c,
   const Eigen::MatrixXd & _A,
   const Eigen::VectorXd & b,
@@ -291,7 +291,7 @@ bool linprog(
   bb<<bS,c;
 
   VectorXd xxs;
-  bool ret = linprog_standard_form(cc,AA,bb,0,xxs);
+  bool ret = linprog(cc,AA,bb,0,xxs);
   x = P.block(0,0,n,2*n+m)*xxs;
   return ret;
 }
