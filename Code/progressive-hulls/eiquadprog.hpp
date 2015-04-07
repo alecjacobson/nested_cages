@@ -128,7 +128,9 @@ bool add_constraint(MatrixXd& R, MatrixXd& J, VectorXd& d, int& iq, double& R_no
 void delete_constraint(MatrixXd& R, MatrixXd& J, VectorXi& A, VectorXd& u,  int p, int& iq, int l);
 
 
-inline double solve_quadprog(MatrixXd & G,  VectorXd & g0,  
+inline bool solve_quadprog(
+    const MatrixXd & G,  
+    const VectorXd & g0,  
                       const MatrixXd & CE, const VectorXd & ce0,  
                       const MatrixXd & CI, const VectorXd & ci0, 
                       VectorXd& x)
@@ -230,7 +232,7 @@ inline double solve_quadprog(MatrixXd & G,  VectorXd & g0,
     {
       // FIXME: it should raise an error
       // Equality constraints are linearly dependent
-      return f_value;
+      return false;
     }
   }
   
@@ -269,7 +271,7 @@ l1:	iter++;
 	{
     /* numerically there are not infeasibilities anymore */
     q = iq;
-		return f_value;
+		return true;
   }
     
   /* save old values for u, x and A */
@@ -289,7 +291,7 @@ l2: /* Step 2: check for feasibility and determine a new S-pair */
   if (ss >= 0.0)
   {
     q = iq;
-    return f_value;
+    return true;
   }
     
   /* set np = n(ip) */
@@ -353,7 +355,7 @@ l2a:/* Step 2a: determine step direction */
     /* QPP is infeasible */
     // FIXME: unbounded to raise
     q = iq;
-    return inf;
+    return false;
   }
   /* case (ii): step in dual space */
   if (t2 >= inf)
