@@ -1,4 +1,3 @@
-#!/bin/bash
 /*/../bin/ls > /dev/null
 # BEGIN BASH SCRIPT
 export PS4=""
@@ -46,6 +45,7 @@ exit
 //#include <igl/linprog.h>
 //#include <igl/mosek_linprog.h>
 #include <igl/read_triangle_mesh.h>
+#include <igl/circulation.h>
 #include <igl/centroid.h>
 #include <igl/matlab_format.h>
 #include <igl/edges.h>
@@ -235,7 +235,7 @@ int main(int argc, char * argv[])
       RowVectorXd p(1,3);
       cost_and_placement(e,V,F,E,EMAP,EF,EI,cost,p);
       C.row(e) = p;
-      Qit[e] = Q.emplace(cost,e).first;
+      Qit[e] = Q.insert(std::pair<double,int>(cost,e)).first;
     }
     num_collapsed = 0;
     viewer.data.clear();
@@ -296,7 +296,7 @@ int main(int argc, char * argv[])
                 RowVectorXd p;
                 cost_and_placement(e,V,F,E,EMAP,EF,EI,cost,p);
                 // Replace in queue
-                Qit[e] = Q.emplace(cost,e).first;
+                Qit[e] = Q.insert(std::pair<double,int>(cost,e)).first;
                 C.row(e) = p;
               }
             }
