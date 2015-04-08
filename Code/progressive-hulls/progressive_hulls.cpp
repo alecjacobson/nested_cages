@@ -40,11 +40,11 @@ rm -f $TEMP
 exit
 */
 
-#include "collapse_edge.h"
-#include "edge_flaps.h"
-//#include "linprog.h"
-//#include "mosek_linprog.h"
 #include "eiquadprog.hpp"
+#include <igl/collapse_edge.h>
+#include <igl/edge_flaps.h>
+//#include <igl/linprog.h>
+//#include <igl/mosek_linprog.h>
 #include <igl/read_triangle_mesh.h>
 #include <igl/centroid.h>
 #include <igl/matlab_format.h>
@@ -281,9 +281,9 @@ int main(int argc, char * argv[])
           // loop over original face neighbors
           for(auto n : N)
           {
-            if(F(n,0) != COLLAPSE_EDGE_NULL ||
-               F(n,1) != COLLAPSE_EDGE_NULL ||
-               F(n,2) != COLLAPSE_EDGE_NULL)
+            if(F(n,0) != IGL_COLLAPSE_EDGE_NULL ||
+               F(n,1) != IGL_COLLAPSE_EDGE_NULL ||
+               F(n,2) != IGL_COLLAPSE_EDGE_NULL)
             {
               for(int v = 0;v<3;v++)
               {
