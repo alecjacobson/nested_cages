@@ -73,10 +73,10 @@ int main(int argc, char * argv[])
   using namespace std;
   using namespace Eigen;
   using namespace igl;
-  string
-    filename("/Users/ajx/Dropbox/models/basic shapes/sphere-hires.obj");
-    //filename("/usr/local/igl/libigl/examples/shared/cheburashka.off");
-    //filename("/usr/local/igl/libigl/examples/shared/decimated-knight.obj");
+  cout<<"Usage: ./progressive_hulls [filename.(off|obj|ply)]"<<endl;
+  cout<<"  [space]  toggle animation."<<endl;
+  cout<<"  'r'  reset."<<endl;
+  string filename("fandisk.off");
   if(argc>=2)
   {
     filename = argv[1];
