@@ -51,6 +51,7 @@ exit
 #include <igl/edges.h>
 #include <igl/unique_edge_map.h>
 #include <igl/unique.h>
+#include <igl/writeOBJ.h>
 #include <igl/intersect.h>
 #include <igl/list_to_matrix.h>
 #include <igl/Viewer/viewer.h>
@@ -81,8 +82,8 @@ int main(int argc, char * argv[])
   {
     filename = argv[1];
   }
-  MatrixXd V,OV;
-  MatrixXi F,OF;
+  MatrixXd V,OV,U;
+  MatrixXi F,OF,G;
   read_triangle_mesh(filename,OV,OF);
   igl::Viewer viewer;
 
@@ -252,63 +253,14 @@ int main(int argc, char * argv[])
       const int max_iter = std::ceil(0.01*Q.size());
       for(int j = 0;j<max_iter;j++)
       {
-        if(Q.empty())
+        if(!collapse_edge(cost_and_placement,V,F,E,EMAP,EF,EI,Q,Qit,C))
         {
           break;
         }
-        std::pair<double,int> p = *(Q.begin());
-        if(p.first == std::numeric_limits<double>::infinity())
-        {
-          break;
-        }
-        Q.erase(Q.begin());
-        Qit[p.second] = Q.end();
-        std::vector<int> N  = circulation(p.second, true,F,E,EMAP,EF,EI);
-        std::vector<int> Nd = circulation(p.second,false,F,E,EMAP,EF,EI);
-        N.insert(N.begin(),Nd.begin(),Nd.end());
-        int e1,e2,f1,f2;
-        const bool collapsed =
-          collapse_edge(p.second,C.row(p.second),V,F,E,EMAP,EF,EI,e1,e2,f1,f2);
-        if(collapsed)
-        {
-          something_collapsed = true;
-          // Erase the two, other collapsed edges
-          Q.erase(Qit[e1]);
-          Qit[e1] = Q.end();
-          Q.erase(Qit[e2]);
-          Qit[e2] = Q.end();
-          // update local neighbors
-          // loop over original face neighbors
-          for(auto n : N)
-          {
-            if(F(n,0) != IGL_COLLAPSE_EDGE_NULL ||
-               F(n,1) != IGL_COLLAPSE_EDGE_NULL ||
-               F(n,2) != IGL_COLLAPSE_EDGE_NULL)
-            {
-              for(int v = 0;v<3;v++)
-              {
-                // get edge id
-                const int e = EMAP(v*F.rows()+n);
-                // erase old entry
-                Q.erase(Qit[e]);
-                // compute cost and potential placement
-                double cost;
-                RowVectorXd p;
-                cost_and_placement(e,V,F,E,EMAP,EF,EI,cost,p);
-                // Replace in queue
-                Qit[e] = Q.insert(std::pair<double,int>(cost,e)).first;
-                C.row(e) = p;
-              }
-            }
-          }
-          num_collapsed++;
-        }else
-        {
-          // reinsert with infinite weight
-          p.first = std::numeric_limits<double>::infinity();
-          Qit[p.second] = Q.insert(p).first;
-        }
+        something_collapsed = true;
+        num_collapsed++;
       }
+
       if(something_collapsed)
       {
         viewer.data.clear();
