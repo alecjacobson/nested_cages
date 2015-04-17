@@ -1,43 +1,3 @@
-/*/../bin/ls > /dev/null
-# BEGIN BASH SCRIPT
-export PS4=""
-set -o xtrace
-TEMP="$0.cpp"
-printf "//" | cat - $0 >$TEMP
-#g++ -O3 -std=c++11 -fopenmp -o .main $TEMP -DNDEBUG -msse4.2 \
-#clang++ -g -O0 -std=c++11 /opt/local/lib/gcc47/libstdc++.dylib -ferror-limit=4 -o .main $TEMP -msse4.2 \
-clang++ -O3 -std=c++11 -o .main $TEMP -DNDEBUG -msse4.2 \
-  -I. \
-  -I/opt/local/include/eigen3/ -I/usr/local/igl/libigl/include \
-  -I/usr/local/igl/libigl/external/AntTweakBar/include \
-  -I/Applications/MATLAB_R2014b.app/extern/include/ \
-  -I/usr/local/igl/libigl/external/AntTweakBar/src \
-  -I/usr/local/igl/libigl/external/tetgen \
-  -I/usr/local/igl/libigl/external/tinyxml2/ \
-  -I/usr/local/igl/libigl/external/embree \
-  -I/usr/local/igl/libigl/external/embree/embree \
-  -L/usr/local/igl/libigl/external/embree/build -lembree -lsys \
-  -L/usr/local/igl/libigl/external/tetgen -ltet \
-  -I/usr/local/igl/libigl/external/glfw/include \
-  -L/usr/local/igl/libigl/external/glfw/lib -lglfw3 -framework Carbon -framework QuartzCore -framework IOKit \
-  -I/usr/local/igl/libigl/external/Singular_Value_Decomposition/ \
-  -I/opt/local/include/ -I/usr/include/ \
-  -I/usr/local/mosek/7/tools/platform/osx64x86/h \
-  -L/usr/local/mosek/7/tools/platform/osx64x86/bin -lmosek64 \
-  -L/opt/local/lib -lCGAL -lCGAL_Core -lgmp -lmpfr -lboost_thread-mt -lboost_system-mt \
-  -framework OpenGL \
-  -framework GLUT \
-  -framework AppKit \
-  -L/opt/local/lib -lboost_thread-mt -lboost_system-mt \
-  -L/usr/local/igl/libigl/external/AntTweakBar/lib -lAntTweakBar_clang \
-  -L/Applications/MATLAB_R2014b.app/bin/maci64/ -lmx -lmat -lmex -leng \
-  -L/opt/local/lib -lboost_program_options-mt -fno-math-errno && ./.main "$@"
-#-DIGL_STATIC_LIBRARY -L/usr/local/igl/libigl/lib -liglviewer -ligl -liglmatlab -liglsvd3x3 -msse4.2 -fopenmp \
-#rm -f .main
-rm -f $TEMP
-# END BASH SCRIPT
-exit
-*/
 
 #include "eiquadprog.hpp"
 #include <igl/collapse_edge.h>
@@ -45,6 +5,10 @@ exit
 //#include <igl/linprog.h>
 //#include <igl/mosek_linprog.h>
 #include <igl/read_triangle_mesh.h>
+#include <igl/triangle_triangle_adjacency.h>
+#include <igl/is_edge_manifold.h>
+#include <igl/is_vertex_manifold.h>
+#include <igl/boundary_facets.h>
 #include <igl/circulation.h>
 #include <igl/centroid.h>
 #include <igl/matlab_format.h>
@@ -59,6 +23,7 @@ exit
 #include <iostream>
 #include <set>
 #include <algorithm>
+#include <cstdlib>
 
 // For debuggin'
 int at(
@@ -74,18 +39,48 @@ int main(int argc, char * argv[])
   using namespace std;
   using namespace Eigen;
   using namespace igl;
-  cout<<"Usage: ./progressive_hulls [filename.(off|obj|ply)]"<<endl;
+  cout<<"Usage: ./progressive_hulls [filename.(off|obj|ply)] [w]"<<endl;
   cout<<"  [space]  toggle animation."<<endl;
   cout<<"  'r'  reset."<<endl;
   string filename("fandisk.off");
-  if(argc>=2)
+  double w = 0.5;
+  switch(argc)
   {
-    filename = argv[1];
+    default:
+    case 3:
+      w = strtod(argv[2],NULL);
+    case 2:
+      filename = argv[1];
+    case 1:
+      break;
   }
+
   MatrixXd V,OV,U;
   MatrixXi F,OF,G;
   read_triangle_mesh(filename,OV,OF);
   igl::Viewer viewer;
+
+  if(OF.size() == 0)
+  {
+    cerr<<"Input is empty."<<endl;
+    return false;
+  }
+  vector<vector<vector<int > > > TT;
+  vector<vector<vector<int > > > TTi;
+  cout<<"triangle_triangle_adjacency..."<<endl;
+  triangle_triangle_adjacency(OF,TT,TTi);
+
+  VectorXi _1;
+  if(!is_edge_manifold(OV,OF) || !is_vertex_manifold(OF,_1))
+  {
+    cerr<<"Input is not manifold."<<endl;
+    return false;
+  }
+  if(boundary_facets<MatrixXi,MatrixXi>(OF).size() != 0)
+  {
+    cerr<<"Input is not closed."<<endl;
+    return false;
+  }
 
   VectorXi EMAP;
   MatrixXi E,EF,EI;
@@ -95,6 +90,7 @@ int main(int argc, char * argv[])
   // If an edge were collapsed, we'd collapse it to these points:
   MatrixXd C;
   int num_collapsed;
+  int m;
 
   std::function<void(
     const int,
@@ -130,6 +126,7 @@ int main(int argc, char * argv[])
 
   const auto & minimal_volume_and_outer_hull = [
     //&env
+    &w
     ](
     const int e,
     const Eigen::MatrixXd & V,
@@ -182,7 +179,6 @@ int main(int argc, char * argv[])
     bool success = false;
     {
       RowVectorXd mid = 0.5*(V.row(E(e,0))+V.row(E(e,1)));
-      const double w = 1;
       MatrixXd G =  w*Matrix3d::Identity(3,3);
       VectorXd g0 = (1.-w)*f - w*mid.transpose();
       const int n = A.cols();
@@ -239,6 +235,7 @@ int main(int argc, char * argv[])
       Qit[e] = Q.insert(std::pair<double,int>(cost,e)).first;
     }
     num_collapsed = 0;
+    m = F.rows();
     viewer.data.clear();
     viewer.data.set_mesh(V,F);
     viewer.data.set_face_based(true);
@@ -259,10 +256,12 @@ int main(int argc, char * argv[])
         }
         something_collapsed = true;
         num_collapsed++;
+        m-=2;
       }
 
       if(something_collapsed)
       {
+        cout<<"m: "<<m<<endl;
         viewer.data.clear();
         viewer.data.set_mesh(V,F);
         viewer.data.set_face_based(true);
