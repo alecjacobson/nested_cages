@@ -50,7 +50,7 @@ is to decompose a high-resolution mesh into a hierarchy of increasingly coarse
 approximations or \emph{cages} (see Figure~\ref{fig:bunny-shelf-teaser}). For example,
 multiresolution FEM techniques efficiently solve Eulerian PDEs on very fine
 meshes by moving up and down the hierarchy.  Coarse enclosing cages also find
-use in: physical simulation, where deformations of the cage are interpolated
+use in physical simulation, where deformations of the cage are interpolated
 onto embedded high-resolution geometries; interactive animation, where
 artists specify large-scale deformations by adjusting the low-dimensional cage;
 and collision detection, where conservative culling reduces computation
@@ -87,7 +87,7 @@ encaged \emph{Bunny}.
 \begin{tabularx}{\linewidth}{X c c c}
 \rowcolor{white}
 \toprule
-Method               & \textsc{Homeom.} & \textsc{Nesting}& \textsc{Tight} \\
+Method               & \textsc{Homeom.} & \textsc{Nesting}& \textsc{Closen.} \\
 \midrule                                                                       
 \textbf{Our method}  & \YES                  & \YES            & \YES           \\
 \emph{Decimation}                                                               
@@ -109,16 +109,18 @@ on one property or another, while ours satisfies all of them.}
 \section{Method}
 
 The input to our method is a sequence of decimations of the original mesh which
-match its topology, but, in general, overlap (e.g. the ones computed by
+match its topology, but, in general, overlap (e.g. the ones computed by CGAL
 \cite{cgal}). The output is a new embedding for each mesh (i.e.\ new vertex
-positions) such that each tightly contains all finer meshes. Our approach works
+positions) such that each contains all finer meshes. Our approach works
 pairwise, from finest to coarsest: given fine mesh positions $\mathbf{F}$, we
 find a new embedding $\mathbf{C}$ for the next coarser mesh so that it encloses
 $\mathbf{F}$. The resulting $\mathbf{C}$ is treated as the fine mesh for the
 next layer and so on. Each layer inductively encages all finer layers.
 
 The pairwise problem is broken down into two stages: \emph{flow} the fine mesh
-completely inside the coarse mesh  (Figure~\ref{fig:swat}) and then \emph{re-inflate} the
+completely inside the coarse mesh  
+%(Figure~\ref{fig:swat}) 
+and then \emph{re-inflate} the
 fine mesh to its original position while pushing the coarse mesh outward.
 
 \begin{figure*}[t]
@@ -173,23 +175,37 @@ as a constrained optimization:
 \text{subject to:} &\quad \text{$\mathbf{C}(t)$ does not intersect itself or $\mathbf{F}(t)$}.
 \end{align}
 
-In physics parlance, we find a static solution for each reverse time step as
+Some choices for the objective function $E$ are total volume, surface and volumetric deformations,
+and symmetry. In physics parlance, we find a static solution for each reverse time step as
 $\mathbf{F}(t)$ moves like an infinite mass obstacle toward its original
 position and pushes the deformable $\mathbf{C}(t)$ outward. We leverage state-of-the-art
 physically-based simulation contact mechanics methods to satisfy these
-constraints. 
-Some choices for $E$ are total volume, surface and volumetric deformations.
+constraints \cite{Brochu:2009}. 
+
+\section{The three desiderata}
+
+We now describe why the cages obtained by our method satisfy the three properties
+presented in Table~\ref{tab:feature-chart}:
+
+\noindent \textbf{Homeomorphic topology:} If the initial decimations are computed by edge collapsing the input mesh,
+they are homeomorphic to it, for example, via the \emph{geomorphs} described
+in \cite{Hoppe:1996:PM}. The physical simulation we employ to find the embedding of the cages
+do not alter their topology \cite{Brochu:2009}.
+
+\noindent \textbf{Strict nesting:} We keep it as an invariant as we perform the re-inflation stage.  
+
+\noindent \textbf{Geometric closeness:} Imposed by our energy minimization formulation.
 
 \section{Results and current work}
 
-\begin{figure}[t]
-  \includegraphics[width=\linewidth]{figs/swat-cage}
-  \caption{Given the a mesh and an initially overlapping coarse mesh (left) we
-  flow it until it is completely inside the coarse mesh. We then re-inflate the
-  fine mesh pushing the coarse mesh away to generate an enclosing cage. This
-  cage can be used for deformation.}
-  \label{fig:swat}
-\end{figure}
+%\begin{figure}[t]
+%  \includegraphics[width=\linewidth]{figs/swat-cage}
+%  \caption{Given the a mesh and an initially overlapping coarse mesh (left) we
+%  flow it until it is completely inside the coarse mesh. We then re-inflate the
+%  fine mesh pushing the coarse mesh away to generate an enclosing cage. This
+%  cage can be used for deformation.}
+%  \label{fig:swat}
+%\end{figure}
 
 \begin{figure}[t]
   \includegraphics[width=\linewidth]{figs/octopus-poisson}
@@ -199,12 +215,14 @@ Some choices for $E$ are total volume, surface and volumetric deformations.
   \label{fig:octopus}
 \end{figure}
 
-In Figure~\ref{fig:minizoo} we show some nested cages produced by our method
-and in Figure~\ref{fig:swat} we show a single cage result. Our method took some
-minutes to generate these results. The input \emph{S.W.A.T. man} mesh has a lot
-of artefacts such as self-intersecting pairs and non-manifold edges and our
-flow is robust to them. In this case we have obtained a symmetric enclosing
-cage by minimizing a symmetry energy $E$ over the coarse mesh.
+In Figure~\ref{fig:minizoo} we show some nested cages produced by our method.
+%and in Figure~\ref{fig:swat} we show a single cage result. 
+It took some
+minutes to generate these results. 
+%The input \emph{S.W.A.T. man} mesh has a lot
+%of artefacts such as self-intersecting pairs and non-manifold edges and our
+%flow is robust to them. In this case we have obtained a symmetric enclosing
+%cage by minimizing a symmetry energy $E$ over the coarse mesh.
 
 Our cages find immediate application to solve volumetric PDEs using finite
 elements (Figure~\ref{fig:octopus}). Nestedness makes linear interpolation a

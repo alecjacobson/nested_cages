@@ -1,0 +1,124 @@
+\documentclass{cgyrf15}
+% The packages graphicx, amssymb, and amsmath are already loaded via
+% cgyrf15.cls
+
+%----------------------- Macros and Definitions --------------------------
+
+% Add all additional macros here, do NOT include any additional files.
+
+% Nice table
+\usepackage[table]{xcolor}
+\usepackage{tabularx}
+\usepackage{booktabs}
+\definecolor{lightbluishgrey}{rgb}{0.9,0.91,0.95}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+\newcommand{\NO}{{\color{red}\textsf{X}}}
+\newcommand{\YES}{$\bullet$}
+\newcommand{\alec}[1]{{\textcolor[rgb]{0.1,0.6,0.1}{\textbf{Alec:} #1}}}
+\newcommand{\leo}[1]{{\textcolor[rgb]{0.8,0.0,0.0}{\textbf{Leo:} #1}}}
+
+
+%----------------------- Title -------------------------------------------
+
+\title{Nested Cages - Appendix}
+
+\author{
+Leonardo Sacht\thanks{Universidade Federal de Santa Catarina, Brazil.} \and
+Alec Jacobson\thanks{Columbia University, USA.} \and
+Etienne Vouga\thanks{University of Texas at Austin, USA.} 
+}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+This document provides additional results, timings and discussion
+for our CG:YRF paper \emph{Nested Cages}.
+\end{abstract}
+
+\section{Additional results}
+
+We implemented a prototype of our method as a serial \textsc{Matlab} program.
+%
+We report timings of our unoptimized code for a few representative examples in
+Table~\ref{tab:timings} recorded on an iMac Intel Core i7 3.5GHz computer with 8GB
+memory.
+%
+As expected the bottleneck is the collision-free re-inflation step.
+%
+We experimented with a wide variety of shapes, ranging from CAD models,
+characters, and scanned objects (see Figure~\ref{fig:bigzoo}). By default we compute
+layers so that each coarser layer has $2^{-\frac{2}{3}}$ times as many facets as
+the previous finer layer, a ratio chosen so that resulting tetrahedral
+meshes will have approximately $8$ times fewer elements. For most
+meshes we compute seven layers, with fewer for lower resolution inputs.
+
+\section{Failure Cases}
+
+Our insight to break the multi-layer nesting problem into pairwise subproblems
+ensures tractability, but in some cases leads to converging at an
+``artificial local minimum.'' If a coarse cage collides with itself during
+inflation then it may create a pinch that blocks inflation of subsequent coarse
+layers (see Figure~\ref{fig:homer}).
+%
+One solution is to iterate through the fine layers to make sufficient room in
+these problem areas, but defining this relaxation direction is not obvious.
+
+In cases where the input coarse cage begins too far away from the fine mesh,
+the signed-distance flow will fail: for example, by flowing vertices of a
+triangle into opposite parts of the coarse mesh. 
+%
+Adding a small amount of smoothing on the flowing fine mesh or expanding the
+coarse mesh alleviates some of these problems, but a general solution is
+allusive.
+%
+The correct assignment seems related to correctly matching medial axes of both
+meshes. Perhaps this is an avenue of future improvement.
+
+\begin{table}[t]
+\centering
+\ra{1.2}
+\setlength{\tabcolsep}{5.5pt}
+\rowcolors{2}{white}{lightbluishgrey}
+\begin{tabular}{l r r r r l r r r r r r r r r r r r}
+\rowcolor{white}
+Name  & \#F & avg($t_{flow}$) & avg($t_{re}$) & Energy\\
+\midrule
+Gargo & 13,500  & 2s & 90s & ARAP\\
+Warrior & 26,658  & 2s & 86s & ARAP  \\
+Pelvis & 40,316  & 11s & 460s & Volume  \\
+Bunny & 52,910  & 11s & 202s & ARAP \\
+Mug & 74,720  & 7s & 54s & Volume \\
+Octopus & 100,000  & 11s & 227s & Volume \\
+\bottomrule
+\end{tabular}
+\caption{
+We report the average time per cage to flow ``avg($t_{flow}$),'' and to
+re-inflate ``avg($t_{re}$)''.}
+\label{tab:timings}
+\end{table}
+
+\begin{figure}
+  \includegraphics[width=\linewidth]{figs/homer-fail}
+  \caption{If a expanding coarse mesh collides with itself (green), it creates
+  a \emph{pinch} preventing processing of further coarser layers.}
+  \label{fig:homer}
+\end{figure}
+
+\begin{figure*}[t]
+  \includegraphics[width=\linewidth]{figs/zoo_big}
+  \caption{Each triplet shows: input model, slice through 
+  all nested layers, and outermost, coarsest layer. 
+  }
+  \label{fig:bigzoo}
+\end{figure*}
+
+%Use of Bibtex is not necessary, but strongly recommended.
+%Please make sure that references are displayed in a uniform fashion
+\bibliographystyle{abbrv}
+\bibliography{references}
+ 
+\end{document}
+
+
