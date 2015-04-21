@@ -18,17 +18,20 @@
 \newcommand{\leo}[1]{{\textcolor[rgb]{0.8,0.0,0.0}{\textbf{Leo:} #1}}}
 
 
+
 %----------------------- Title -------------------------------------------
 
 \title{Nested Cages}
 
 \author{
 Leonardo Sacht\thanks{Universidade Federal de Santa Catarina, Brazil.} \and
-Alec Jacobson\thanks{Columbia University, USA.} \and
-Etienne Vouga\thanks{University of Texas at Austin, USA.} 
+Etienne Vouga\thanks{University of Texas at Austin, USA.} \and
+Alec Jacobson\thanks{Columbia University, USA.}
 }
 
 \begin{document}
+% YOLO
+\renewcommand{\baselinestretch}{0.95}
 
 \maketitle
 
@@ -69,7 +72,8 @@ then fully encages the next while retaining a snug fit and respecting the
 original surface topology.
 
 \begin{figure}[t]
-  \includegraphics[width=\linewidth]{figs/bunny-shelf-teaser} 
+  \vspace{-0.1cm}
+  \includegraphics[trim=0mm 0mm 0mm 8mm,width=\linewidth]{figs/bunny-shelf-teaser} 
   \vspace*{-2em}
   \caption{Given an input shape (top left), our method constructs \emph{nested} cages:
 each subsequent mesh is coarser than the last and fully encloses it without
@@ -121,8 +125,9 @@ The pairwise problem is broken down into two stages: \emph{flow} the fine mesh
 completely inside the coarse mesh  
 %(Figure~\ref{fig:swat}) 
 and then \emph{re-inflate} the
-fine mesh to its original position while pushing the coarse mesh outward.
-
+fine mesh to its original position while pushing the coarse mesh
+outward.\\[0.5em]
+%
 \begin{figure*}[t]
   \includegraphics[width=\linewidth]{figs/zoo_mini}
   \caption{We show robustness of our method by generating 50 nested cages
@@ -131,8 +136,9 @@ fine mesh to its original position while pushing the coarse mesh outward.
   \emph{Feritility} we have generated 7 layers minimizing surface deformation.
   }
   \label{fig:minizoo}
+  \vspace{-0.2cm}
 \end{figure*}
-
+%
 \noindent \textbf{Flow:} We first find new positions $\mathbf{F}$ for the fine
 mesh that minimize total signed distance to $\mathbf{C}$ integrated over all
 deforming surface points $\textbf{p} \in F$ \begin{equation}
@@ -164,7 +170,8 @@ on $\mathbf{C}$, therefore linearizing its signed distance gradient direction.
 %We continue along this flow until the fine mesh is full inside the coarse mesh. 
 %In contrast to normal flows, this flow guides the fine mesh toward the medial axis
 % of the coarse mesh.
-
+%
+\\[0.5em]
 \noindent \textbf{Re-inflation:} Next we reverse the flow,
 marching the fine mesh back along its path, but now we resolve collisions with
 the coarse mesh \emph{\`{a} la} physically based simulation. There are many
@@ -172,9 +179,9 @@ feasible embeddings for the coarse mesh so we regularize, treating the problem
 as a constrained optimization:
 \begin{align}
 \min_{\mathbf{C}(t)}  &\quad E(\mathbf{C}(t)),\\
-\text{subject to:} &\quad \text{$\mathbf{C}(t)$ does not intersect itself or $\mathbf{F}(t)$}.
+\text{subject to:} &\quad \text{$\mathbf{C}(t)$ does not intersect itself or
+$\mathbf{F}(t)$}.\nonumber
 \end{align}
-
 Some choices for the objective function $E$ are total volume, surface and volumetric deformations,
 and symmetry. In physics parlance, we find a static solution for each reverse time step as
 $\mathbf{F}(t)$ moves like an infinite mass obstacle toward its original
@@ -182,19 +189,22 @@ position and pushes the deformable $\mathbf{C}(t)$ outward. We leverage state-of
 physically-based simulation contact mechanics methods to satisfy these
 constraints \cite{Brochu:2009}. 
 
-\section{The three desiderata}
-
-We now describe why the cages obtained by our method satisfy the three properties
-presented in Table~\ref{tab:feature-chart}:
-
-\noindent \textbf{Homeomorphic topology:} If the initial decimations are computed by edge collapsing the input mesh,
-they are homeomorphic to it, for example, via the \emph{geomorphs} described
-in \cite{Hoppe:1996:PM}. The physical simulation we employ to find the embedding of the cages
-do not alter their topology \cite{Brochu:2009}.
-
-\noindent \textbf{Strict nesting:} We keep it as an invariant as we perform the re-inflation stage.  
-
-\noindent \textbf{Geometric closeness:} Imposed by our energy minimization formulation.
+%\section{The three desiderata}
+%
+%We now describe why the cages obtained by our method satisfy the three properties
+%presented in Table~\ref{tab:feature-chart}:
+Cages obtained by our method satisfy the three properties in
+Table~\ref{tab:feature-chart}:\\[0.5em]
+\noindent \textbf{Homeomorphic topology:} If the initial decimations are
+computed by edge collapsing the input mesh, they are homeomorphic to it, for
+example, via the \emph{geomorphs} described in \cite{Hoppe:1996:PM}. The
+flow and physical simulation alter the embedding but not the topology of the
+cages.\\[0.5em]
+\noindent \textbf{Strict nesting:} The flow finds a feasible initial state then
+we maintain strict nesting as an invariant as we perform the re-inflation
+stage.\\[0.5em]
+\noindent \textbf{Geometric closeness} is imposed by our energy minimization
+formulation.
 
 \section{Results and current work}
 
@@ -213,12 +223,15 @@ do not alter their topology \cite{Brochu:2009}.
   volumetric Poisson equation. With 14 more iterations (21 secs) the residual
   error matches a direct solver's (11 mins, back substitution only).}
   \label{fig:octopus}
+  \vspace{-0.3cm}
 \end{figure}
 
 In Figure~\ref{fig:minizoo} we show some nested cages produced by our method.
+%
+These are representative of a large battery of empirical tests we conducted to
+validate our method's robustness.
 %and in Figure~\ref{fig:swat} we show a single cage result. 
-It took some
-minutes to generate these results. 
+Examples of these resolution take on the order of minutes to generate. 
 %The input \emph{S.W.A.T. man} mesh has a lot
 %of artefacts such as self-intersecting pairs and non-manifold edges and our
 %flow is robust to them. In this case we have obtained a symmetric enclosing
