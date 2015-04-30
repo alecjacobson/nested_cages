@@ -56,11 +56,13 @@ function [Pall_fine,Pall_coarse] = shrink_fine_expand_coarse_3D( ...
   positive_projection = false;
   smoothing = 0;
   first_only = false;
+  pflow = inf;
+  flow_step_vis = false;
 
   % Map of parameter names to variable names
   params_to_variables = containers.Map( ...
-    {'FirstOnly','quadrature_order','step_size','expand_every','eps_distance','PositiveProjection','smoothing'}, ...
-    {'first_only','quadrature_order','step_size','expand_every','eps_distance','positive_projection','smoothing'});
+    {'FirstOnly','quadrature_order','step_size','expand_every','eps_distance','PositiveProjection','smoothing','pflow','FlowStepVis'}, ...
+    {'first_only','quadrature_order','step_size','expand_every','eps_distance','positive_projection','smoothing','pflow','flow_step_vis'});
   v = 1;
   while v <= numel(varargin)
     param_name = varargin{v};
@@ -192,7 +194,7 @@ function [Pall_fine,Pall_coarse] = shrink_fine_expand_coarse_3D( ...
       plot_struct.V_to_intersect = V_exp;
       plot_struct.F_to_intersect = F_exp;
       %       plot_struct.V_shrink_prev = V_exp_prev;
-      plot_struct = flow_plot_control(plot_struct,false);
+      plot_struct = flow_plot_control(plot_struct,flow_step_vis);
 
 
     else
@@ -205,7 +207,7 @@ function [Pall_fine,Pall_coarse] = shrink_fine_expand_coarse_3D( ...
           V_exp,F_coarse, ...
           moving_vertices_shrink, ...
           A_qv_shrink,M_shrink, ...
-          w_lap_shrink,L_shrink,1,'step',step_size);
+          w_lap_shrink,L_shrink,1,'step',step_size,'pflow',pflow);
 
       if positive_projection
         % Per-vertex direction
@@ -227,7 +229,7 @@ function [Pall_fine,Pall_coarse] = shrink_fine_expand_coarse_3D( ...
       plot_struct.V_shrink = V_shrink;
       plot_struct.V_shrink_prev = V_shrink_prev;
       plot_struct.F_shrink = F_shrink;
-      plot_struct = flow_plot_control(plot_struct,false);
+      plot_struct = flow_plot_control(plot_struct,flow_step_vis);
 
       Pall_fine(:,:,end+1) = V_shrink;
 

@@ -48,6 +48,7 @@ function [V,moving_vertices,grad_V,quad_points,grad_quadrature,C,s] = signed_dis
   
   % initialize scalar factor for line search
   s = 1e-3;
+  p = inf;
   ii = 1;
   while ii < numel(varargin)
       switch varargin{ii}
@@ -55,10 +56,19 @@ function [V,moving_vertices,grad_V,quad_points,grad_quadrature,C,s] = signed_dis
               ii = ii+1;
               assert(ii<=numel(varargin));
               s = varargin{ii};
+          case 'pflow'
+              ii = ii+1;
+              assert(ii<=numel(varargin));
+              p = varargin{ii};
           otherwise
               error('Unsupported parameter: %s',varargin{ii});
       end
       ii = ii+1;
+  end
+  
+  if p==3
+      % Perturb to avoid NaNs in the p-flow
+      V_coarse = V_coarse+1e-6*randn(size(V_coarse,1),3);
   end
   
   initial_s = s;
@@ -88,8 +98,44 @@ function [V,moving_vertices,grad_V,quad_points,grad_quadrature,C,s] = signed_dis
           p31 = 0.5*(V0(F0(moving_faces,3),:)+V0(F0(moving_faces,1),:));
           quad_points = [p12;p23;p31];
           
-          [grad_p_all,~,C] = signed_distance_direction(quad_points,V_coarse,F_coarse);
-          grad_quadrature = -grad_p_all;
+          if p==3
+              % p-flow
+              int = zeros(size(quad_points,1),1);
+              grad_int = zeros(size(quad_points,1),3);
+              
+              for j=1:size(F_coarse,1)
+                  
+                  v1 = V_coarse(F_coarse(j,1),:)';
+                  v2 = V_coarse(F_coarse(j,2),:)';
+                  v3 = V_coarse(F_coarse(j,3),:)';
+                  % First wedge
+                  P_1 = v1; e1_1 = v2-v1; e2_1 = v3-v1;
+                  % Second wedge
+                  P_2 = v3; e1_2 = v2-v3; e2_2 = v3-v1;
+                  % Third wedge
+                  P_3 = v2; e1_3 = v2-v3; e2_3 = v2-v1;
+                  
+                  [int_1,grad_int_1] = peng2004_wedge_integral_gradient(quad_points,P_1,e1_1,e2_1);
+                  [int_2,grad_int_2] = peng2004_wedge_integral_gradient(quad_points,P_2,e1_2,e2_2);
+                  [int_3,grad_int_3] = peng2004_wedge_integral_gradient(quad_points,P_3,e1_3,e2_3);
+                  
+                  int = int + (int_1-int_2+int_3);
+                  grad_int = grad_int + (grad_int_1-grad_int_2+grad_int_3);
+                  
+                  % Need to output C
+                  C = [];
+                  
+              end
+              
+              grad = real(-[int.^(-1/3-1) int.^(-1/3-1) int.^(-1/3-1)].*grad_int);
+              grad_quadrature = normalizerow(grad);
+              
+              signs = -2*(winding_number(V_coarse,F_coarse,quad_points))+1;
+              grad_quadrature = grad_quadrature.*[signs signs signs];
+          else
+              [grad_p_all,~,C] = signed_distance_direction(quad_points,V_coarse,F_coarse);
+              grad_quadrature = -grad_p_all;
+          end
           
           A_not_in = A(:,[moving_faces;size(F0,1)+moving_faces;2*size(F0,1)+moving_faces]);
           grad_V = (M\(A_not_in*grad_quadrature));
@@ -103,8 +149,44 @@ function [V,moving_vertices,grad_V,quad_points,grad_quadrature,C,s] = signed_dis
           p4 = (11/15)*V0(F0(moving_faces,1),:)+(2/15)*V0(F0(moving_faces,2),:)+(2/15)*V0(F0(moving_faces,3),:);
           quad_points = [p1;p2;p3;p4];
           
-          [grad_p_all,~,C] = signed_distance_direction(quad_points,V_coarse,F_coarse);
-          grad_quadrature = -grad_p_all;
+          if p==3
+              % p-flow
+              int = zeros(size(quad_points,1),1);
+              grad_int = zeros(size(quad_points,1),3);
+              
+              for j=1:size(F_coarse,1)
+                  
+                  v1 = V_coarse(F_coarse(j,1),:)';
+                  v2 = V_coarse(F_coarse(j,2),:)';
+                  v3 = V_coarse(F_coarse(j,3),:)';
+                  % First wedge
+                  P_1 = v1; e1_1 = v2-v1; e2_1 = v3-v1;
+                  % Second wedge
+                  P_2 = v3; e1_2 = v2-v3; e2_2 = v3-v1;
+                  % Third wedge
+                  P_3 = v2; e1_3 = v2-v3; e2_3 = v2-v1;
+                  
+                  [int_1,grad_int_1] = peng2004_wedge_integral_gradient(quad_points,P_1,e1_1,e2_1);
+                  [int_2,grad_int_2] = peng2004_wedge_integral_gradient(quad_points,P_2,e1_2,e2_2);
+                  [int_3,grad_int_3] = peng2004_wedge_integral_gradient(quad_points,P_3,e1_3,e2_3);
+                  
+                  int = int + (int_1-int_2+int_3);
+                  grad_int = grad_int + (grad_int_1-grad_int_2+grad_int_3);
+                  
+                  % Need to output C
+                  C = [];
+                  
+              end
+              
+              grad = real(-[int.^(-1/3-1) int.^(-1/3-1) int.^(-1/3-1)].*grad_int);
+              grad_quadrature = normalizerow(grad);
+              
+              signs = -2*(winding_number(V_coarse,F_coarse,quad_points))+1;
+              grad_quadrature = grad_quadrature.*[signs signs signs];
+          else
+              [grad_p_all,~,C] = signed_distance_direction(quad_points,V_coarse,F_coarse);
+              grad_quadrature = -grad_p_all;
+          end
           
           A_not_in = A(:,[moving_faces;size(F0,1)+moving_faces;2*size(F0,1)+moving_faces;3*size(F0,1)+moving_faces]);
           grad_V = (M\(A_not_in*grad_quadrature));
