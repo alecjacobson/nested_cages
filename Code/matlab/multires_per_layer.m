@@ -21,6 +21,7 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = multires_per_layer(V0
   %         'expand_every' steps.
   %     ... and any optional arguements to combined_step_project or
   %       shrink_fine_expand_coarse_3D
+  %     'ShrinkPoints': true to work with a point cloud
   % Output:
   %   cages_V   array with (#levels) matrices with vertices positions. 
   %             cages_V{k} corresponds to levels(k)-output mesh
