@@ -59,10 +59,11 @@ function [CV_filtered,timing] = ...
   D_CV_MIN = 1e-5;
   BETA_MIN = 1e-3;
   render_data = [];
+  shrink_points = false;
   % Map of parameter names to variable names
   params_to_variables = containers.Map( ...
-    {  'SkipElTopo','Eps','BetaInit','Tol','PlotInfo','Debug','D_CV_MIN','BETA_MIN','RenderData'}, ...
-    {'skip_el_topo','eps_distance','beta_init','tol_dt','plot_info','debug','D_CV_MIN','BETA_MIN','render_data'});
+    {  'SkipElTopo','Eps','BetaInit','Tol','PlotInfo','Debug','D_CV_MIN','BETA_MIN','RenderData','ShrinkPoints'}, ...
+    {'skip_el_topo','eps_distance','beta_init','tol_dt','plot_info','debug','D_CV_MIN','BETA_MIN','render_data','shrink_points'});
   v = 1;
   while v <= numel(varargin)
     param_name = varargin{v};
@@ -98,7 +99,11 @@ function [CV_filtered,timing] = ...
 
 
   % faces for all vertices of both meshes (for collision detection)
-  F_all = [F;CF+size(V,1)];
+  if (shrink_points)
+      F_all = CF+size(V,1);
+  else
+      F_all = [F;CF+size(V,1)];
+  end
 
   beta = beta_init;
   % initialize energy as inf
@@ -171,9 +176,11 @@ function [CV_filtered,timing] = ...
       % Extract new positions for coarse mesh
       CV_filtered = V_all_bb(size(V,1)+1:end,:);
       % (CV_filtered,CF) should not intersect (V,F)
-      assert(isempty(intersect_other(V,F,CV_filtered,CF,'FirstOnly',true)));
-      [~,~,siIF] = selfintersect(CV_filtered,CF,'DetectOnly',true,'FirstOnly',true);
-      assert(isempty(siIF));
+      if (~shrink_points)
+          assert(isempty(intersect_other(V,F,CV_filtered,CF,'FirstOnly',true)));
+          [~,~,siIF] = selfintersect(CV_filtered,CF,'DetectOnly',true,'FirstOnly',true);
+          assert(isempty(siIF));
+      end
 
       [E_val,cb_data] = energy_value(CV_filtered,cb_data);
       % Is energy decreasing (and not first run)
@@ -209,9 +216,13 @@ function [CV_filtered,timing] = ...
     %    delete(pc);
     %    delete(pv);
        cla;
-       % trisurf maintains previous axes, while tsuyrf doesn't
-       pv = trisurf(F,V(:,1),V(:,2),V(:,3),...
-           'FaceColor',[0.0 0.0 0.8],'FaceAlpha',0.2,'EdgeAlpha',0.2);
+       if (shrink_points)
+           pv = plot3(V(:,1),V(:,2),V(:,3),'b.','markersize',10);
+       else
+           % trisurf maintains previous axes, while tsuyrf doesn't
+           pv = trisurf(F,V(:,1),V(:,2),V(:,3),...
+               'FaceColor',[0.0 0.0 0.8],'FaceAlpha',0.2,'EdgeAlpha',0.2);
+       end
        pc = trisurf(CF,CV_filtered(:,1),CV_filtered(:,2),CV_filtered(:,3),...
            'FaceColor',[0.5 0.0 0.0],'FaceAlpha',0.1,'EdgeAlpha',0.2);
        title(sprintf('energy: %s, t: %d',plot_info.energy,plot_info.t),'FontSize',20,'Interpreter','none');
