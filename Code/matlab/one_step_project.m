@@ -140,6 +140,9 @@ function [CV_filtered,timing] = ...
       end
       assert(max(abs(CV_grad(:)))<1,'Gradient is too big. Aborting...');
 
+      writeOBJ('mesh_0.obj',[V_prev;CV_prev],F_all);
+      writeOBJ('mesh_1.obj',[V;CV_prev-beta*CV_grad],F_all);
+      
       % Try to take one step using el topo
       %assert(isempty(intersect_other(V_prev,F,CV_prev,CF,'FirstOnly',true)));
       if ~skip_el_topo
