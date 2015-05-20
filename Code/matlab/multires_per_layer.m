@@ -146,26 +146,28 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = multires_per_layer(V0
       end
       [~,~,siIF] = selfintersect( ...
         V_coarse{k},F_coarse{k},'DetectOnly',true,'FirstOnly',true);
-      if exist('meshfix','file')
-        % Also remove triangles with tiny angles
-%         for iter = 1:100
-%           % 1*needed for multiplying
-%           A = 1*facet_adjacency_matrix(F_coarse{k});
-%           small_angles = ...
-%             min(internalangles(V_coarse{k},F_coarse{k}),[],2)<(5/180*pi); %5??
-%           if ~any(small_angles)
-%             break;
-%           end
-%           for grow = 1:iter-1
-%             small_angles = (A*small_angles)~=0;
-%           end
-%           fprintf('Removing %d skinny facets...\n',nnz(small_angles));
-%           F_coarse{k} = F_coarse{k}(~small_angles,:);
-          [V_coarse{k},F_coarse{k}] = meshfix(V_coarse{k},F_coarse{k});
-%         end
-      else
-        error('Decimation contains self-intersections, but no meshfix');
-      end
+        if size(siIF,1)>0
+          if exist('meshfix','file')
+            % Also remove triangles with tiny angles
+    %         for iter = 1:100
+    %           % 1*needed for multiplying
+    %           A = 1*facet_adjacency_matrix(F_coarse{k});
+    %           small_angles = ...
+    %             min(internalangles(V_coarse{k},F_coarse{k}),[],2)<(5/180*pi); %5??
+    %           if ~any(small_angles)
+    %             break;
+    %           end
+    %           for grow = 1:iter-1
+    %             small_angles = (A*small_angles)~=0;
+    %           end
+    %           fprintf('Removing %d skinny facets...\n',nnz(small_angles));
+    %           F_coarse{k} = F_coarse{k}(~small_angles,:);
+              [V_coarse{k},F_coarse{k}] = meshfix(V_coarse{k},F_coarse{k});
+    %         end
+          else
+            error('Decimation contains self-intersections, but no meshfix');
+          end
+        end
       timing.decimation = timing.decimation + toc;
     end
 
