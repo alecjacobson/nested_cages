@@ -13,7 +13,9 @@
 
 #include <subdivisionscheme.h>
 
-#include <mat.h>
+// mat.h coincides with the name of a headere file in Matlab includes.
+//#include <mat.h>
+#include "../common/mat.h"
 #include <surftrack.h>
 
 // ---------------------------------------------------------
