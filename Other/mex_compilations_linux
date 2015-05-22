@@ -1,6 +1,6 @@
 cd '/home/leo/PHD_Work/Cage_Generation_2013/nested_cages/Code/matlab/'
 
-mex -v -DMEX collide_eltopo_mex.cpp -I../eltopo/common -I../eltopo/eltopo3d -I/home/leo/PHD_Work/Cage_Generation_2013/libigl/include/ -I../eltopo/talpa -I../eltopo/talpa/drivers -I../eltopo/common/tunicate -L../eltopo/eltopo3d/ -leltopo_release -lblas -llapack -o collide_eltopo_mex
+ mex -v -DMEX collide_eltopo_mex.cpp -I../eltopo/common -I../eltopo/eltopo3d -I/home/leo/PHD_Work/Cage_Generation_2013/libigl/include/ -I../eltopo/talpa -I../eltopo/talpa/drivers -I../eltopo/common/tunicate -L../eltopo/eltopo3d/ -leltopo_release -lblas -llapack -o collide_eltopo_mex
 
 cd '/home/leo/PHD_Work/Cage_Generation_2013/gptoolbox/mex'
 
@@ -18,5 +18,6 @@ mex -v -DMEX intersect_other.cpp -Isrc -I/usr/include/ -I/usr/include/Eigen -I/h
 
  
  # Binary Eltopo
- g++ collide_eltopo_two_objs.cpp ../common/bfstream.cpp ../talpa/iomesh.cpp -std=c++11 -I../common -I../eltopo3d -I../talpa -I../talpa/drivers -I../common/tunicate -I/usr/local/MATLAB/R2011b/extern/include -I/home/leo/PHD_Work/Cage_Generation_2013/libigl/include -lstdc++ -I/usr/include/Eigen -lcholmod -L. -leltopo_release -L/usr/local/lib -llapack -lblas -DNO_GUI -D__LITTLE_ENDIAN__ -o collide_eltopo_two_objs
+ g++ collide_eltopo_two_objs.cpp ../common/bfstream.cpp ../talpa/iomesh.cpp -std=c++11 -I../common -I../eltopo3d -I../talpa -I../talpa/drivers -I../common/tunicate -I/usr/local/MATLAB/R2011b/extern/include -I/home/leo/PHD_Work/Cage_Generation_2013/libigl/include -lstdc++ -I/usr/include/Eigen -lcholmod -L. -leltopo_release -L/usr/local/lib -llapack -lblas -L/usr/local/MATLAB/R2011b/bin/glnxa64 -Wl,-rpath-link,/usr/local/MATLAB/R2011b/bin/glnxa64 -lmex -lmx -lmat -DNO_GUI -D__LITTLE_ENDIAN__ -o collide_eltopo_two_objs
+
 
