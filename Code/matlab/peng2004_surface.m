@@ -19,29 +19,45 @@ axis equal
 
 for k=1:steps
     
-    int = zeros(size(X,1),1);
-    grad_int = zeros(size(X,1),3);
+    k
     
-    for j=1:size(F0,1)
+    % beggining of the C++ code (20x speedup)
+    tic
+    [int,grad_int] = peng2004_surface_integral_gradient_mex(X,V0,F0)
+    toc
     
-        v1 = V0(F0(j,1),:)';
-        v2 = V0(F0(j,2),:)';
-        v3 = V0(F0(j,3),:)';
-        % First wedge
-        P_1 = v1; e1_1 = v2-v1; e2_1 = v3-v1;
-        % Second wedge
-        P_2 = v3; e1_2 = v2-v3; e2_2 = v3-v1;
-        % Third wedge
-        P_3 = v2; e1_3 = v2-v3; e2_3 = v2-v1;
-
-        [int_1,grad_int_1] = peng2004_wedge_integral_gradient(X,P_1,e1_1,e2_1);
-        [int_2,grad_int_2] = peng2004_wedge_integral_gradient(X,P_2,e1_2,e2_2);
-        [int_3,grad_int_3] = peng2004_wedge_integral_gradient(X,P_3,e1_3,e2_3);
-
-        int = int + (int_1-int_2+int_3);
-        grad_int = grad_int + (grad_int_1-grad_int_2+grad_int_3);
-        
-    end
+%     tic
+%     
+%     int = zeros(size(X,1),1);
+%     grad_int = zeros(size(X,1),3);
+%     
+%     for j=1:size(F0,1)
+%     
+%         v1 = V0(F0(j,1),:)';
+%         v2 = V0(F0(j,2),:)';
+%         v3 = V0(F0(j,3),:)';
+%         % First wedge
+%         P_1 = v1; e1_1 = v2-v1; e2_1 = v3-v1;
+%         % Second wedge
+%         P_2 = v3; e1_2 = v2-v3; e2_2 = v3-v1;
+%         % Third wedge
+%         P_3 = v2; e1_3 = v2-v3; e2_3 = v2-v1;
+% 
+%         [int_1,grad_int_1] = peng2004_wedge_integral_gradient(X,P_1,e1_1,e2_1);
+%         [int_2,grad_int_2] = peng2004_wedge_integral_gradient(X,P_2,e1_2,e2_2);
+%         [int_3,grad_int_3] = peng2004_wedge_integral_gradient(X,P_3,e1_3,e2_3);
+% 
+%         int = int + (int_1-int_2+int_3);
+%         grad_int = grad_int + (grad_int_1-grad_int_2+grad_int_3);
+%         
+%     end
+%     
+%     int
+%     grad_int
+%     
+%     toc
+    
+    % end of the C++ code
     
     grad = -[int.^(-1/3-1) int.^(-1/3-1) int.^(-1/3-1)].*grad_int;
     grad = normalizerow(grad);
@@ -49,10 +65,10 @@ for k=1:steps
     grad = grad.*[signs signs signs];
     
     X = X+h*(-grad)
-%     hold on
-%     plot3(X(:,1),X(:,2),X(:,3),'.k','MarkerSize',10);
-%     drawnow
-%     input('');
+    hold on
+    plot3(X(:,1),X(:,2),X(:,3),'.k','MarkerSize',10);
+    drawnow
+    input('');
     
 end
 

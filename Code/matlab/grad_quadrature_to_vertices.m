@@ -25,7 +25,11 @@ function A = grad_quadrature_to_vertices(V0,F0,area_initial,quadrature_order)
   %        (#vertices)x(4*#faces) that converts gradient at 3rd order 
   %        quadrature points to vertices on the mesh
 
-  if (quadrature_order==1)
+  if (quadrature_order==0)
+  
+      A = speye(size(V0,1));
+      
+  elseif (quadrature_order==1)
 
       n = size(V0,1);
       m = size(F0,1);
@@ -72,7 +76,7 @@ function A = grad_quadrature_to_vertices(V0,F0,area_initial,quadrature_order)
         n,4*m);
   else
 
-      error('specify quadrature order 1, 2 or 3 ')
+      error('specify quadrature order 0, 1, 2 or 3 ')
 
   end
 

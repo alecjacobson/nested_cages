@@ -58,11 +58,14 @@ function [Pall_fine,Pall_coarse] = shrink_fine_expand_coarse_3D( ...
   first_only = false;
   pflow = inf;
   flow_step_vis = false;
+  shrink_points = false;
 
   % Map of parameter names to variable names
   params_to_variables = containers.Map( ...
-    {'FirstOnly','quadrature_order','step_size','expand_every','eps_distance','PositiveProjection','smoothing','pflow','FlowStepVis'}, ...
-    {'first_only','quadrature_order','step_size','expand_every','eps_distance','positive_projection','smoothing','pflow','flow_step_vis'});
+    {'FirstOnly','quadrature_order','step_size','expand_every','eps_distance',...
+    'PositiveProjection','smoothing','pflow','FlowStepVis','ShrinkPoints'}, ...
+    {'first_only','quadrature_order','step_size','expand_every','eps_distance',...
+    'positive_projection','smoothing','pflow','flow_step_vis','shrink_points'});
   v = 1;
   while v <= numel(varargin)
     param_name = varargin{v};
@@ -132,7 +135,11 @@ function [Pall_fine,Pall_coarse] = shrink_fine_expand_coarse_3D( ...
   title('shrinking','FontSize',30);
   hold on;
   pc = trisurf(F_exp,V_exp(:,1),V_exp(:,2),V_exp(:,3),'FaceColor',[0.5 0.0 0.0],'FaceAlpha',0.05,'EdgeAlpha',0.2);
-  pv = trisurf(F_shrink,V_shrink(:,1),V_shrink(:,2),V_shrink(:,3),'FaceColor',[0.0 0.0 0.8],'FaceAlpha',0.4,'EdgeAlpha',0.2);
+  if (shrink_points)
+      pv = plot3(V_shrink(:,1),V_shrink(:,2),V_shrink(:,3),'b.','markersize',10);
+  else
+      pv = trisurf(F_shrink,V_shrink(:,1),V_shrink(:,2),V_shrink(:,3),'FaceColor',[0.0 0.0 0.8],'FaceAlpha',0.4,'EdgeAlpha',0.2);
+  end
   % draw everything
   drawnow;
 
@@ -229,22 +236,30 @@ function [Pall_fine,Pall_coarse] = shrink_fine_expand_coarse_3D( ...
       plot_struct.V_shrink = V_shrink;
       plot_struct.V_shrink_prev = V_shrink_prev;
       plot_struct.F_shrink = F_shrink;
-      plot_struct = flow_plot_control(plot_struct,flow_step_vis);
+      plot_struct = flow_plot_control(plot_struct,flow_step_vis,shrink_points);
 
       Pall_fine(:,:,end+1) = V_shrink;
 
-      IF = intersect_other( ...
-        Pall_fine(:,:,end), ...
-        F_shrink(doublearea(Pall_fine(:,:,end),F_shrink)>eps,:), ...
-        Pall_coarse(:,:,end), ...
-        F_coarse, ...
-        'FirstOnly',first_only && (mod(ii-1,10)~=0) );
-      if first_only && (mod(ii-1,10)~=0)
-        if ~isempty(IF)
-          fprintf('%05d: intersections remain after fine mesh shrinking.\n',ii);
+      if (shrink_points)
+        W = winding_number(V_exp,F_coarse,V_shrink);
+        fprintf('%05d: number of points outside \n',sum(W<(1-1e-4)));
+        if (norm(W-ones(size(V_shrink,1),1))<1e-6)
+            IF = [];
         end
       else
-        fprintf('%05d: number of intersections after fine mesh shrinking: %d \n',ii,size(IF,1));
+          IF = intersect_other( ...
+            Pall_fine(:,:,end), ...
+            F_shrink(doublearea(Pall_fine(:,:,end),F_shrink)>eps,:), ...
+            Pall_coarse(:,:,end), ...
+            F_coarse, ...
+            'FirstOnly',first_only && (mod(ii-1,10)~=0) );
+          if first_only && (mod(ii-1,10)~=0)
+            if ~isempty(IF)
+              fprintf('%05d: intersections remain after fine mesh shrinking.\n',ii);
+            end
+          else
+            fprintf('%05d: number of intersections after fine mesh shrinking: %d \n',ii,size(IF,1));
+          end
       end
 
       %if (size(IF,1)==0)

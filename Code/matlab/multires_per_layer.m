@@ -21,6 +21,7 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = multires_per_layer(V0
   %         'expand_every' steps.
   %     ... and any optional arguements to combined_step_project or
   %       shrink_fine_expand_coarse_3D
+  %     'ShrinkPoints': true to work with a point cloud
   % Output:
   %   cages_V   array with (#levels) matrices with vertices positions. 
   %             cages_V{k} corresponds to levels(k)-output mesh
@@ -53,6 +54,7 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = multires_per_layer(V0
   step_back_every = 1;
   pflow = inf;
   flow_step_vis = false;
+  shrink_points = false;
 
   % save timings
   timing.decimation = 0.0;
@@ -71,11 +73,11 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = multires_per_layer(V0
     {'QuadratureOrder','StepSize','V_coarse','F_coarse','ExpandEvery', ...
       'ExpansionEnergy','FinalEnergy','EpsExpansion','EpsFinal','BetaInit','Debug','Fquad', ...
       'SkipElTopo','PositiveProjection','PartialPath','Smoothing', ...
-      'D_CV_MIN','FirstOnly','NewFlow','BETA_MIN','StepBackEvery','pflow','FlowStepVis'}, ...
+      'D_CV_MIN','FirstOnly','NewFlow','BETA_MIN','StepBackEvery','pflow','FlowStepVis','ShrinkPoints'}, ...
     {'quadrature_order','step_size','V_coarse','F_coarse','expand_every', ...
       'energy_expansion','energy_final','eps_distance_expansion','eps_distance_final','beta_init','debug','Fquad', ...
       'skip_el_topo','positive_projection','partial_path','smoothing', ...
-      'D_CV_MIN','first_only','new_flow','BETA_MIN','step_back_every','pflow','flow_step_vis'});
+      'D_CV_MIN','first_only','new_flow','BETA_MIN','step_back_every','pflow','flow_step_vis','shrink_points'});
   v = 1;
   while v <= numel(varargin)
     param_name = varargin{v};
@@ -144,26 +146,28 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = multires_per_layer(V0
       end
       [~,~,siIF] = selfintersect( ...
         V_coarse{k},F_coarse{k},'DetectOnly',true,'FirstOnly',true);
-      if exist('meshfix','file')
-        % Also remove triangles with tiny angles
-%         for iter = 1:100
-%           % 1*needed for multiplying
-%           A = 1*facet_adjacency_matrix(F_coarse{k});
-%           small_angles = ...
-%             min(internalangles(V_coarse{k},F_coarse{k}),[],2)<(5/180*pi); %5??
-%           if ~any(small_angles)
-%             break;
-%           end
-%           for grow = 1:iter-1
-%             small_angles = (A*small_angles)~=0;
-%           end
-%           fprintf('Removing %d skinny facets...\n',nnz(small_angles));
-%           F_coarse{k} = F_coarse{k}(~small_angles,:);
-          [V_coarse{k},F_coarse{k}] = meshfix(V_coarse{k},F_coarse{k});
-%         end
-      else
-        error('Decimation contains self-intersections, but no meshfix');
-      end
+        if size(siIF,1)>0
+          if exist('meshfix','file')
+            % Also remove triangles with tiny angles
+    %         for iter = 1:100
+    %           % 1*needed for multiplying
+    %           A = 1*facet_adjacency_matrix(F_coarse{k});
+    %           small_angles = ...
+    %             min(internalangles(V_coarse{k},F_coarse{k}),[],2)<(5/180*pi); %5??
+    %           if ~any(small_angles)
+    %             break;
+    %           end
+    %           for grow = 1:iter-1
+    %             small_angles = (A*small_angles)~=0;
+    %           end
+    %           fprintf('Removing %d skinny facets...\n',nnz(small_angles));
+    %           F_coarse{k} = F_coarse{k}(~small_angles,:);
+              [V_coarse{k},F_coarse{k}] = meshfix(V_coarse{k},F_coarse{k});
+    %         end
+          else
+            error('Decimation contains self-intersections, but no meshfix');
+          end
+        end
       timing.decimation = timing.decimation + toc;
     end
 
@@ -173,7 +177,8 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = multires_per_layer(V0
         [Pall,Pall_coarse] = shrink_fine_expand_coarse_3D(cages_V{k+1},cages_F{k+1},...
             V_coarse{k},F_coarse{k},'quadrature_order',quadrature_order,...
             'step_size',step_size,'expand_every',expand_every, ...
-            'smoothing',smoothing,'FirstOnly',first_only,'pflow',pflow,'FlowStepVis',flow_step_vis);
+            'smoothing',smoothing,'FirstOnly',first_only,'pflow',pflow,...
+            'FlowStepVis',flow_step_vis,'ShrinkPoints',shrink_points);
 %     else
 %         [Pall,Pall_coarse] = shrink_fine_expand_coarse_3D(V_coarse{k+1},F_coarse{k+1},...
 %             V_coarse{k},F_coarse{k},'quadrature_order',quadrature_order,...
@@ -210,7 +215,8 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = multires_per_layer(V0
         'Debug',debug,...
         'Fquad',Fquad,...
         'D_CV_MIN',D_CV_MIN,...
-        'BETA_MIN',BETA_MIN);
+        'BETA_MIN',BETA_MIN,...
+        'ShrinkPoints',shrink_points);
 
 
     % output level

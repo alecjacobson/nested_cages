@@ -77,8 +77,18 @@ function [V,moving_vertices,grad_V,quad_points,grad_quadrature,C,s] = signed_dis
   moving_faces = (1:size(F0,1))';
   
   for k=1:steps
+      
+      if (order==0)
+          
+          % quadrature points are the mesh vertices
+          quad_points = V0;
+          
+          [grad_p_all,~,C] = signed_distance_direction(quad_points,V_coarse,F_coarse);
+          grad_quadrature = -grad_p_all;
+             
+          grad_V = grad_quadrature;
   
-      if (order==1)
+      elseif (order==1)
           
           % only quadrature point (barycenters)
           p123 = (1/3)*(V0(F0(moving_faces,1),:)+V0(F0(moving_faces,2),:)+V0(F0(moving_faces,3),:));
@@ -99,33 +109,40 @@ function [V,moving_vertices,grad_V,quad_points,grad_quadrature,C,s] = signed_dis
           quad_points = [p12;p23;p31];
           
           if p==3
-              % p-flow
-              int = zeros(size(quad_points,1),1);
-              grad_int = zeros(size(quad_points,1),3);
+              % p-flow (4x speedup with C++ code)
+              tic
+              [int,grad_int] = peng2004_surface_integral_gradient_mex(quad_points,V_coarse,F_coarse);
+              C = [];
+              toc
               
-              for j=1:size(F_coarse,1)
-                  
-                  v1 = V_coarse(F_coarse(j,1),:)';
-                  v2 = V_coarse(F_coarse(j,2),:)';
-                  v3 = V_coarse(F_coarse(j,3),:)';
-                  % First wedge
-                  P_1 = v1; e1_1 = v2-v1; e2_1 = v3-v1;
-                  % Second wedge
-                  P_2 = v3; e1_2 = v2-v3; e2_2 = v3-v1;
-                  % Third wedge
-                  P_3 = v2; e1_3 = v2-v3; e2_3 = v2-v1;
-                  
-                  [int_1,grad_int_1] = peng2004_wedge_integral_gradient(quad_points,P_1,e1_1,e2_1);
-                  [int_2,grad_int_2] = peng2004_wedge_integral_gradient(quad_points,P_2,e1_2,e2_2);
-                  [int_3,grad_int_3] = peng2004_wedge_integral_gradient(quad_points,P_3,e1_3,e2_3);
-                  
-                  int = int + (int_1-int_2+int_3);
-                  grad_int = grad_int + (grad_int_1-grad_int_2+grad_int_3);
-                  
-                  % Need to output C
-                  C = [];
-                  
-              end
+%               tic
+%               int = zeros(size(quad_points,1),1);
+%               grad_int = zeros(size(quad_points,1),3);
+%               
+%               for j=1:size(F_coarse,1)
+%                   
+%                   v1 = V_coarse(F_coarse(j,1),:)';
+%                   v2 = V_coarse(F_coarse(j,2),:)';
+%                   v3 = V_coarse(F_coarse(j,3),:)';
+%                   % First wedge
+%                   P_1 = v1; e1_1 = v2-v1; e2_1 = v3-v1;
+%                   % Second wedge
+%                   P_2 = v3; e1_2 = v2-v3; e2_2 = v3-v1;
+%                   % Third wedge
+%                   P_3 = v2; e1_3 = v2-v3; e2_3 = v2-v1;
+%                   
+%                   [int_1,grad_int_1] = peng2004_wedge_integral_gradient(quad_points,P_1,e1_1,e2_1);
+%                   [int_2,grad_int_2] = peng2004_wedge_integral_gradient(quad_points,P_2,e1_2,e2_2);
+%                   [int_3,grad_int_3] = peng2004_wedge_integral_gradient(quad_points,P_3,e1_3,e2_3);
+%                   
+%                   int = int + (int_1-int_2+int_3);
+%                   grad_int = grad_int + (grad_int_1-grad_int_2+grad_int_3);
+%                   
+%                   % Need to output C
+%                   C = [];
+%                   
+%               end
+%               toc
               
               grad = real(-[int.^(-1/3-1) int.^(-1/3-1) int.^(-1/3-1)].*grad_int);
               grad_quadrature = normalizerow(grad);
@@ -151,32 +168,37 @@ function [V,moving_vertices,grad_V,quad_points,grad_quadrature,C,s] = signed_dis
           
           if p==3
               % p-flow
-              int = zeros(size(quad_points,1),1);
-              grad_int = zeros(size(quad_points,1),3);
+              tic
+              [int,grad_int] = peng2004_surface_integral_gradient_mex(quad_points,V_coarse,F_coarse);
+              C = [];
+              toc
               
-              for j=1:size(F_coarse,1)
-                  
-                  v1 = V_coarse(F_coarse(j,1),:)';
-                  v2 = V_coarse(F_coarse(j,2),:)';
-                  v3 = V_coarse(F_coarse(j,3),:)';
-                  % First wedge
-                  P_1 = v1; e1_1 = v2-v1; e2_1 = v3-v1;
-                  % Second wedge
-                  P_2 = v3; e1_2 = v2-v3; e2_2 = v3-v1;
-                  % Third wedge
-                  P_3 = v2; e1_3 = v2-v3; e2_3 = v2-v1;
-                  
-                  [int_1,grad_int_1] = peng2004_wedge_integral_gradient(quad_points,P_1,e1_1,e2_1);
-                  [int_2,grad_int_2] = peng2004_wedge_integral_gradient(quad_points,P_2,e1_2,e2_2);
-                  [int_3,grad_int_3] = peng2004_wedge_integral_gradient(quad_points,P_3,e1_3,e2_3);
-                  
-                  int = int + (int_1-int_2+int_3);
-                  grad_int = grad_int + (grad_int_1-grad_int_2+grad_int_3);
-                  
-                  % Need to output C
-                  C = [];
-                  
-              end
+%               int = zeros(size(quad_points,1),1);
+%               grad_int = zeros(size(quad_points,1),3);
+%               
+%               for j=1:size(F_coarse,1)
+%                   
+%                   v1 = V_coarse(F_coarse(j,1),:)';
+%                   v2 = V_coarse(F_coarse(j,2),:)';
+%                   v3 = V_coarse(F_coarse(j,3),:)';
+%                   % First wedge
+%                   P_1 = v1; e1_1 = v2-v1; e2_1 = v3-v1;
+%                   % Second wedge
+%                   P_2 = v3; e1_2 = v2-v3; e2_2 = v3-v1;
+%                   % Third wedge
+%                   P_3 = v2; e1_3 = v2-v3; e2_3 = v2-v1;
+%                   
+%                   [int_1,grad_int_1] = peng2004_wedge_integral_gradient(quad_points,P_1,e1_1,e2_1);
+%                   [int_2,grad_int_2] = peng2004_wedge_integral_gradient(quad_points,P_2,e1_2,e2_2);
+%                   [int_3,grad_int_3] = peng2004_wedge_integral_gradient(quad_points,P_3,e1_3,e2_3);
+%                   
+%                   int = int + (int_1-int_2+int_3);
+%                   grad_int = grad_int + (grad_int_1-grad_int_2+grad_int_3);
+%                   
+%                   % Need to output C
+%                   C = [];
+%                   
+%               end
               
               grad = real(-[int.^(-1/3-1) int.^(-1/3-1) int.^(-1/3-1)].*grad_int);
               grad_quadrature = normalizerow(grad);
