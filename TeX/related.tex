@@ -2,6 +2,8 @@
 \section{Related work}
 \label{sec:related}
 
+Cite Volino paper, "Resolving Surface collisions through intersection contour
+minimization"
 
 \paragraph{Multiresolution}
 %
@@ -144,17 +146,22 @@ that this process will converge. Further, a single-layer cage created with our
 method is much tighter fitting for the same vertex count (see
 \reffig{dane-vs-ben-chen}).
 %
-Deng et al.\ attempt to keep coarse meshes exterior during decimation and
-resort to post-hoc global intersection resolution to repair invalid output
-cages \shortcite{Deng:2011vr}.
-%
 Xian et al.\ construct automatic cages by simplifying dense voxelizations
 \shortcite{Xian:2009}, stitching oriented bounding boxes
 around vertex clusters \shortcite{Xian:2012tv}, or by offsetting coarse
 on-surface triangulations of feature curves \shortcite{Xian:2013}.
 %
-These cages are often dense or loose fitting and may still self-intersect or
-intersect the input shape globally, as only local checks are conducted.
+Sander et al.\ attempt to keep coarse meshes exterior during decimation by
+enforcing local inequality constraints \shortcite{Sander:2000:SC}.
+%
+Deng et al.\ use a similar construction and resort to post-hoc global
+intersection resolution to repair invalid output cages \shortcite{Deng:2011vr}.
+%
+Though these ``progressive hulls'' found some success in real-time rendering
+and intersection applications \cite{Platis:CGF}, these cages are often dense or
+loose fitting and may still self-intersect or intersect the input shape ad
+other layers globally, as only local checks are conducted. \alec{We compare to
+\cite{Sander:2000:SC} in XXX.}
 
 %Alternatives to geometric multigrid: algebraic multi-grid (cite Brandt) or
 %algebraic techniques for special problem \cite{Krishnan:2013:EPL} (doesn't
@@ -215,3 +222,5 @@ ordering \cite{Baraff:2003:UC}.
 With our feasible state, the volume minimization of
 \cite{ContactAwareModeling:2011} could then be an alternative to our use of
 constraint satisfaction to resolve collisions.
+
+\alec{Cite ``Abstraction of Man-Made Shapes''}

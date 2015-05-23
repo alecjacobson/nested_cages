@@ -203,27 +203,6 @@ open-bracket={\text{-}}, close-bracket={}}
 
 
 
-% FIX LINE NUMBERS AFTER EQUATION
-% http://changilkim.wordpress.com/2013/05/13/siggraph-latex-template-line-number-correction-hack/
-\newcommand*\patchAmsMathEnvironmentForLineno[1]{%
-\expandafter\let\csname old#1\expandafter\endcsname\csname #1\endcsname
-\expandafter\let\csname oldend#1\expandafter\endcsname\csname end#1\endcsname
-\renewenvironment{#1}%
-{\linenomath\csname old#1\endcsname}%
-{\csname oldend#1\endcsname\endlinenomath}}%
-\newcommand*\patchBothAmsMathEnvironmentsForLineno[1]{%
-\patchAmsMathEnvironmentForLineno{#1}%
-\patchAmsMathEnvironmentForLineno{#1*}}%
-\AtBeginDocument{%
-\patchBothAmsMathEnvironmentsForLineno{equation}%
-\patchBothAmsMathEnvironmentsForLineno{align}%
-\patchBothAmsMathEnvironmentsForLineno{flalign}%
-\patchBothAmsMathEnvironmentsForLineno{alignat}%
-\patchBothAmsMathEnvironmentsForLineno{gather}%
-\patchBothAmsMathEnvironmentsForLineno{multline}%
-\patchBothAmsMathEnvironmentsForLineno{eqnarray}%
-}
-
 %  bold paragraph header without space after
 \newcommand{\nospaceparagraph}[1]{{\sffamily\textbf{#1}}}
 \renewcommand{\Re}{\operatorname{Re}}
