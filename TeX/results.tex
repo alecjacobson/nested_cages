@@ -6,6 +6,7 @@ We implemented a prototype of our method as a serial \textsc{Matlab} program.
 We report timings of our unoptimized code for a few representative examples in
 \reftab{timings} recorded on an iMac Intel Core i7 3.5GHz computer with 8GB
 memory.
+\alec{``Timings should be better explained."}
 %
 As expected the bottleneck is the collision-free re-inflation step.
 %
@@ -69,8 +70,9 @@ number of layers. We nest 25 tightly fitting layers around the \emph{Horse} in
 Constructing our nested cages can be considered expensive \emph{precomputation}
 for a multiresolution linear system solver.
 %
-However, once meshes are computed the multigrid solver is sleek and memory
-efficient.
+However, once cage meshes are computed and their interiors are meshed with
+tetrahedra (e.g.\ using \cite{tetgen}),
+the volumetric multigrid solver is sleek and memory efficient.
 %
 A single multiresolution V-cycle for a Poisson equation with homogeneous
 Dirichlet boundary conditions inside the volume of the \emph{Octopus} with over
@@ -83,14 +85,29 @@ of memory finishing in over 16 minutes.
 %
 \textsc{Cholmod}'s Cholesky factorization with reordering is mildly better than
 \textsc{Matlab}, solving via backsubstitution in 10 minutes, but suffers from
-similar memory issues during the pre-factorization procedures, which takes over
+similar memory issues during factorization, which takes over
 an hour using 17GB max memory.
 %
+\alec{Explain why back substitution is so slow. Are factors dense?}
+%
 In terms of precomputation, our time consuming cage computation lives at a much
-earlier stage than pre-factorization: before determining constraints or
-boundary conditions and before even choosing the particular system being
+earlier stage than system-matrix factorization: before determining constraints
+or boundary conditions and before even choosing the particular system being
 solved.
-
+%
+\alec{This is even true for inhomogeneous systems where local metrics are
+varying between solves. In this case, the internal tet-meshing might need to be
+recomputed (XXXsec for \emph{Octopus}), but our cages can be reused.}
+%
+\alec{Reference and compare to algebraic multigrid \cite{ruge1987algebraic}}
+%
+\alec{what are the transfer operators used in multiresolution results? Appendix
+for multiresolution implementation? We use linear interpolation as prolongation
+operator and its transpose as the restriction operator \cite{Demmel04}.}
+%
+\alec{``Compare to direct solver on machine with more memory?'' No, there will
+always be a problem size big enough that direct solver will choke: This is just
+asymptotic analysis of memory.}
 
 \begin{figure}
   \includegraphics[width=\linewidth]{figs/octopus-poisson}
@@ -114,20 +131,31 @@ from its flexibility. For example, we may quickly change the diffusion rate in
 a heat equation solved in the volume of the \emph{Pelvis} (see
 \reffig{pelvis-diffusion}). 
 %
-Factorization based solvers, in general scrap previous precomputation after
+Factorization based solvers, in general, scrap previous precomputation after
 such a global change to the system matrix. 
 %
 Multiresolution hardly notices, and previous solutions become warm starts.
 %
 We employ Neumann boundary conditions and notice that naively decimating the
 input mesh leads to a divergent solver (inset).
+%
+\alec{Give simple example of naive decimation failing to converge}
+%
+\alec{multiresolution results seem to suggest that without this method
+multiresolution is hopeless for the octopus and armadillo: it \emph{may} be
+possible to tweak extrapolation parameters to handle these cases with naive
+decimation but an automatic method for determining correct extrapolation for
+convergence is not obvious. We tried: linear extrapolation from nearest tet,
+constant interpolation of nearest vertex, linear interpolation of closest point
+on nearest face. Bottom line, extrapolation is not $C^0$, and some amount of
+cleverness is needed to avoid discontinuities.}
 
 \begin{figure}
   \includegraphics[width=\linewidth]{figs/pelvis-diffusion}
   \caption{We solve a diffusion equation $(λ∆+I) x = b$ for various diffusion
-  rates $λ$ with our nested cages in a multiresolution solver (top: surface
-  values via Neumann boundary conditions, bottom: slice through tet-mesh
-  volumes).}
+  rates $λ$ with our nested cages in a volumetric multiresolution solver (top:
+  surface values via Neumann boundary conditions, bottom: slice through
+  tet-mesh volumes).}
   \label{fig:pelvis-diffusion}
 \end{figure}
 
@@ -148,10 +176,10 @@ single relaxation iteration with our meshes.
 \begin{figure}
   \includegraphics[width=\linewidth]{figs/armadillo-heat-plot}
   \caption{We solve for smooth geodesics via two Poisson equations over a
-  tetrahedal mesh of the \emph{Armadillo}. Multiresolution using naive
-  overlapping and shrinking decimations leads to divergence unless a very large
-  number of relaxation iterations is used in each level in each v-cycle. Ours
-  is always convergent.}
+  volumetric tetrahedal mesh inside the \emph{Armadillo}. Multiresolution using
+  naive overlapping and shrinking decimations leads to divergence unless a very
+  large number of relaxation iterations is used in each level in each v-cycle.
+  Ours is always convergent.}
   \label{fig:armadillo-heat-plot}
 \end{figure}
 
@@ -179,6 +207,9 @@ While technically a ``perfectly tight fit'', this cage fails to coarsen the
 domain and meshing near intersections creates sliver triangles problematic for
 numerics.
 %
+\alec{Problem statement did not include conditions on output mesh quality or
+coarseness.}
+%
 We also compare to signed-distance field contouring \cite{Xu:2014:SDF}, which
 creates a loose fit joining the legs near the knees.
 %
@@ -199,7 +230,11 @@ does not collide against a surface enclosing a second object,
 %
 \end{wrapfigure}
 %
-this certifies that the two objects do not collide either. Bounding sphere, cubes, and
+this certifies that the two objects do not collide either.
+%
+\alec{Need to clarify that these are rigid objects.}
+%
+Bounding sphere, cubes, and
 higher-degree polytopes are often used to quick-reject candidate collisions for
 this reason, but these convex cages lose effectiveness when objects are concave
 or have holes and cavities. On the other hand, a coarse nested cage is ideal
@@ -220,6 +255,10 @@ the BVH on the octopus itself. We found that the latter strategy is
 $\sim 8\times$ faster, for intuitive reasons: the octopus's many
 protruding arms causes it to easily nestle near other copies of itself, so that
 their convex hulls overlap but our tight, coarse cage does not.
+%
+\alec{Discuss that nesting is not maintained (cages do not \emph{track}) during
+non-rigid deformation of fine mesh (cf.\ simulation meshes where coarse mesh is
+deformed).}
 
 A single very coarse cage is needed for interactive deformation with
 generalized barycentric coordinates.
@@ -233,12 +272,13 @@ but also better generalized barycentric coordinates. In particular, harmonic
 coordinates are theoretically defined for arbitrary polyhedra, yet previous
 works implement them inside triangle-mesh cages only
 \cite{HarmonicCoodinates07}.
+\alec{Martin et al.\ use general polyhedral domains. Not just theoretical...}
 %
 To utilize popular quad-dominant meshes as cages, all faces must be outside the
 input model and \emph{planar}.
 %
-Such cages are difficult to model manually, hence simply triangulating any
-high-order facets \cite{HarmonicCoodinates07}.
+Since such cages are difficult to model manually, many implementations simply
+triangulate high-order facets \cite{HarmonicCoodinates07}.
 %
 We complement the recent sketch-based quad-meshing tool \cite{Takayama:2013},
 post-processing its output to enclose the input model and minimize a
@@ -275,6 +315,8 @@ may still flow it inside the coarse mesh.
 Though details on the expanding input mesh are asymmetric (see hip pockets or
 hands), the energy minimization keeps the cage symmetric.
 
+\alec{``Would have appreciated seeing (more) coarser cages."}
+
 \begin{figure}
   \includegraphics[width=\linewidth]{figs/swat-cage}
   \caption{The \emph{S.W.A.T. man} is an artifact-ridden mesh with 2806 pairs
@@ -284,3 +326,7 @@ hands), the energy minimization keeps the cage symmetric.
   fully exterior cage used to deform the embedded model.}
   \label{fig:swat-cage}
 \end{figure}
+
+\alec{``No high genus results."}
+
+\alec{``How can point clouds/polygon soups be handled?''}

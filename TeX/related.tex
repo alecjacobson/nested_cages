@@ -2,18 +2,23 @@
 \section{Related work}
 \label{sec:related}
 
-Cite Volino paper, "Resolving Surface collisions through intersection contour
-minimization"
-
 \paragraph{Multiresolution}
 %
 Methods based on regular grids or lattices naturally support multiresolution numerical methods.
 %
-McAdams et al.\ successfully employ multgrid on voxelized shapes to animate
-elastic charaters \shortcite{McAdams:2011}.
+\cite{McAdams:2011}
+successfully employ multigrid on voxelized shapes to animate
+elastic characters..
 %
 The main downside of grid-based methods is their handling of irregular
 boundaries.
+%
+\alec{previous multi-grid methods handle complicated boundaries
+\cite{Dick:2011,Ferstl:2014} Use adaptive octree multigrid solvers for
+fractures and fluids, respectively.  Though supporting complicated and even
+dynamic boundaries, they are not immune to troubles of regular grids:
+boundaries must be uniformly represented at the finest grid level to avoid
+aliasing.}
 %
 To avoid \emph{fusing} together geodesically distant parts, the
 shape must be modeled in an accommodating pose. If remodeling is not
@@ -24,8 +29,11 @@ A hypothetical solution is to replicate cells in close areas and manage
 adjacencies when two or more replicated patches merge and split.
 %
 This succeeds for the less complicated topologies of 2D cartoons
-\cite{Sykora09}, but is avoided in 3D: Wojtan et al.
-\shortcite{wojtan2011liquid} opt for dynamic mesh \emph{surgery} instead.
+\cite{Sykora09}, but is avoided in 3D: 
+\cite{wojtan2011liquid} opt for dynamic mesh \emph{surgery} instead.
+%
+\alec{Some methods that \emph{do} use replicating in 3D: 
+   \cite{Teran:2005:CSS,Nesme:2009:PTE}}
 %
 Cell replication is not only difficult to realize robustly, but also riddles
 multigrid numerical methods with expensive, SIMD-breaking boundary handling
@@ -63,7 +71,7 @@ irregular as the coarsest layer, simplifying level design \cite{feng1997non}.
 %mesh coincide: user provides meshes. I'm not sure how much better this
 %restriction would really be compared to simple barycentric one.
 
-A second group of methods generate a multiresolution hierarchy using decimation. Unmodified mesh decimations \cite{Garland:1997:SSU} have been used for adaptive
+A second group of methods generates a multiresolution hierarchy using decimation. Unmodified mesh decimations \cite{Garland:1997:SSU} have been used for adaptive
 simulations for visco-elastic solids \cite{Debunne:2001:DRD}.
 %
 Such non-nested cages require extrapolation or one-to-many mappings to
@@ -77,7 +85,7 @@ Algebraic alternatives to geometric remeshing also exist,
 but are recommended only when geometric information is not available
 \cite{falgout06}.
 %
-Recently, Krishnan et al. \shortcite{Krishnan:2013:EPL} proposed a
+Recently, \cite{Krishnan:2013:EPL} proposed a
 multiresolution preconditioner for Laplace-based systems on images and
 surfaces.
 %
@@ -101,11 +109,11 @@ enveloping the object, but also \emph{contouring it} with a piecewise-linear
 triangle mesh without 1) cutting corners too harshly and intersecting the input
 or 2) resorting to fine resolution nullifying any performance gains.
 %
-Xu et al. \shortcite{Xu:2014:SDF} define a robust signed distance field, but
+\cite{Xu:2014:SDF} define a robust signed distance field, but
 pass the field to an off-the-shelf contour mesher without any attempt to
 guarantee non-intersection with the input.
 %
-Similarly, Shen et al.\ \shortcite{Shen:2004:IAI} iteratively refine a moving
+Similarly, \cite{Shen:2004:IAI} iteratively refine a moving
 least squares iso-surface to enclose an existing model tightly via a global
 scaling parameter. Though the \emph{continuous}
 isosurface may not intersect the input model, generic contouring invalidates
@@ -123,11 +131,20 @@ surface than the input.
 By deforming input decimations, we constrain our pipeline to ensure its output
 will match the desired mesh resolutions. 
 
+\alec{collision detection schemes do not need intermediary triangle so isosurface
+of distance fields are OK for that application.}
+
+
 \begin{figure}
-  \includegraphics[width=\linewidth]{figs/dane-horse-vs-ben-chen}
+  \includegraphics[width=\linewidth]{figs/dane-horse-vs-ben-chen-vs-sander}
   \caption{Methods like \protect\cite{Ben-Chen:2009:SDT} use coarse cages as
   computational workhorses to reduce complexity. Their iterative offset
-  heuristic produces oversmoothed, loosely fitting cages.}
+  heuristic produces oversmoothed, loosely fitting cages.
+  %
+  Meanwhile, \protect\cite{Sander:2000:SC} attempt to
+  maintain nestedness during greedy decimation with local constraints. Cages
+  are also loose, but more importantly self-intersections (orange) and
+  intersections with the input model (yellow) eventually accumulate.}
   \label{fig:dane-vs-ben-chen}
 \end{figure}
 
@@ -139,29 +156,42 @@ input ``cage'' to be completely exterior to the input shape (e.g.\
 %
 Creating such cages manually is time consuming and breaks automatic pipelines.
 %
-Ben-Chen et al.\ \shortcite{Ben-Chen:2009:SDT} create exterior cages
+\cite{Ben-Chen:2009:SDT} create exterior cages
 automatically by iteratively creating an offset surface via Poisson surface
 reconstruction \cite{PoissonSurfaceReconstruction06}. There is no guarantee
-that this process will converge. Further, a single-layer cage created with our
+that this process will converge. 
+\alec{Not fair, since ours will not converge.}
+%
+Further, a single-layer cage created with our
 method is much tighter fitting for the same vertex count (see
 \reffig{dane-vs-ben-chen}).
 %
-Xian et al.\ construct automatic cages by simplifying dense voxelizations
-\shortcite{Xian:2009}, stitching oriented bounding boxes
-around vertex clusters \shortcite{Xian:2012tv}, or by offsetting coarse
-on-surface triangulations of feature curves \shortcite{Xian:2013}.
+Xian et al.\ 
+construct automatic cages by simplifying dense voxelizations
+\cite{Xian:2009},
+stitching oriented bounding boxes
+around vertex clusters \cite{Xian:2012tv}, or by offsetting coarse
+on-surface triangulations of feature curves \cite{Xian:2013}.
 %
-Sander et al.\ attempt to keep coarse meshes exterior during decimation by
-enforcing local inequality constraints \shortcite{Sander:2000:SC}.
+\cite{Sander:2000:SC} attempt to keep coarse meshes exterior during decimation
+by enforcing local inequality constraints.
 %
-Deng et al.\ use a similar construction and resort to post-hoc global
-intersection resolution to repair invalid output cages \shortcite{Deng:2011vr}.
+\cite{Deng:2011vr}
+use a similar construction and resort to post-hoc global
+intersection resolution to repair invalid output cages.
 %
 Though these ``progressive hulls'' found some success in real-time rendering
 and intersection applications \cite{Platis:CGF}, these cages are often dense or
 loose fitting and may still self-intersect or intersect the input shape ad
 other layers globally, as only local checks are conducted. \alec{We compare to
 \cite{Sander:2000:SC} in XXX.}
+%
+\alec{Incorporating decimation into our pipeline is tempting. The ability to
+add or remove extra degrees of freedom according to the tightness of fit or
+difficulty to maintain nestingness is attractive. To this end, we experimented
+with subdivision, but then it was difficult to ensure that our output stays
+coarse. Nevertheless, this could be interesting future work and may be
+necessary in some impossible configurations (see Csasar counterexample)}
 
 %Alternatives to geometric multigrid: algebraic multi-grid (cite Brandt) or
 %algebraic techniques for special problem \cite{Krishnan:2013:EPL} (doesn't
@@ -176,7 +206,7 @@ The majority of surface mesh decimation techniques aim to preserve outward
 appearance with lower and lower mesh resolution
 \cite{Hoppe:1996:PM,Garland:1997:SSU,Melax98}.
 %
-Along these lines, Gumhold et al.\ \shortcite{gumhold2003intersection} output
+Along these lines, \cite{gumhold2003intersection} output
 decimations free of \emph{self-}intersections, ensuring for example that a
 character's clothing stays outside its body.
 %
@@ -187,9 +217,9 @@ hierarchy layers.
 Recent work has considered more elaborate decimation goals than appearance such
 as preserving haptic sensations \cite{Otaduy:2003:SPS}.
 %
-Otaduy et al.\ also demonstrate how to combine mesh decimations and bounding
+\cite{Otaduy:2003:CDH} also demonstrate how to combine mesh decimations and bounding
 volume hierarchies to achieve faster collision detection and handle without
-affecting visual appearance \shortcite{Otaduy:2003:CDH}.
+affecting visual appearance.
 %
 Our nested cages are hierarchical decimations strictly containing the input
 shape, ensuring strictly conservative collision detection.
@@ -207,7 +237,7 @@ decimation and works as a post process to nest each layer.
 
 %\cite{Tagliasacchi:2012:MCS} coerces flow toward the medial axis
 
-We credit Harmon et al.\ \shortcite{ContactAwareModeling:2011} for their
+We credit \cite{ContactAwareModeling:2011} for their
 ground-breaking introduction of contact handling to mainstream geometry
 processing. Their work inspires us to consider the contact and collisions
 tool-set familiar to physically based simulation in our geometry processing
@@ -219,8 +249,19 @@ state.
 Without it, untangling the overlapping input cages could result in incorrect
 ordering \cite{Baraff:2003:UC}.
 %
+\alec{ \cite{Volino:2006:RSC} as alternative to re-inflation using
+Eltopo/SPACM, here, or in method. Also could lead to wrong ordering?}
+%
 With our feasible state, the volume minimization of
 \cite{ContactAwareModeling:2011} could then be an alternative to our use of
 constraint satisfaction to resolve collisions.
 
-\alec{Cite ``Abstraction of Man-Made Shapes''}
+\alec{Cite enveloping in ``Abstraction of Man-Made Shapes''}
+
+\alec{reference surface-based multi-resolution methods
+   \cite{Aksoylu2005msu,Chuan:2009:ELO}}
+
+\alec{reference recent collision detection papers \cite{BEB2012,Wang:2014:DCC}: I
+   guess we could at least say that we lean on implementations of collision
+   detection in ElTopo/SPACM but we readily benefit from new advances in
+   faster  robust detection.}
