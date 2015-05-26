@@ -10,8 +10,6 @@
 - changed all \shortcite (e.g. ``Sander et al.\ ... [2000]") citations to \cite
   (e.g. ``[Sander et al.\ 2000] ...'')
 
-
-
 # Changes that should be made with notes already in tex
 
  - Claim that watertightness is only important property need from decimation,
