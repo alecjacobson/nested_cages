@@ -91,16 +91,29 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = multires_per_layer(V0
     end
     v=v+1;
   end
+  
+  % number of levels
+  num_levels = size(levels,2);
 
     % check if layers were previously prescribed
   if (isempty(V_coarse) && isempty(F_coarse))
       decimation_given = 0;
   else
       decimation_given = 1;
+      % overwrite number of levels (it doesn't matter 'levels',
+      % what matters is the number of given decimations)
+      num_levels = size(V_coarse,2)
+      for k=1:num_levels
+        [~,~,IF] = selfintersect(V_coarse{k},F_coarse{k},'FirstOnly',true); 
+        assert(size(IF,1)==0,'One of the given decimations self-intersects');
+      end
   end
-
-  % number of levels
-  num_levels = size(levels,2);
+  
+  % fire a warning mesh if input mesh self-intersects
+  [~,~,IF] = selfintersect(V0,F0,'FirstOnly',true);
+  if (size(IF,1)>0)
+      warning('Input mesh self-intersects');
+  end
 
   if (isempty(V_coarse)&&isempty(F_coarse))
       % coarsen the mesh with Qslim with different levels
