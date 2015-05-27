@@ -110,9 +110,11 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = multires_per_layer(V0
   end
   
   % fire a warning mesh if input mesh self-intersects
-  [~,~,IF] = selfintersect(V0,F0,'FirstOnly',true);
-  if (size(IF,1)>0)
-      warning('Input mesh self-intersects');
+  if (~shrink_points)
+      [~,~,IF] = selfintersect(V0,F0,'FirstOnly',true);
+      if (size(IF,1)>0)
+          warning('Input mesh self-intersects');
+      end
   end
 
   if (isempty(V_coarse)&&isempty(F_coarse))
