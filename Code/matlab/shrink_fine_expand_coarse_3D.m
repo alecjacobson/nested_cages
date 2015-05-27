@@ -93,7 +93,17 @@ function [Pall_fine,Pall_coarse] = shrink_fine_expand_coarse_3D( ...
   % concatenate meshes and test for intersections
   V_all = [V_exp;V_shrink];
   F_all = [F_exp;F_shrink+size(V_exp,1)];
-  IF = intersect_other(V_shrink,F_shrink,V_exp,F_exp,'FirstOnly',true);
+  if (~shrink_points)
+      IF = intersect_other(V_shrink,F_shrink,V_exp,F_exp,'FirstOnly',true);
+  else
+      W = winding_number(V_exp,F_coarse,V_shrink);
+      fprintf('%05d: number of points outside \n',sum(W<(1-1e-4)));
+      if (norm(W-ones(size(V_shrink,1),1))<1e-6)
+          IF = [];
+      else
+          IF = 1;
+      end
+  end
 
   %initialize flow
   ii = 1;
@@ -112,16 +122,29 @@ function [Pall_fine,Pall_coarse] = shrink_fine_expand_coarse_3D( ...
   % initialize all vertices as moving vertices
   moving_vertices_coarse = ones(size(V_exp,1),1);
 
-  % flow settings for the fine mesh
-  area_initial_shrink = doublearea(V_shrink,F_shrink)/2;
-  A_qv_shrink = grad_quadrature_to_vertices(V_shrink,F_shrink,area_initial_shrink,quadrature_order);
-  % needed to run 'signed_distance_direction_quadrature_matrix'
-  % remove in the future
-  M_shrink = massmatrix(V_shrink,F_shrink,'barycentric');
-  w_lap_shrink = smoothing;
-  L_shrink = cotmatrix(V_shrink,F_shrink);
-  % initialize all vertices as moving vertices
-  moving_vertices_shrink = ones(size(V_shrink,1),1);
+  if (~shrink_points)
+      % flow settings for the fine mesh
+      area_initial_shrink = doublearea(V_shrink,F_shrink)/2;
+      A_qv_shrink = grad_quadrature_to_vertices(V_shrink,F_shrink,area_initial_shrink,quadrature_order);
+      % needed to run 'signed_distance_direction_quadrature_matrix'
+      % remove in the future
+      M_shrink = massmatrix(V_shrink,F_shrink,'barycentric');
+      w_lap_shrink = smoothing;
+      L_shrink = cotmatrix(V_shrink,F_shrink);
+      % initialize all vertices as moving vertices
+      moving_vertices_shrink = ones(size(V_shrink,1),1);
+  else
+      % flow settings for the fine mesh
+      area_initial_shrink = [];
+      A_qv_shrink = [];
+      % needed to run 'signed_distance_direction_quadrature_matrix'
+      % remove in the future
+      M_shrink = [];
+      w_lap_shrink = [];
+      L_shrink = [];
+      % initialize all vertices as moving vertices
+      moving_vertices_shrink = [];
+  end
 
   % plot general options
   axis equal;
@@ -214,7 +237,7 @@ function [Pall_fine,Pall_coarse] = shrink_fine_expand_coarse_3D( ...
           V_exp,F_coarse, ...
           moving_vertices_shrink, ...
           A_qv_shrink,M_shrink, ...
-          w_lap_shrink,L_shrink,1,'step',step_size,'pflow',pflow);
+          w_lap_shrink,L_shrink,1,shrink_points,'step',step_size,'pflow',pflow);
 
       if positive_projection
         % Per-vertex direction

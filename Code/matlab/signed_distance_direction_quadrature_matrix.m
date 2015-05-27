@@ -1,4 +1,4 @@
-function [V,moving_vertices,grad_V,quad_points,grad_quadrature,C,s] = signed_distance_direction_quadrature_matrix(V0,F0,steps,order,V_coarse,F_coarse,moving_vertices,A,M,w_lap,L,sign_increase,varargin)
+function [V,moving_vertices,grad_V,quad_points,grad_quadrature,C,s] = signed_distance_direction_quadrature_matrix(V0,F0,steps,order,V_coarse,F_coarse,moving_vertices,A,M,w_lap,L,sign_increase,shrink_points,varargin)
   % SIGNED_DISTANCE_DIRECTION_QUADRATURE_MATRIX
   % [V,moving_vertices,grad_V,quad_points,grad_quadrature,C] = signed_distance_direction_quadrature_matrix(V0,F0,steps,order,V_coarse,F_coarse,moving_vertices,A,M,w_lap,L)
   %
@@ -26,6 +26,7 @@ function [V,moving_vertices,grad_V,quad_points,grad_quadrature,C,s] = signed_dis
   %   w_lap: scalar that defines the ammount of smoothing
   %   L: cotangent matrix w.r.t. initial mesh
   %   sign_increase: 1 of maximum decrase and -1 if maximum increase
+  %   shrink_points: true if point cloud
   % Output:
   %   V   (#vertices)x3 list of new mesh vertex positions of 
   %   the fine mesh
@@ -221,10 +222,14 @@ function [V,moving_vertices,grad_V,quad_points,grad_quadrature,C,s] = signed_dis
             
       % smooth if necessary (changed by constant smoothing)
       S = s*ones(size(V0,1),1)*sign_increase;
-      M_new = massmatrix(V0,F0,'barycentric');
-      rhs_MCF = M_new*V_shrink;
-      A_MCF = (M_new-initial_s*L);
-      V_shrink = [M*speye(size(V0,1));w_lap*A_MCF]\[M*(V_shrink-(S*ones(1,3)).*(grad_V));w_lap*rhs_MCF];
+      if (~shrink_points)
+          M_new = massmatrix(V0,F0,'barycentric');
+          rhs_MCF = M_new*V_shrink;
+          A_MCF = (M_new-initial_s*L);
+          V_shrink = [M*speye(size(V0,1));w_lap*A_MCF]\[M*(V_shrink-(S*ones(1,3)).*(grad_V));w_lap*rhs_MCF];
+      else
+          V_shrink = V_shrink-s*grad_V;
+      end
       
   end
   
