@@ -309,11 +309,18 @@ choice of diagonals splitting each quad.
 In \reffig{swat-cage}, we again adapt the optimization energy, this time to
 maintain the reflectional symmetry of the coarse input cage.
 %
-The input \emph{S.W.A.T.\ man} mesh is riddled with meshing artifacts, but we
-may still flow it inside the coarse mesh.
+The input polygon soup \emph{S.W.A.T.\ man} is riddled with meshing artifacts,
+but we may still flow it inside a coarse cage.
 %
 Though details on the expanding input mesh are asymmetric (see hip pockets or
 hands), the energy minimization keeps the cage symmetric.
+
+\alec{``Tone down homeomorphism requirement: topological noise.'' Mention here
+that SWAT is not strictly homeomorphic to cage as it contains topological
+noise, but it is homeomorphic to the solid the SWAT mesh abstractly represents:
+a topological sphere. This leads into the point cloud examples.}
+
+\alec{``How can point clouds/polygon soups be handled?''}
 
 \alec{``Would have appreciated seeing (more) coarser cages."}
 
@@ -329,4 +336,3 @@ hands), the energy minimization keeps the cage symmetric.
 
 \alec{``No high genus results."}
 
-\alec{``How can point clouds/polygon soups be handled?''}
