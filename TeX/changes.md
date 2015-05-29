@@ -1,15 +1,21 @@
 # list of changes made since submission
 
-- cited and compares to [Sander et al.\ 2000] see \reffig{dane-vs-ben-chen}
-- typos in text and equations noted by previous reviews
-- handles.obj meshes have been fixed and checks have been added to
-  algorithm to ensure that decimations meet assumptions on input
-- clarified that multi-resolution Poisson equations are volumetric not
-  surface-based and explicitly state that interior of cages are meshed with
-  tetrahedra
-- changed all \shortcite (e.g. ``Sander et al.\ ... [2000]") citations to \cite
-  (e.g. ``[Sander et al.\ 2000] ...'')
-- Must check one vertex per connected component is inside
+ - cited and compares to [Sander et al.\ 2000] see \reffig{dane-vs-ben-chen}
+ - typos in text and equations noted by previous reviews
+ - handles.obj meshes have been fixed and checks have been added to
+   algorithm to ensure that decimations meet assumptions on input
+ - clarified that multi-resolution Poisson equations are volumetric not
+   surface-based and explicitly state that interior of cages are meshed with
+   tetrahedra
+ - changed all \shortcite (e.g. ``Sander et al.\ ... [2000]") citations to \cite
+   (e.g. ``[Sander et al.\ 2000] ...'')
+ - Must check one vertex per connected component is inside
+ - cited \cite{Aksoylu2005msu,Chuang:2009:ELO]} and discussed surface-based
+   multiresolution
+ - octopus in timings table differs from octopus used in multi-res example
+ - frustrating that discussion of other options and previous work came after
+   proposal of ideas
+ - theoretical snags are not adequately discussed
 
 # Changes that should be made with notes already in tex
 
@@ -30,7 +36,6 @@
    attempts: Only really makes sense for ARAP, doesn't make much of a
    difference and adds parameters (for stability).
  - I would have appreciated seeing (more) coarser cages
- - octopus in timings table differs from octopus used in multi-res example
  - no high genus inputs 
  - Cite papers that have used cell-replicating:
    \cite{Teran:2005:CSS,Nesme:2009:PTE}
@@ -93,19 +98,16 @@
    be a problem size big enough that direct solver will choke: This is just
    asymptotic analysis of memory.
  - How can point clouds/polygon soups be handled?
+ - Tone down homeomorphism requirement: topological noise
 
 # Changes that should be made without notes in tex
 
- - Tone down homeomorphism requirement: topological noise
  - how does the method _rely_ on the input simplification?
  - when and in which configuration will the algorithm break?
  - "the initial flow is not guaranteed to work": show impossible csaszar-torus
    case, discuss types of meshes where flow fails: "surface too close to medial
    axis?"
- - theoretical snags are not adequately discussed
  - need stronger argument for strict nesting
- - frustrating that discussion of other options and previous work came after
-   proposal of ideas
  - discuss drawbacks in situa rather than at the end
  - hahaha, "paper should be 8-pages instead of 12"
  - discussion of problem difficulty before jumping into concrete solution

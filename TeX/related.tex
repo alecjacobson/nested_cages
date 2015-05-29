@@ -1,24 +1,136 @@
+\section{Related Methods and Special Cases}
 
-\section{Related work}
-\label{sec:related}
+Although our method is the first to solve the nested cage problem for the large
+variety of input meshes shown in \refsec{results} \emph{while} interoperating
+with arbitrary problem-specific decimation algorithms and fitness functions,
+many related approaches have been proposed that work for special cases, or
+relax some of the requirements imposed above.
 
-\paragraph{Multiresolution}
+If the algorithm is free to generate the coarse cage $\Cinp$, rather than
+accepting it as input from the user, the problem becomes substantially easier,
+and has been extensively studied:
 %
-Methods based on regular grids or lattices naturally support multiresolution numerical methods.
+\begin{figure}[b]
+\includegraphics[width=\linewidth]{figs/warrior-poisson-vs-cgal}
+\caption{Contouring requires aggressive spacing between distance-field
+isolevels to produce valid nesting. Semantically distant parts \emph{fuse}
+together, destroying shape-awareness, visualized by a pseudocoloring of a
+Poisson solution computed on each level.} \label{fig:warrior-poisson}
+\end{figure}
+
+\paragraph{Bounding polytopes.}
 %
-\cite{McAdams:2011}
+Most naively, one can simply take $\Cinp$ to be a canonical bounding polytope
+(e.g.\ box, KDOP, convex hull), perhaps also ``shrink-wrapping'' it around
+$\Finp$ to minimize $E$. This approach works well for convex $\Finp$, but will
+not give a good fit for meshes with nooks and concavities. It is also not clear
+how to find a bounding polytope for meshes of nontrivial topology.
+%
+Another approach might be to stitch overlapping convex volumes
+\cite{Xian:2012tv} using mesh boolean operations, but cage topology and
+\emph{quality} become difficult to control without sacrificing control of
+resolution.
+
+\paragraph{Offset surfaces for simulation meshes.}
+%
+Representing $\Finp$ as an implicit surface and \emph{contouring level
+sets} is a popular method of creating offset surfaces that nest $\Finp$,
+particularly in the context of simulations that use a ``simulation mesh'' as a
+proxy for very fine rendered geometry~\cite{Campen:2010}. The challenge is not
+just defining a scalar function with an isosurface enveloping the object, but
+also contouring it with a piecewise-linear triangle mesh without (i) cutting
+corners too harshly and intersecting $\Finp$ or (ii) resorting to fine
+resolution, nullifying any performance gains of using the cage.
+%
+Xu et al~\shortcite{Xu:2014:SDF} define a robust signed distance field, but
+pass the field to an off-the-shelf contour mesher without any attempt to
+guarantee non-intersection with the input.  Similarly, Shen at
+al~\shortcite{Shen:2004:IAI} iteratively refine a moving least squares
+iso-surface to enclose an existing model tightly via a global scaling
+parameter. Though the \emph{continuous} isosurface may not intersect the input
+model, generic contouring invalidates this. A large enough iso-value or
+small-enough resolution tolerance must always be chosen to ensure
+non-intersection after contouring. For large iso-values, topological control is
+lost and close features are quickly merged (see \reffig{warrior-poisson}),
+violating the nestedness of the cage. A similar
+approach~\cite{Ben-Chen:2009:SDT} has been used for building deformation cages
+around input shapes, where an offset surface is created via Poisson surface
+reconstruction~\cite{PoissonSurfaceReconstruction06} (we compare against this
+approach in ~\reffig{dane-vs-ben-chen}).
+%
+For meshes with well defined feature curves, it may be possible to merge coarse
+on-surface triangulations of patches \cite{Xian:2013}, though strict nesting is
+not sought or guaranteed.
+
+\begin{figure}
+  \includegraphics[width=\linewidth]{figs/dane-horse-vs-ben-chen-vs-sander}
+  \caption{Methods like \protect\cite{Ben-Chen:2009:SDT} use coarse cages as
+  computational workhorses to reduce complexity. Their iterative offset
+  heuristic produces oversmoothed, loosely fitting cages.
+  %
+  Meanwhile, \protect\cite{Sander:2000:SC} attempt to
+  maintain nestedness during greedy decimation with local constraints. Cages
+  are also loose, but more importantly self-intersections (orange) and
+  intersections with the input model (yellow) eventually accumulate.}
+  \label{fig:dane-vs-ben-chen}
+\end{figure}
+
+\paragraph{Progressive decimation} of $\Finp$ using edge collapses, taking care
+to place new vertices on the exterior of the current volume by solving a system
+of inequality constraints~\cite{Sander:2000:SC}, has found some success in
+real-time rendering and intersection applications \cite{Platis:CGF}.  Although
+the \emph{vertices} of these ``progressive hulls'' are guaranteed to lie
+outside of the volume of $\Finp$, edges and faces of $\Cinp$ might still
+intersect $\Finp$ (and $\Cinp$ might globally self-intersect); see
+\reffig{dane-vs-ben-chen}. We tested this method on the entire ``zoo'' of
+examples shown in \reffig{zoo} and the supplementary material, and of the 26
+examples there, in only one case was the entire hierarchy free of such
+intersections. We also observe that for coarse cages these hulls tend to be
+more loose-fitting than cages produced by methods that optimize the cage shape
+globally (see \reffig{dane-vs-ben-chen}).  Self-intersections resulting from
+edge collapses can be corrected with post-hoc mesh repair~\cite{Deng:2011vr},
+but this technique relies on temperamental 3D tetrahedral meshing in tight
+regions near overlaps and does not consider face-/edge-intersections with
+the input model.
+
+\paragraph{Voxelization} of $\Finp$ will create a nested cage, provided that
+the resolution of the voxel grid is chosen fine enough to avoid topological
+artifacts (as in the case of contouring implicit functions). Naive voxelization
+yields dense, inefficient cages \cite{Mehra:2009:AMS}, possibly improved by
+progressive decimation~\cite{Xian:2009} or mesh booleans~\cite{Xian:2015}
+though also inheriting their respective drawbacks.
+
+\paragraph{Mesh untangling.}
+%
+All of the above methods require relinquishing some degree of control over
+decimation to the nested cage algorithm; algorithms that accept an arbitrary
+pre-decimated cage $\Cinp$ are less well-developed. \emph{History-free} cloth
+collision response methods~\cite{Baraff:2003:UC,Volino2006,Ye2012,Wicke2006}
+be used to separate $\Cinp$ from $\Finp$ if the degree of intersection is
+not too severe; otherwise such methods tend to become stuck in local minima.
+Finally, one might try to flow $\Cinp$ away from $\Finp$ along the latter's
+signed distance field; we experimented with this approach before settling on
+the algorithm based on inward flow described below. While outward flow works
+well for convex meshes, for concave $\Finp$ it is common for edges of $\Cinp$
+to intersect $\Finp$ even in the limit of flowing for infinite time.
+
+\paragraph{Multiresolution.}
+%
+Methods based on regular grids or lattices naturally support multiresolution
+numerical methods.
+%
+McAdams et al.\ \shortcite{McAdams:2011}
 successfully employ multigrid on voxelized shapes to animate
-elastic characters..
+volumetric elastic characters.
 %
-The main downside of grid-based methods is their handling of irregular
-boundaries.
+The main downside of grid-based methods is their traditionally poor handling of
+irregular boundaries.
 %
-\alec{previous multi-grid methods handle complicated boundaries
-\cite{Dick:2011,Ferstl:2014} Use adaptive octree multigrid solvers for
-fractures and fluids, respectively.  Though supporting complicated and even
-dynamic boundaries, they are not immune to troubles of regular grids:
-boundaries must be uniformly represented at the finest grid level to avoid
-aliasing.}
+Specialized multigrid methods using adaptive octree to handle complex
+boundaries for fractures \cite{Dick:2011} and fluids \cite{Ferstl:2014} exist,
+but are not immune to troubles of regular grids: boundaries must be 
+represented at fine grid levels to avoid aliasing and retain the input's
+topology.
 %
 To avoid \emph{fusing} together geodesically distant parts, the
 shape must be modeled in an accommodating pose. If remodeling is not
@@ -54,15 +166,6 @@ coarsening will not \emph{eat away} large portions of the domain.
 In many scenarios, the boundary of the domain is assumed to be only as
 irregular as the coarsest layer, simplifying level design \cite{feng1997non}.
 
-\begin{figure}[b]
-  \includegraphics[width=\linewidth]{figs/warrior-poisson-vs-cgal}
-  \caption{Contouring requires aggressive spacing between distance-field
-  isolevels to produce valid nesting. Semantically distant parts \emph{fuse}
-  together, destroying shape-awareness, visualized by a pseudocoloring of a
-  Poisson solution computed on each level.} 
-  \label{fig:warrior-poisson}
-\end{figure}
-
 %\cite{fish1995efficient} just an example of a (nonlinear) multigrid solver
 %which expects the user to provide (nested?) tetrahedral meshes as input.
 %
@@ -71,15 +174,16 @@ irregular as the coarsest layer, simplifying level design \cite{feng1997non}.
 %mesh coincide: user provides meshes. I'm not sure how much better this
 %restriction would really be compared to simple barycentric one.
 
-A second group of methods generates a multiresolution hierarchy using decimation. Unmodified mesh decimations \cite{Garland:1997:SSU} have been used for adaptive
-simulations for visco-elastic solids \cite{Debunne:2001:DRD}.
+A second group of methods generates a multiresolution hierarchy using
+decimation. Unmodified mesh decimations \cite{Garland:1997:SSU} have been used
+for adaptive simulations for visco-elastic solids \cite{Debunne:2001:DRD}.
 %
 Such non-nested cages require extrapolation or one-to-many mappings to
 \emph{prolongate} solutions on the coarse levels to finer levels.
 %
 We show cases where this fails to converge for common linear systems on
-irregular domains, and we show better convergence for strictly nesting cages where
-prolongation is a purely linear interpolation.
+irregular domains, and we show better convergence for strictly nesting cages
+where prolongation is a purely linear interpolation.
 
 Algebraic alternatives to geometric remeshing also exist,
 but are recommended only when geometric information is not available
@@ -93,105 +197,9 @@ This method combines the elegance of algebraic techniques with some geometric
 information derived from the characteristics of the Laplacian matrix, but is
 limited to special problems.
 
-\paragraph{Offset surfaces for simulation meshes}
-In addition to multiresolution layers, our method is suitable for creating a
-single-layer ``simulation mesh'' for physically based animation.
-%
-A simulation mesh reduces computational complexity and ensures robust
-deformations for the complex, artifact-ridden geometries embedded inside them.
-%
-Previous practitioners have experimented with automatic means to create the
-surface of these simulation meshes via contouring offset surfaces
-\cite{Campen:2010}.
-%
-The challenge is not just defining a scalar function with an isosurface
-enveloping the object, but also \emph{contouring it} with a piecewise-linear
-triangle mesh without 1) cutting corners too harshly and intersecting the input
-or 2) resorting to fine resolution nullifying any performance gains.
-%
-\cite{Xu:2014:SDF} define a robust signed distance field, but
-pass the field to an off-the-shelf contour mesher without any attempt to
-guarantee non-intersection with the input.
-%
-Similarly, \cite{Shen:2004:IAI} iteratively refine a moving
-least squares iso-surface to enclose an existing model tightly via a global
-scaling parameter. Though the \emph{continuous}
-isosurface may not intersect the input model, generic contouring invalidates
-this.
-%
-A large enough iso-value or small-enough resolution tolerance must always be
-chosen to ensure non-intersection after contouring.
-%
-For large iso-values, topological control is lost and close features are
-quickly merged (see \reffig{warrior-poisson}).
-%
-Whereas high-resolution contouring could actually lead to a more densely sampled
-surface than the input.
-%
-By deforming input decimations, we constrain our pipeline to ensure its output
-will match the desired mesh resolutions. 
-
 \alec{collision detection schemes do not need intermediary triangle so isosurface
 of distance fields are OK for that application.}
 
-
-\begin{figure}
-  \includegraphics[width=\linewidth]{figs/dane-horse-vs-ben-chen-vs-sander}
-  \caption{Methods like \protect\cite{Ben-Chen:2009:SDT} use coarse cages as
-  computational workhorses to reduce complexity. Their iterative offset
-  heuristic produces oversmoothed, loosely fitting cages.
-  %
-  Meanwhile, \protect\cite{Sander:2000:SC} attempt to
-  maintain nestedness during greedy decimation with local constraints. Cages
-  are also loose, but more importantly self-intersections (orange) and
-  intersections with the input model (yellow) eventually accumulate.}
-  \label{fig:dane-vs-ben-chen}
-\end{figure}
-
-\paragraph{Automatic cages for deformation}
-%
-Most generalized barycentric coordinates used for shape deformation expect an
-input ``cage'' to be completely exterior to the input shape (e.g.\
-\cite{Ju:2005:MVC,HarmonicCoodinates07}).
-%
-Creating such cages manually is time consuming and breaks automatic pipelines.
-%
-\cite{Ben-Chen:2009:SDT} create exterior cages
-automatically by iteratively creating an offset surface via Poisson surface
-reconstruction \cite{PoissonSurfaceReconstruction06}. There is no guarantee
-that this process will converge. 
-\alec{Not fair, since ours will not converge.}
-%
-Further, a single-layer cage created with our
-method is much tighter fitting for the same vertex count (see
-\reffig{dane-vs-ben-chen}).
-%
-Xian et al.\ 
-construct automatic cages by simplifying dense voxelizations
-\cite{Xian:2009},
-stitching oriented bounding boxes
-around vertex clusters \cite{Xian:2012tv}, or by offsetting coarse
-on-surface triangulations of feature curves \cite{Xian:2013}.
-%
-\cite{Sander:2000:SC} attempt to keep coarse meshes exterior during decimation
-by enforcing local inequality constraints.
-%
-\cite{Deng:2011vr}
-use a similar construction and resort to post-hoc global
-intersection resolution to repair invalid output cages.
-%
-Though these ``progressive hulls'' found some success in real-time rendering
-and intersection applications \cite{Platis:CGF}, these cages are often dense or
-loose fitting and may still self-intersect or intersect the input shape ad
-other layers globally, as only local checks are conducted. \alec{We compare to
-\cite{Sander:2000:SC} in XXX.}
-%
-\alec{Incorporating decimation into our pipeline is tempting. The ability to
-add or remove extra degrees of freedom according to the tightness of fit or
-difficulty to maintain nestingness is attractive. To this end, we experimented
-with subdivision, but then it was difficult to ensure that our output stays
-coarse. Nevertheless, this could be interesting future work and may be
-necessary in some impossible configurations (see Csasar counterexample)}
 
 %Alternatives to geometric multigrid: algebraic multi-grid (cite Brandt) or
 %algebraic techniques for special problem \cite{Krishnan:2013:EPL} (doesn't
@@ -200,6 +208,7 @@ necessary in some impossible configurations (see Csasar counterexample)}
 %\cite{CGCDP:2002} assume a subdivision lattice containing the deforming shape
 %as part of the input. Presumably this cage is modeled manually.
 
+\alec{Should we include any of this:}
 \paragraph{Decimation}
 %
 The majority of surface mesh decimation techniques aim to preserve outward
@@ -228,15 +237,7 @@ Rather than work against the staggering quality of existing shape decimation
 techniques, we complement them. Our method takes as input an arbitrary
 decimation and works as a post process to nest each layer.
 
-%Flows
-%\cite{Kazhdan2012} remove singularities, also self-intersections
-%\cite{Sacht:SIV:2013}, in general, will not move inside original surface
-
-% Alternating global scaling and attraction, attempts to move inside. No
-% guarantees, requires parameter tuning \cite{Wang:2008}
-
-%\cite{Tagliasacchi:2012:MCS} coerces flow toward the medial axis
-
+\alec{Should we include any of this?}
 We credit \cite{ContactAwareModeling:2011} for their
 ground-breaking introduction of contact handling to mainstream geometry
 processing. Their work inspires us to consider the contact and collisions
@@ -260,10 +261,6 @@ With our feasible state, the volume minimization of
 \cite{ContactAwareModeling:2011} could then be an alternative to our use of
 constraint satisfaction to resolve collisions.
 
-\alec{Cite enveloping in ``Abstraction of Man-Made Shapes''}
-
-\alec{reference surface-based multi-resolution methods
-   \cite{Aksoylu2005msu,Chuang:2009:ELO}}
 
 \alec{reference recent collision detection papers \cite{BEB2012,Wang:2014:DCC}: I
    guess we could at least say that we lean on implementations of collision

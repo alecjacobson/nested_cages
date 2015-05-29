@@ -4,7 +4,7 @@
 \begin{figure}[b]
   \includegraphics[width=\linewidth]{figs/horse-25-layers}
   \caption{Our tight nesting property is robust even when the number of cages
-  is large: 25 around this \emph{Horse}.}
+  is large: 25 around this \emph{Horse}. \alec{no ref in new intro text}}
   \label{fig:horse-25-layers}
 \end{figure}
 
@@ -23,144 +23,96 @@ where conservative culling reduces computation time. For all these
 applications, the key to high performance is the ability to generate a quality
 multiresolution hierarchy.
 
-\paragraph{Desiderata} Although emphasis varies according to application, an
-ideal multiresolution hierarchy possesses several properties useful across a
-broad spectrum of applications (see \reftab{feature-chart}):
+The straightforward approach to building a hierarchy around an object $\Fout$ is
+to use an application-specific decimation algorithm to build a coarse
+approximation $\Cout$ to $\Fout$; $\Cout$ itself can be further coarsened to build the
+next level of the hierarchy, etc. Unfortunately $\Cout$ will typically intersect
+$\Fout$, which is often undesirable: most algorithms for transferring the pose of
+a deformation cage to a detailed object only guarantee small distortion of the
+object and lack of element-inversion artifacts if the object is entirely
+contained within the cage \cite{HarmonicCoodinates07,Ben-Chen:2009:VHM}; strict
+nesting is essential for accelerating collision detection
+\emph{conservatively}; and while nesting is not a necessary condition for
+multiresolution convergence \cite{Chan96overlappingschwarz}, the ability to use
+simple linear interpolation for prolongation is known to produce more robust,
+more efficient, and easier to implement solvers
+\cite{chan2000robust,dickopf2010multilevel}. This is particularly important for
+enforcing Neumann boundary conditions, common to simulation and geometry
+processing \cite{chan1999boundary}.
 
-\begin{table}
+\begin{wrapfigure}{r}{1.02in}
+%
 \centering
-\ra{1.2}
-\setlength{\tabcolsep}{5.5pt}
-\rowcolors{2}{white}{lightbluishgrey}
-\begin{tabularx}{\linewidth}{X c c c}
-\rowcolor{white}
-\toprule
-Method               & \textsc{Homeomorphic} & \textsc{Nesting}& \textsc{Tight} \\
-\midrule                                                                       
-\textbf{Our method}  & \YES                  & \YES            & \YES           \\
-\emph{Decimation}                                                               
-                     & \YES                  & \NO             & \YES           \\
-\emph{Voxelization}                                                             
-                     & \NO                   & \YES            & \NO            \\
-\emph{Level-set}                                                                
-                     & \NO                   & \YES            & \NO            \\
-\bottomrule
-\end{tabularx}
-\caption{Hierarchy construction feature chart: Previous techniques fall short
-on one property or another.}
-\label{tab:feature-chart}
-\end{table}
+%
+\includegraphics[trim=0 0 0 3mm,width=\linewidth]{figs/boxer-cages-not-cages}
+%
+\end{wrapfigure}
+%
+For these reasons, one would like a cage $\Cout$ that is \emph{nested} around
+$\Fout$: that surrounds $\Fout$ without intersecting it. More formally, given two
+watertight (connected, closed, self-intersecting-free and oriented)
+homeomorphic meshes.\footnote{For clarity of exposition we assume here that
+$\Cout$ and $\Fout$ are watertight meshes; later in the paper we generalize our
+method to build cages for other types of geometric objects $\Fout$ such as
+triangle soups, point clouds, etc.}
+%
+$\Cout$ and $\Fout$, we say that $\Cout$ \emph{nests} $\Fout$ if: 
+%
+(i) $\Fout$ is contained in the interior of $\Cout$, and 
+%
+(ii) there is a homotopy from $\Cout$ to $\Fout$ that remains at all times inside
+$\Cout$'s volume. 
+%
+The inset figure shows some examples of cages that do (top) and do not (bottom)
+nest a 2D example shape (black outline). Given a $\Cinp$ that does not nest
+$\Fout$, we can look for the best perturbation $\Cout$ of $\Cinp$ that does
+nest $\Fout$; where ``best'' is measured by an application-dependent fitness
+energy $E(\Fout, \Cinp, \Cout)$ which penalizes, for example, total volume for
+tight fitting cages for efficient multiresolution solvers; as-rigid-as-possible
+energy for minimal distortion for simulation or collision handling; or
+violations of symmetry and quad planarity for automatically computing
+interactive deformation cages.  Finding this $\Cout$ entails solving the
+\emph{nested cage problem}:
 
-\noindent \textsc{Homeomorphic}: All levels of the hierarchy respect the
-\emph{topology} of the original mesh, and do not introduce any large global
-errors in the object geometry. It is important to differentiate between two
-types of distances: \emph{embedded distance} in
-ambient space, and \emph{intrinsic distance} within the shape.
-%
-It is possible for two points that are nearby in embedded distance to be very
-far apart in intrinsic distance. Consider a human stretching her hands to
-nearly touch her toes. The fingertips and toes may be within millimeters across
-ambient space but meters apart intrinsically.
-%
-It is critical for many applications that coarse cages do not fuse together
-intrisically-distant parts. It would be unacceptable when animating a 
-human's fingers if the toes moved as well.
-%
-Similarly, when calculating the vibration modes of a broken ring, fusing the
-ring and changing its topology would lead to largely incorrect low energy
-modes.
+Given an embedded polyhedron $\Fout$, a polyhedron $\Cinp$ homeomorphic to $\Fout$, and a
+fitness function $E$, minimize $E(\Fout, \Cinp, \Cout)$ over all embeddings
+$\Cout$ of $\Cinp$ that nest $\Fout$.
 
-\noindent \textsc{Nesting}:
-%
-Each mesh of the hierarchy completely \emph{encloses} the next-finest mesh, as
-well as all finer meshes.
-%
-Most algorithms for transferring the pose of a deformation cage to a detailed
-object only guarantee small distortion of the object and lack of
-element-inversion artifacts if the object is entirely contained within the cage
-\cite{HarmonicCoodinates07,Ben-Chen:2009:VHM}.
-%
-Strict nesting is essential for accelerating collision detection
-\emph{conservatively}.
-%
-Nesting is not a necessary condition for multiresolution convergence
-\cite{Chan96overlappingschwarz}, but the ability to use simple linear
-interpolation for prolongation is known to produce more robust, more efficient,
-and easier to implement solvers \cite{chan2000robust,dickopf2010multilevel}.
-%
-This is particularly important for enforcing Neumann boundary conditions,
-common to simulation and geometry processing \cite{chan1999boundary}.
 
-\noindent \textsc{Tight}:
-%
-Each mesh in the hierarchy fits \emph{tightly} around the next-finest level of
-the hierarchy (see \reffig{horse-25-layers}).
-%
-Tightness can be quantified by the volume or Hausdorff distance between cages.
-%
-Across all applications, a tight fit minimizes the geometric error at the
-object boundary incurred by simplifying the input mesh.
+\begin{figure}
+  \includegraphics[width=\linewidth]{figs/torus-counterexample}
+  \caption{Some coarse-fine mesh combinations are impossible. The
+  \emph{Cs\'asz\'ar torus} is too coarse to properly nested around the
+  \emph{Squiggly torus}'s complex handle. While embedding the \emph{Squiggly
+  torus} \emph{inside} the \emph{Cs\'asz\'ar torus} is possible (right), this
+  is not a validly \emph{nesting} cage.}
+  \label{fig:torus-counterexample}
+\end{figure}
 
-Existing popular approaches to construct coarse cages satisfy some, but not
-all, of these three properties.
+This problem in its full generality is almost certainly intractable. For
+polygons in 2D, and simply-connected meshes in 3D, at least one nested
+embedding $\Cout$ always exists, but once $\Fout$ is allowed to have nontrivial
+topology, counterexamples exist where it is impossible to embed $\Cinp$ in a way
+that nests $\Fout$ (see \reffig{torus-counterexample}). In fact in 3D the decision
+problem of whether any nesting of $\Cinp$ around $\Fout$ exists is at least as hard
+as the graph isomorphism problem\alec{ (see Appendix for a reduction)}.
+Fortunately, in practice $\Cinp$ and $\Fout$ are not completely arbitrary; any
+reasonable decimation scheme will keep $\Cinp$ morphologically similar, and
+roughly aligned, to $\Fout$, and these favorable initial conditions can be
+leveraged by heuristics.
 
-\emph{Decimation} of the original surface mesh may yield coarse
-approximations fitting very tightly to the original and preserving detail.
-%
-Constrained decimations also preserve the topology of the original mesh, but in
-general a decimation will intersect the original mesh nearly everywhere, rather
-than encage it.
+\paragraph{Contribution} We present a practical algorithm for solving the
+nested cage problem on meshes typically used in applications such as physical
+simulation and geometric modeling. Our method is the first to do so while
+remaining completely \emph{agnostic} to the decimation scheme used to create
+$\Cinp$ and fitness function $E$. Briefly, the method first flows $\Fout$ inside $\Cinp$
+along $\Cinp$'s signed distance field; once inside, we rewind the flow while
+deforming $\Cinp$ to minimize $E$; contact forces guarantee that the coarse cage
+always encloses $\Fout$ at each reverse-flow time step. This process can be
+generalized to building an entire multiresolution hierarchy around $\Fout$.
+Although our method is not guaranteed to always find a solution $\Cout$,
+especially for very coarse or nearly-self-intersecting $\Fout$ (see
+\refsec{failure-cases}
+for discussion of failure cases), we tested our algorithm on an extensive zoo
+of example meshes (see \refsec{results}).
 
-\emph{Voxelization} of the object to a regular grid is guaranteed to produce
-an enclosing cage, but the fit will not be tight and intrinsically distant
-features can be fused together if the grid is too coarse. Adaptive grids
-(octrees, etc.) improve the fit and topological fidelity, but unless the object
-contains mostly axis-aligned features the resulting cage will not efficiently
-fit the object.
-
-\emph{Level-set} methods can ensure nesting, but can fuse spatially proximate
-features, changing the object topology. Strict nesting, and in turn tightness,
-are also in danger when using standard contouring as output surface meshes will
-cut corners in high curvature areas, leading to intersections with other
-cages.
-
-\paragraph{Our Contribution}
-%
-We propose an algorithm for computing a multiresolution hierarchy that
-satisfies all three of the desired properties.
-%
-Given an input mesh, we decimate the model to the desired levels while
-preserving its original topology.
-%
-We then recursively deform each cage to contain the next finest output
-cage.
-%
-Working with a consecutive pair of cages, we shrink the finer output cage along
-a signed-distance-field flow until inside the coarse cage.
-%
-We then rewind the flow, returning the fine cage to its original positions.
-During this \emph{re-inflation}, we run collision detection and handling
-\emph{à la} physical simulation to update the positions of the coarse
-containing cage. Contact forces guarantee that the coarse cage always encloses
-the reversing fine mesh at each reverse-flow time step.
-%
-When complete, the output coarse cage takes the role of the fine cage for the
-next coarsest layer.
-
-During re-inflation we optimize the positions of the coarse cage by minimizing
-a user-specified, problem-specific energy: for example, total volume for tight fitting
-cages for efficient multiresolution solvers, as-rigid-as-possible (ARAP) energy for
-minimal distortion for simulation or collision handling, or symmetry and quad
-planarity for automatically computing interactive deformation cages.
-
-% Multiresolution hierarchies
-  % tight fitting, enclosing, same topology
-
-% simulation meshes
-  % respect semantically distant parts
-
-% cages for deformation
-  % symmetric cages for overall symmetric shapes with asymmetric details
-  % planarity, first to show harmonic coordinates using quad cages
-
-% Coarse cages for conservative collision detection
