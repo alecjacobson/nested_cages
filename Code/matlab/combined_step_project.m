@@ -143,6 +143,28 @@ function [V_coarse_final,timing,Pall_expansion] = ...
     E = cb_data.E;
   end
 
+  function [G,cb_data] = surface_arap_newton(V0,F,V,arap_data)
+    % Gradient of surface based arap energy
+    %
+    % Inputs:
+    %   V0  #V by 3 list of rest-pose mesh vertex positions
+    %   F  #F by 3 list of mesh facet indices
+    %   V  #V by 3 list of deformed mesh vertex positions
+    % Outputs
+    %   G  #V by 3 list of gradient vectors
+    %   cb_data  callback data set with energy data.E and best fit rotations
+    %     data.R
+    %
+    cb_data.arap_data = arap_data;
+    [G,cb_data.E,cb_data.R,cb_data.arap_data] = ...
+      arap_gradient(V0,F,V,'Data',cb_data.arap_data,'SinglePrecision',true);
+    H = arap_hessian(V0,F,'EvaluationPoint',V,'Rotations',cb_data.R);
+    G = reshape(H\G(:),size(V));
+    %warning('Saving arap state');
+    %R = cb_data.R;
+    %save('arap.mat','V0','F','V','G','R');
+  end
+
   function [G,cb_data] = surface_arap_planarity_gradient(V0,F,V,arap_data,Fquad)
     cb_data.arap_data = arap_data;
     [G_arap,cb_data.E,cb_data.R,cb_data.arap_data] = ...
@@ -189,6 +211,32 @@ function [V_coarse_final,timing,Pall_expansion] = ...
     E = cb_data.E;
   end
 
+  function [G,cb_data] = volumetric_arap_newton(V,cb_data)
+    % Gradient of volumetric arap
+    % 
+    % Inputs:
+    %   V  #V by 3 list of deformed mesh vertex positions
+    %   cb_data  struct containing
+    %     .TV0  #TV>#V by 3 list of tet mesh vertices in initial positions: surface
+    %       vertices come first TV0 = [V0;steiner]
+    %     .TT  #TT by 4 list of tet mesh indices into TV
+    %     .TV  #TV by 3  new tet mesh vertices (with surface coming first
+    % Outputs:
+    %   G  #V by 3 list of gradient vectors
+    %   cb_data  unused output callback data field (needed to match expected
+    %     prototype)
+    b = 1:size(V,1);
+    % Save solution as initial value for next call
+    [cb_data.TV,cb_data.arap_data,~,R] = arap( ...
+      cb_data.TV0,cb_data.TT,b,V,'Energy','elements','V0',cb_data.TV,'Tol',1e-7,'MaxIter',inf, ...
+      'Data',cb_data.arap_data);
+    [G,cb_data.E] = arap_gradient(cb_data.TV0,cb_data.TT,cb_data.TV, ...
+      'Energy','elements','Rotations',R,'Data',cb_data.arap_data);
+    H = arap_hessian(cb_data.TV0,cb_data.TT,'EvaluationPoint',cb_data.TV,'Energy','elements','Rotations',R);
+    G = reshape(H\G(:),size(cb_data.TV));
+    G = G(b,:);
+  end
+
   function [energy_gradient,energy_value,cb_data] = ...
     energy_handles_from_string(energy)
     % for most energies call back data is not used
@@ -219,6 +267,13 @@ function [V_coarse_final,timing,Pall_expansion] = ...
           surface_arap_gradient(CV_ref,CF,CV_prev,cb_data.arap_data);
         energy_value  = @(CV_prev,cb_data) ...
           surface_arap_energy(CV_ref,CF,CV_prev,cb_data.arap_data);
+      case {'surface_arap_newton'}
+        % Call back data will be used to reduce calls to `fit_rotations`: this
+        cb_data.arap_data = [];
+        energy_gradient = @(CV_prev,cb_data) ...
+          surface_arap_newton(CV_ref,CF,CV_prev,cb_data.arap_data);
+        energy_value  = @(CV_prev,cb_data) ...
+          surface_arap_energy(CV_ref,CF,CV_prev,cb_data.arap_data);
       case {'volumetric_arap'}
         % Optimize for internal steiner points according to volumetric arap,
         % fixing surface to CV
@@ -230,6 +285,18 @@ function [V_coarse_final,timing,Pall_expansion] = ...
         cb_data.TV = cb_data.TV0;
         cb_data.arap_data = [];
         energy_gradient = @(CV_prev,cb_data) volumetric_arap_gradient(CV_prev,cb_data);
+        energy_value  = @(CV_prev,cb_data) volumetric_arap_energy(CV_prev,cb_data);
+      case {'volumetric_arap_newton'}
+        % Optimize for internal steiner points according to volumetric arap,
+        % fixing surface to CV
+        %
+        % Note: this is done only once at beginning of this flow step. It is
+        % **not** done for each call to `energy_gradient`
+        %
+        [cb_data.TV0,cb_data.TT,cb_data.TF] = tetgen(CV_ref,CF,'Flags','-q2Y');
+        cb_data.TV = cb_data.TV0;
+        cb_data.arap_data = [];
+        energy_gradient = @(CV_prev,cb_data) volumetric_arap_newton(CV_prev,cb_data);
         energy_value  = @(CV_prev,cb_data) volumetric_arap_energy(CV_prev,cb_data);
       case {'planarity'}
         energy_gradient = @(CV_prev,cb_data) planarity_gradient(CV_prev,Fquad);

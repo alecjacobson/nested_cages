@@ -142,6 +142,7 @@ function [CV_filtered,timing] = ...
 
       writeOBJ('mesh_0.obj',[V_prev;CV_prev],F_all);
       writeOBJ('mesh_1.obj',[V;CV_prev-beta*CV_grad],F_all);
+%       writeOBJ('/home/leo/PHD_Work/Cage_Generation_2013/nested_cages/Meshes/Results/raptor_claw/claw_cage.obj',CV_prev,CF);
       
       % Try to take one step using el topo
       %assert(isempty(intersect_other(V_prev,F,CV_prev,CF,'FirstOnly',true)));
