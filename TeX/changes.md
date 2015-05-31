@@ -16,6 +16,27 @@
  - frustrating that discussion of other options and previous work came after
    proposal of ideas
  - theoretical snags are not adequately discussed
+ - Cite papers that have used cell-replicating:
+   \cite{Teran:2005:CSS,Nesme:2009:PTE}
+ - previous multi-grid methods handle complicated boundaries
+   \cite{Dick:2011,Ferstl:2014} Use adaptive octree multigrid solvers for
+   fractures and fluids, respectively.  Though supporting complicated and even
+   dynamic boundaries, they are not immune to troubles of regular grids:
+   boundaries must be uniformly represented at the finest grid level to avoid
+   aliasing.
+ - reference and compare to algebraic multigrid \cite{ruge1987algebraic}.
+ - reference recent collision detection papers \cite{BEB2012,Wang:2014:DCC}: I
+   guess we could at least say that we lean on implementations of collision
+   detection in ElTopo/SPACM but we readily benefit from new advances in
+   faster  robust detection.
+ - cite \cite{Volino:2006:RSC} "Resolving Surface ...": could be used to replace
+   re-inflation?
+ - collision detection schemes do not need intermediary triangle so isosurface
+   of distance fields are OK
+ - why not always use the point-to-plane distance as ICP community does?
+ - "the initial flow is not guaranteed to work": show impossible csaszar-torus
+   case, discuss types of meshes where flow fails: "surface too close to medial
+   axis?"
 
 # Changes that should be made with notes already in tex
 
@@ -30,25 +51,13 @@
    changing 
  - [Martin et al. 2008] used harmonic coordinates on general polyhedra for FEM.
  - overall timing performance should be better explained
- - cite \cite{Volino:2006:RSC} "Resolving Surface ...": could be used to replace
-   re-inflation?
  - approximate gradient descent seems brute force: discuss Newton's method
    attempts: Only really makes sense for ARAP, doesn't make much of a
    difference and adds parameters (for stability).
  - I would have appreciated seeing (more) coarser cages
  - no high genus inputs 
- - Cite papers that have used cell-replicating:
-   \cite{Teran:2005:CSS,Nesme:2009:PTE}
- - previous multi-grid methods handle complicated boundaries
-   \cite{Dick:2011,Ferstl:2014} Use adaptive octree multigrid solvers for
-   fractures and fluids, respectively.  Though supporting complicated and even
-   dynamic boundaries, they are not immune to troubles of regular grids:
-   boundaries must be uniformly represented at the finest grid level to avoid
-   aliasing.
  - Cite and discuss that surface offsetting and normal flowing is not a novel
    idea.
- - collision detection schemes do not need intermediary triangle so isosurface
-   of distance fields are OK
  - Not fair to attack [Ben-Chen et al.] for non-convergence since ours might
    not
  - Frankenstein example complains that [Jacobson et al.] doesn't coarsen domain
@@ -64,7 +73,6 @@
    future work
  - No reason for confidence that quadrature approximation of energy is "somehow
    as nice and useful as exact energy"
- - Flow is not guaranteed to even terminate. How is it stopped?
  - Doesn't discuss shrink wrapping alternative
  - Not clear why/that self-intersections of fine mesh during flow can be ignored
  - Give examples of "stupid choices" of energies that don't regularize flow
@@ -72,10 +80,8 @@
  - No discussion that nesting is not maintained during deformation of fine mesh
  - Simple example of naive decimation failing to converge for multi-resolution
  - Explain why 10 mins for backsubstitution? Are factors dense?
- - reference and compare to algebraic multigrid \cite{ruge1987algebraic}.
  - reference surface-based multi-resolution methods
    \cite{Aksoylu2005msu,Chuan:2009:ELO}
- - why not always use the point-to-plane distance as ICP community does?
  - Why are you comparing to conformalized mean curvature flow rather than
    standard MCF? cMCF is at least guaranteed to shrink to a point, MCF will
    converge to a zero-area, but not zero-length structure.
@@ -90,10 +96,6 @@
  - what are the transfer operators used in multiresolution results? Appendix
    for multiresolution implementation? We use linear interpolation as
    prolongation operator and its transpose as the restriction operator (cite).
- - reference recent collision detection papers \cite{BEB2012,Wang:2014:DCC}: I
-   guess we could at least say that we lean on implementations of collision
-   detection in ElTopo/SPACM but we readily benefit from new advances in
-   faster  robust detection.
  - Compare to direct solver on machine with more memory? No, there will always
    be a problem size big enough that direct solver will choke: This is just
    asymptotic analysis of memory.
@@ -104,9 +106,6 @@
 
  - how does the method _rely_ on the input simplification?
  - when and in which configuration will the algorithm break?
- - "the initial flow is not guaranteed to work": show impossible csaszar-torus
-   case, discuss types of meshes where flow fails: "surface too close to medial
-   axis?"
  - need stronger argument for strict nesting
  - discuss drawbacks in situa rather than at the end
  - hahaha, "paper should be 8-pages instead of 12"
