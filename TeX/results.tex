@@ -6,7 +6,6 @@ We implemented a prototype of our method as a serial \textsc{Matlab} program.
 We report timings of our unoptimized code for a few representative examples in
 \reftab{timings} recorded on an iMac Intel Core i7 3.5GHz computer with 8GB
 memory.
-\alec{``Timings should be better explained."}
 %
 As expected the bottleneck is the collision-free re-inflation step.
 %
@@ -65,6 +64,9 @@ similar outermost cages.
 We also conducted stress tests to evaluate how well our method scales with the
 number of layers. We nest 25 tightly fitting layers around the \emph{Horse} in
 \reffig{horse-25-layers} and 50 around \emph{Max Planck} in \reffig{zoo}.
+%
+In \reffig{gargo-coarse}, we continue computing nested cages until only eight
+vertices of an extremely coarse cage.
 
 %
 Constructing our nested cages can be considered expensive \emph{precomputation}
@@ -86,28 +88,20 @@ of memory finishing in over 16 minutes.
 \textsc{Cholmod}'s Cholesky factorization with reordering is mildly better than
 \textsc{Matlab}, solving via backsubstitution in 10 minutes, but suffers from
 similar memory issues during factorization, which takes over
-an hour using 17GB max memory.
-%
-\alec{Explain why back substitution is so slow. Are factors dense?}
+an hour using 17GB max memory, due to high fill-in.
 %
 In terms of precomputation, our time consuming cage computation lives at a much
 earlier stage than system-matrix factorization: before determining constraints
 or boundary conditions and before even choosing the particular system being
 solved.
 %
-\alec{This is even true for inhomogeneous systems where local metrics are
+This is even true for inhomogeneous systems where local metrics are
 varying between solves. In this case, the internal tet-meshing might need to be
-recomputed (XXXsec for \emph{Octopus}), but our cages can be reused.}
+recomputed (seconds for \emph{Octopus}), but our boundary cages can be reused.
 %
-\alec{Reference and compare to algebraic multigrid \cite{ruge1987algebraic}}
-%
-\alec{what are the transfer operators used in multiresolution results? Appendix
-for multiresolution implementation? We use linear interpolation as prolongation
-operator and its transpose as the restriction operator \cite{Demmel04}.}
-%
-\alec{``Compare to direct solver on machine with more memory?'' No, there will
-always be a problem size big enough that direct solver will choke: This is just
-asymptotic analysis of memory.}
+Since all fine mesh vertices are inside coarse mesh tetrahedra, we use linear
+interpolation as prolongation operator and its transpose as the restriction
+operator \cite{Demmel04}.
 
 \begin{figure}
   \includegraphics[width=\linewidth]{figs/octopus-poisson}
@@ -137,18 +131,20 @@ such a global change to the system matrix.
 Multiresolution hardly notices, and previous solutions become warm starts.
 %
 We employ Neumann boundary conditions and notice that naively decimating the
-input mesh leads to a divergent solver (inset).
+input mesh leads to a divergent solver (inset), agreeing with previous analysis
+that nesting is important for such boundary conditions \cite{chan1999boundary}.
 %
-\alec{Give simple example of naive decimation failing to converge}
+Because naive decimations do not nest eachother, the prolongation operator must
+extrapolate for fine mesh vertices lying outside the coarse domain.
 %
-\alec{multiresolution results seem to suggest that without this method
-multiresolution is hopeless for the octopus and armadillo: it \emph{may} be
+It \emph{may} be
 possible to tweak extrapolation parameters to handle these cases with naive
-decimation but an automatic method for determining correct extrapolation for
-convergence is not obvious. We tried: linear extrapolation from nearest tet,
-constant interpolation of nearest vertex, linear interpolation of closest point
-on nearest face. Bottom line, extrapolation is not $C^0$, and some amount of
-cleverness is needed to avoid discontinuities.}
+decimation, but an automatic method for determining correct extrapolation for
+convergence is not obvious.
+%
+For comparisons, we tried: linear extrapolation from nearest tet, constant
+interpolation of nearest vertex, linear interpolation of the closest point on
+nearest face. In our figures we compare to the most favorable choice.
 
 \begin{figure}
   \includegraphics[width=\linewidth]{figs/pelvis-diffusion}
@@ -207,9 +203,6 @@ While technically a ``perfectly tight fit'', this cage fails to coarsen the
 domain and meshing near intersections creates sliver triangles problematic for
 numerics.
 %
-\alec{Problem statement did not include conditions on output mesh quality or
-coarseness.}
-%
 We also compare to signed-distance field contouring \cite{Xu:2014:SDF}, which
 creates a loose fit joining the legs near the knees.
 %
@@ -219,8 +212,9 @@ suitable for elastic simulation with collision handling.
 The deformation of the volume inside the coarse cage is then propagated via
 linear interpolation to the embedded mesh (see also accompanying video).
 
-Another application area for nested cages is collision detection: if an object
-does not collide against a surface enclosing a second object, 
+Another application area for nested cages is collision detection for rigid
+objects: if an object does not collide against a surface enclosing a second
+object, 
 %
 \begin{wrapfigure}{r}{1.02in}
 %
@@ -231,8 +225,6 @@ does not collide against a surface enclosing a second object,
 \end{wrapfigure}
 %
 this certifies that the two objects do not collide either.
-%
-\alec{Need to clarify that these are rigid objects.}
 %
 Bounding sphere, cubes, and
 higher-degree polytopes are often used to quick-reject candidate collisions for
@@ -256,9 +248,9 @@ $\sim 8\times$ faster, for intuitive reasons: the octopus's many
 protruding arms causes it to easily nestle near other copies of itself, so that
 their convex hulls overlap but our tight, coarse cage does not.
 %
-\alec{Discuss that nesting is not maintained (cages do not \emph{track}) during
-non-rigid deformation of fine mesh (cf.\ simulation meshes where coarse mesh is
-deformed).}
+Nesting is applicable for rigid or nearly rigid objects, but it is not obvious
+to track cages along with deformable bodies, unless, for example, deformations
+could be precomputed.
 
 A single very coarse cage is needed for interactive deformation with
 generalized barycentric coordinates.
@@ -269,10 +261,8 @@ vertex counts.
 
 The ability to customize our optimization energy enables not just better cages,
 but also better generalized barycentric coordinates. In particular, harmonic
-coordinates are theoretically defined for arbitrary polyhedra, yet previous
-works implement them inside triangle-mesh cages only
-\cite{HarmonicCoodinates07}.
-\alec{Martin et al.\ use general polyhedral domains. Not just theoretical...}
+coordinates are defined for arbitrary polyhedra, yet most works implement them
+inside triangle-mesh cages only \cite{HarmonicCoodinates07}.
 %
 To utilize popular quad-dominant meshes as cages, all faces must be outside the
 input model and \emph{planar}.
@@ -306,6 +296,11 @@ choice of diagonals splitting each quad.
   \label{fig:hand-hc}
 \end{figure}
 
+\paragraph{Generalizations beyond watertight meshes.}
+%
+Though not strictly meeting our input criteria, we can apply our method to
+polygon soups and point clouds.
+%
 In \reffig{swat-cage}, we again adapt the optimization energy, this time to
 maintain the reflectional symmetry of the coarse input cage.
 %
@@ -315,14 +310,9 @@ but we may still flow it inside a coarse cage.
 Though details on the expanding input mesh are asymmetric (see hip pockets or
 hands), the energy minimization keeps the cage symmetric.
 
-\alec{``Tone down homeomorphism requirement: topological noise.'' Mention here
-that SWAT is not strictly homeomorphic to cage as it contains topological
-noise, but it is homeomorphic to the solid the SWAT mesh abstractly represents:
-a topological sphere. This leads into the point cloud examples.}
-
-\alec{``How can point clouds/polygon soups be handled?''}
-
-\alec{``Would have appreciated seeing (more) coarser cages."}
+In \reffig{point-cloud}, we use Poisson surface reconstruction and decimation
+to compute an initial cage for a point cloud and then nest it around the points
+using our method.
 
 \begin{figure}
   \includegraphics[width=\linewidth]{figs/swat-cage}
@@ -333,6 +323,3 @@ a topological sphere. This leads into the point cloud examples.}
   fully exterior cage used to deform the embedded model.}
   \label{fig:swat-cage}
 \end{figure}
-
-\alec{``No high genus results."}
-

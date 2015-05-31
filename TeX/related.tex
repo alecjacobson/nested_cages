@@ -21,10 +21,15 @@ Poisson solution computed on each level.} \label{fig:warrior-poisson}
 \paragraph{Bounding polytopes.}
 %
 Most naively, one can simply take $\Cinp$ to be a canonical bounding polytope
-(e.g.\ box, KDOP, convex hull), perhaps also ``shrink-wrapping'' it around
-$\Finp$ to minimize $E$. This approach works well for convex $\Finp$, but will
-not give a good fit for meshes with nooks and concavities. It is also not clear
-how to find a bounding polytope for meshes of nontrivial topology.
+(e.g.\ box, KDOP, convex hull). An extension would be to ``shrink-wrap'' the
+bounding polytope around $\Finp$ to minimize $E$. This idea has been explored
+before \cite{Peterhans:2012,Wang:2013:HPE}, but no full solution has been
+developed.
+%
+This is presumably because---while this approach works well for convex
+$\Finp$---it will not give a good fit for meshes with nooks concavities. It is
+also not clear how to find a bounding polytope for meshes of nontrivial
+topology.
 %
 Another approach might be to stitch overlapping convex volumes
 \cite{Xian:2012tv} using mesh boolean operations, but cage topology and
@@ -47,8 +52,16 @@ pass the field to an off-the-shelf contour mesher without any attempt to
 guarantee non-intersection with the input.  Similarly, Shen at
 al~\shortcite{Shen:2004:IAI} iteratively refine a moving least squares
 iso-surface to enclose an existing model tightly via a global scaling
-parameter. Though the \emph{continuous} isosurface may not intersect the input
-model, generic contouring invalidates this. A large enough iso-value or
+parameter.
+%
+Some applications, such as collision detection, can make use of implicit
+representations without intermediary meshes,
+%
+but when a mesh is needed it is not enough that the \emph{continuous}
+isosurface does not intersect the input model since generic contouring will
+invalidate this.
+%
+A large enough iso-value or
 small-enough resolution tolerance must always be chosen to ensure
 non-intersection after contouring. For large iso-values, topological control is
 lost and close features are quickly merged (see \reffig{warrior-poisson}),
@@ -75,7 +88,7 @@ not sought or guaranteed.
   \label{fig:dane-vs-ben-chen}
 \end{figure}
 
-\paragraph{Progressive decimation} of $\Finp$ using edge collapses, taking care
+\textbf{Progressive decimation} of $\Finp$ using edge collapses, taking care
 to place new vertices on the exterior of the current volume by solving a system
 of inequality constraints~\cite{Sander:2000:SC}, has found some success in
 real-time rendering and intersection applications \cite{Platis:CGF}.  Although
@@ -93,7 +106,7 @@ but this technique relies on temperamental 3D tetrahedral meshing in tight
 regions near overlaps and does not consider face-/edge-intersections with
 the input model.
 
-\paragraph{Voxelization} of $\Finp$ will create a nested cage, provided that
+\textbf{Voxelization} of $\Finp$ will create a nested cage, provided that
 the resolution of the voxel grid is chosen fine enough to avoid topological
 artifacts (as in the case of contouring implicit functions). Naive voxelization
 yields dense, inefficient cages \cite{Mehra:2009:AMS}, possibly improved by
@@ -137,15 +150,9 @@ shape must be modeled in an accommodating pose. If remodeling is not
 possible, the grid size must be chosen smaller than not just the smallest
 features but also the \emph{smallest void} between features.
 %
-A hypothetical solution is to replicate cells in close areas and manage
-adjacencies when two or more replicated patches merge and split.
-%
-This succeeds for the less complicated topologies of 2D cartoons
-\cite{Sykora09}, but is avoided in 3D: 
-\cite{wojtan2011liquid} opt for dynamic mesh \emph{surgery} instead.
-%
-\alec{Some methods that \emph{do} use replicating in 3D: 
-   \cite{Teran:2005:CSS,Nesme:2009:PTE}}
+One solution is to replicate cells in close areas and manage
+adjacencies when two or more replicated patches merge and split
+\cite{Teran:2005:CSS,Nesme:2009:PTE,Sykora09}.
 %
 Cell replication is not only difficult to realize robustly, but also riddles
 multigrid numerical methods with expensive, SIMD-breaking boundary handling
@@ -185,7 +192,8 @@ We show cases where this fails to converge for common linear systems on
 irregular domains, and we show better convergence for strictly nesting cages
 where prolongation is a purely linear interpolation.
 
-Algebraic alternatives to geometric remeshing also exist,
+Algebraic alternatives to geometric remeshing also exist
+\cite{ruge1987algebraic},
 but are recommended only when geometric information is not available
 \cite{falgout06}.
 %
@@ -197,9 +205,6 @@ This method combines the elegance of algebraic techniques with some geometric
 information derived from the characteristics of the Laplacian matrix, but is
 limited to special problems.
 
-\alec{collision detection schemes do not need intermediary triangle so isosurface
-of distance fields are OK for that application.}
-
 
 %Alternatives to geometric multigrid: algebraic multi-grid (cite Brandt) or
 %algebraic techniques for special problem \cite{Krishnan:2013:EPL} (doesn't
@@ -208,8 +213,7 @@ of distance fields are OK for that application.}
 %\cite{CGCDP:2002} assume a subdivision lattice containing the deforming shape
 %as part of the input. Presumably this cage is modeled manually.
 
-\alec{Should we include any of this:}
-\paragraph{Decimation}
+\paragraph{Simplification.}
 %
 The majority of surface mesh decimation techniques aim to preserve outward
 appearance with lower and lower mesh resolution
@@ -237,32 +241,11 @@ Rather than work against the staggering quality of existing shape decimation
 techniques, we complement them. Our method takes as input an arbitrary
 decimation and works as a post process to nest each layer.
 
-\alec{Should we include any of this?}
-We credit \cite{ContactAwareModeling:2011} for their
-ground-breaking introduction of contact handling to mainstream geometry
-processing. Their work inspires us to consider the contact and collisions
-tool-set familiar to physically based simulation in our geometry processing
-task.
+\paragraph{Interference-aware processing} We credit
+\cite{ContactAwareModeling:2011} for their ground-breaking introduction of
+contact handling to mainstream geometry processing. Their work inspires us to
+consider the contact and collisions tool-set familiar to physically based
+simulation in our geometry processing task.
 %
 In this task, our novel flow is essential for finding a feasible starting
 state.
-%
-Without it, untangling the overlapping input cages could result in incorrect
-ordering \cite{Baraff:2003:UC}.
-%
-\alec{ \cite{Volino:2006:RSC} as alternative to re-inflation using
-Eltopo/SPACM, here, or in method. Also could lead to wrong ordering?}
-\alec{From rebuttal: ``quickly gets stuck in local minima if the decimation
-mesh cuts through geometrically complex features of the fine mesh. Also will
-fail to converge in concave regions if pushing the coarse mesh out of the fine
-causes coarse mesh self-collisions, and vice versa."}
-%
-With our feasible state, the volume minimization of
-\cite{ContactAwareModeling:2011} could then be an alternative to our use of
-constraint satisfaction to resolve collisions.
-
-
-\alec{reference recent collision detection papers \cite{BEB2012,Wang:2014:DCC}: I
-   guess we could at least say that we lean on implementations of collision
-   detection in ElTopo/SPACM but we readily benefit from new advances in
-   faster  robust detection.}

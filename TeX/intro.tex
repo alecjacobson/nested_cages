@@ -4,7 +4,7 @@
 \begin{figure}[b]
   \includegraphics[width=\linewidth]{figs/horse-25-layers}
   \caption{Our tight nesting property is robust even when the number of cages
-  is large: 25 around this \emph{Horse}. \alec{no ref in new intro text}}
+  is large: 25 around this \emph{Horse}.}
   \label{fig:horse-25-layers}
 \end{figure}
 
@@ -23,22 +23,22 @@ where conservative culling reduces computation time. For all these
 applications, the key to high performance is the ability to generate a quality
 multiresolution hierarchy.
 
-The straightforward approach to building a hierarchy around an object $\Fout$ is
-to use an application-specific decimation algorithm to build a coarse
-approximation $\Cout$ to $\Fout$; $\Cout$ itself can be further coarsened to build the
-next level of the hierarchy, etc. Unfortunately $\Cout$ will typically intersect
-$\Fout$, which is often undesirable: most algorithms for transferring the pose of
-a deformation cage to a detailed object only guarantee small distortion of the
-object and lack of element-inversion artifacts if the object is entirely
-contained within the cage \cite{HarmonicCoodinates07,Ben-Chen:2009:VHM}; strict
-nesting is essential for accelerating collision detection
-\emph{conservatively}; and while nesting is not a necessary condition for
-multiresolution convergence \cite{Chan96overlappingschwarz}, the ability to use
-simple linear interpolation for prolongation is known to produce more robust,
-more efficient, and easier to implement solvers
-\cite{chan2000robust,dickopf2010multilevel}. This is particularly important for
-enforcing Neumann boundary conditions, common to simulation and geometry
-processing \cite{chan1999boundary}.
+The straightforward approach to building a hierarchy around an object $\Fout$
+is to use an application-specific decimation algorithm to build a coarse
+approximation $\Cout$ to $\Fout$; $\Cout$ itself can be further coarsened to
+build the next level of the hierarchy, etc. (see \reffig{horse-25-layers}).
+Unfortunately $\Cout$ will typically intersect $\Fout$, which is often
+undesirable: most algorithms for transferring the pose of a deformation cage to
+a detailed object only guarantee small distortion of the object and lack of
+element-inversion artifacts if the object is entirely contained within the cage
+\cite{HarmonicCoodinates07,Ben-Chen:2009:VHM}; strict nesting is essential for
+accelerating collision detection \emph{conservatively}; and while nesting is
+not a necessary condition for multiresolution convergence
+\cite{Chan96overlappingschwarz}, the ability to use simple linear interpolation
+for prolongation is known to produce more robust, more efficient, and easier to
+implement solvers \cite{chan2000robust,dickopf2010multilevel}. This is
+particularly important for enforcing Neumann boundary conditions, common to
+simulation and geometry processing \cite{chan1999boundary}.
 
 \begin{wrapfigure}{r}{1.02in}
 %
