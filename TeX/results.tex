@@ -66,8 +66,26 @@ number of layers. We nest 25 tightly fitting layers around the \emph{Horse} in
 \reffig{horse-25-layers} and 50 around \emph{Max Planck} in \reffig{zoo}, top
 left.
 %
-For the \emph{Gargoyle} in \reffig{zoo}, bottom left, we continue computing
-nested cages until leaving only eight vertices of an extremely coarse cage.
+We purposefully continue nesting cages around the the \emph{Gargoyle} in
+\reffig{zoo}, bottom left, until only eight vertices of an extremely coarse
+cage remain.
+
+\begin{figure}
+  \includegraphics[width=\linewidth]{figs/octopus-poisson}
+  \caption{A single multiresolution v-cycle takes 1.4 secs on this 7M-vertex
+  volumetric Poisson equation in the \emph{Octopus}. With 14 more iterations
+  (21 secs) the residual error matches a direct solver's (11 mins, back
+  substitution only).}
+  \label{fig:octopus-poisson}
+\end{figure}
+\begin{figure}
+  \includegraphics[width=\linewidth]{figs/pelvis-diffusion}
+  \caption{We solve a diffusion equation $(λ∆+I) x = b$ for various diffusion
+  rates $λ$ with our nested cages in a volumetric multiresolution solver (top:
+  surface values via Neumann boundary conditions, bottom: slice through
+  tet-mesh volumes).}
+  \label{fig:pelvis-diffusion}
+\end{figure}
 
 Constructing our nested cages can be considered expensive \emph{precomputation}
 for a multiresolution linear system solver.
@@ -99,17 +117,25 @@ This is even true for inhomogeneous systems where local metrics are
 varying between solves. In this case, the internal tet-meshing might need to be
 recomputed (seconds for \emph{Octopus}), but our boundary cages can be reused.
 %
-Since all fine mesh vertices are inside coarse mesh tetrahedra, we use linear
-interpolation as prolongation operator and its transpose as the restriction
-operator \cite{Demmel04}.
+Since all fine mesh vertices are inside coarse-mesh tetrahedra, we use linear
+interpolation for prolongation and its transpose for restriction
+\cite{Demmel04}.
 
 \begin{figure}
-  \includegraphics[width=\linewidth]{figs/octopus-poisson}
-  \caption{A single multiresolution v-cycle takes 1.4 secs on this 7M-vertex
-  volumetric Poisson equation in the \emph{Octopus}. With 14 more iterations
-  (21 secs) the residual error matches a direct solver's (11 mins, back
-  substitution only).}
-  \label{fig:octopus-poisson}
+  \includegraphics[width=\linewidth]{figs/armadillo-heat-plot}
+  \caption{We solve for smooth geodesics over volumetric tetrahedral mesh
+  inside the \emph{Armadillo}. Using naive overlapping and
+  shrinking decimations leads to divergence unless a very large number of
+  relaxation iterations is used.  Ours is always convergent.}
+  \label{fig:armadillo-heat-plot}
+\end{figure}
+\begin{figure}
+  \includegraphics[width=\linewidth]{figs/frankenstein-physics-02}
+  \caption{Extracting an outer hull with fails to coarsen the domain (top
+  left). Contouring a distance field achieves nesting at a large
+  iso-level but fuses the legs (top center). Our coarse cage fits the input
+  tightly and provides a reduced domain for real-time physics.}
+  \label{fig:frankenstein-physics}
 \end{figure}
 
 \begin{wrapfigure}{r}{1.02in}
@@ -146,15 +172,6 @@ For comparisons, we tried: linear extrapolation from nearest tet, constant
 interpolation of nearest vertex, linear interpolation of the closest point on
 nearest face. In our figures we compare to the most favorable choice.
 
-\begin{figure}
-  \includegraphics[width=\linewidth]{figs/pelvis-diffusion}
-  \caption{We solve a diffusion equation $(λ∆+I) x = b$ for various diffusion
-  rates $λ$ with our nested cages in a volumetric multiresolution solver (top:
-  surface values via Neumann boundary conditions, bottom: slice through
-  tet-mesh volumes).}
-  \label{fig:pelvis-diffusion}
-\end{figure}
-
 On less challenging domains, naive decimations can be used, but may require
 many relaxation (a.k.a.\ smoothing) iterations on each level of each v-cycle.
 %
@@ -168,28 +185,6 @@ more v-cycles is preferable).
 In contrast, multiresolution using naive non-nested decimations converge when
 using a large number of relaxation iterations, and then at a rate equivalent to
 single relaxation iteration with our meshes.
-
-\begin{figure}
-  \includegraphics[width=\linewidth]{figs/armadillo-heat-plot}
-  \caption{We solve for smooth geodesics via two Poisson equations over a
-  volumetric tetrahedal mesh inside the \emph{Armadillo}. Multiresolution using
-  naive overlapping and shrinking decimations leads to divergence unless a very
-  large number of relaxation iterations is used in each level in each v-cycle.
-  Ours is always convergent.}
-  \label{fig:armadillo-heat-plot}
-\end{figure}
-
-\begin{figure}
-  \includegraphics[width=\linewidth]{figs/frankenstein-physics}
-  \caption{Extracting an outer hull with \protect\cite{Jacobson:WN:2013} fails
-  to coarsen the domain away from the original discretization (top left). Contouring
-  the signed distance field \protect\cite{Xu:2014:SDF} achieves true nesting at
-  a large iso-level fusing the legs (top center). Our method fits the input
-  tightly (top right). The coarse mesh provides a low-dimensional domain for
-  real-time physical simulation (middle) and simple interpolation onto the
-  input mesh (bottom).}
-  \label{fig:frankenstein-physics}
-\end{figure}
 
 A single enclosing cage is useful for creating a lower dimensional volumetric
 domain for elastic simulation of an input model that is either too high
@@ -212,18 +207,18 @@ suitable for elastic simulation with collision handling.
 The deformation of the volume inside the coarse cage is then propagated via
 linear interpolation to the embedded mesh (see also accompanying video).
 
-Another application area for nested cages is collision detection for rigid
-objects: if an object does not collide against a surface enclosing a second
-object, 
 %
 \begin{wrapfigure}{r}{1.02in}
 %
 \centering
 %
-\includegraphics[width=\linewidth]{figs/octopi-collisions}
+\includegraphics[trim=4mm 0 0 3mm,width=\linewidth]{figs/octopi-collisions}
 %
 \end{wrapfigure}
 %
+Another application area for nested cages is collision detection for rigid
+objects: if an object does not collide against a surface enclosing a second
+object, 
 this certifies that the two objects do not collide either.
 %
 Bounding sphere, cubes, and
@@ -298,14 +293,14 @@ choice of diagonals splitting each quad.
 
 \paragraph{Generalizations beyond watertight meshes.}
 %
-Though not strictly meeting our input criteria, we can apply our method to
+Though not strictly meeting our input criteria, we apply our method to
 polygon soups and point clouds.
 %
 In \reffig{swat-cage}, we again adapt the optimization energy, this time to
 maintain the reflectional symmetry of the coarse input cage.
 %
 The input polygon soup \emph{S.W.A.T.\ man} is riddled with meshing artifacts,
-but we may still flow it inside a coarse cage.
+but we still flow it inside.
 %
 Though details on the expanding input mesh are asymmetric (see hip pockets or
 hands), the energy minimization keeps the cage symmetric.
@@ -323,9 +318,9 @@ using our method.
 
 \begin{figure}
   \includegraphics[width=\linewidth]{figs/swat-cage}
-  \caption{The \emph{S.W.A.T. man} is an artifact-ridden mesh with 2806 pairs
-  of intersecting triangles, 24 non-manifold edges, 51 boundary loops and 51
-  connected components. Our shrinking flow is robust to such artifacts. Once
+  \caption{\emph{S.W.A.T. man} is a polygon soup with 2806 
+  intersecting triangle pairs, 24 non-manifold edges, 51 boundary loops and 51
+  components. Our shrinking flow is robust to such artifacts. Once
   inside the coarse, overlapping input cage, we re-inflate it and produce a
   fully exterior cage used to deform the embedded model.}
   \label{fig:swat-cage}

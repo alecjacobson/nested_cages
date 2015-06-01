@@ -4,9 +4,9 @@
 We plan to optimize the performance of both the signed distance field flow and
 the re-inflation steps.
 %
-Collision detection and handling dominates running time and our prototype
-naively recomputes acceleration data-structures rather than updating them while
-the meshes change dynamically.
+Collision detection and response dominates running time, and our prototype
+naively recomputes acceleration data-structures rather than updating them
+continuously.
 
 Our insight to break the multi-layer nesting problem into pairwise subproblems
 ensures tractability, but in some cases leads to converging at an
@@ -33,7 +33,7 @@ coarse mesh alleviates some of these problems, but a general solution is
 illusive.
 %
 The correct assignment seems related to correctly matching medial axes of both
-meshes. Perhaps this is an avenue of future improvement.
+meshes: perhaps an avenue of future improvement.
 
 Though we are delighted with the performance of our multiresolution solver, 
 we would like to further improve it. We believe there are even more gains to be
@@ -50,7 +50,7 @@ non-nested hierarchies.
 
 Though our cages excel with in a \emph{volumetric} multiresolution solver, they
 are not immediately applicable to \emph{surface-based} multiresolution problems
-(cf.\ \cite{Aksoylu2005msu,Chuang:2009:ELO]}. Wether nesting is at all useful
+(cf.\ \cite{Aksoylu2005msu,Chuang:2009:ELO}. Wether nesting is at all useful
 for surface problems remains an open question.
 
 In conclusion, nested cages prove to be a powerful tool in a variety of
@@ -67,3 +67,6 @@ deformation user interfaces.
 We hope that our algorithm's success encourages more multiresolution volumetric
 methods using unstructured meshes in geometry processing, computer graphics,
 and beyond.
+%
+We are also excited about possible practical solutions and theoretical
+questions yet to be imagined with nested cages.

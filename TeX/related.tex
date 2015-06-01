@@ -1,10 +1,10 @@
-\section{Related Methods and Special Cases}
+\section{Related methods and special cases}
 
 Although our method is the first to solve the nested cage problem for the large
 variety of input meshes shown in \refsec{results} \emph{while} interoperating
 with arbitrary problem-specific decimation algorithms and fitness functions,
 many related approaches have been proposed that work for special cases, or
-relax some of the requirements imposed above.
+relax requirements imposed above.
 
 If the algorithm is free to generate the coarse cage $\Cinp$, rather than
 accepting it as input from the user, the problem becomes substantially easier,
@@ -91,9 +91,9 @@ not sought or guaranteed.
 \textbf{Progressive decimation} of $\Finp$ using edge collapses, taking care
 to place new vertices on the exterior of the current volume by solving a system
 of inequality constraints~\cite{Sander:2000:SC}, has found some success in
-real-time rendering and intersection applications \cite{Platis:CGF}.  Although
+real-time rendering and collision detection \cite{Platis:CGF}.  Although
 the \emph{vertices} of these ``progressive hulls'' are guaranteed to lie
-outside of the volume of $\Finp$, edges and faces of $\Cinp$ might still
+outside of $\Finp$, edges and faces of $\Cinp$ might still
 intersect $\Finp$ (and $\Cinp$ might globally self-intersect); see
 \reffig{dane-vs-ben-chen}. We tested this method on the entire ``zoo'' of
 examples shown in \reffig{zoo} and the supplementary material, and of the 26
@@ -107,7 +107,7 @@ regions near overlaps and does not consider face-/edge-intersections with
 the input model.
 
 \textbf{Voxelization} of $\Finp$ will create a nested cage, provided that
-the resolution of the voxel grid is chosen fine enough to avoid topological
+the resolution is chosen fine enough to avoid topological
 artifacts (as in the case of contouring implicit functions). Naive voxelization
 yields dense, inefficient cages \cite{Mehra:2009:AMS}, possibly improved by
 progressive decimation~\cite{Xian:2009} or mesh booleans~\cite{Xian:2015}
@@ -118,14 +118,16 @@ though also inheriting their respective drawbacks.
 All of the above methods require relinquishing some degree of control over
 decimation to the nested cage algorithm; algorithms that accept an arbitrary
 pre-decimated cage $\Cinp$ are less well-developed. \emph{History-free} cloth
-collision response methods~\cite{Baraff:2003:UC,Volino2006,Ye2012,Wicke2006}
-be used to separate $\Cinp$ from $\Finp$ if the degree of intersection is
-not too severe; otherwise such methods tend to become stuck in local minima.
-Finally, one might try to flow $\Cinp$ away from $\Finp$ along the latter's
-signed distance field; we experimented with this approach before settling on
-the algorithm based on inward flow described below. While outward flow works
-well for convex meshes, for concave $\Finp$ it is common for edges of $\Cinp$
-to intersect $\Finp$ even in the limit of flowing for infinite time.
+collision response methods (e.g.\
+\cite{Baraff:2003:UC,Volino:2006:RSC,Wicke:2006,Ye:2012:ICM}) could be used to
+separate $\Cinp$ from $\Finp$ if intersections are not too severe; otherwise
+such methods quickly get stuck in local minima.
+%
+Before settling on an inward flow of $\Finp$, we experimented with an outward
+flow of $\Cinp$ away from $\Finp$, along its signed distance field.
+%
+For convex meshes this works well, but for concave $\Finp$  the edges of
+$\Cinp$ will intersect $\Finp$ even in the limit of flowing for infinite time.
 
 \paragraph{Multiresolution.}
 %
@@ -237,9 +239,9 @@ affecting visual appearance.
 Our nested cages are hierarchical decimations strictly containing the input
 shape, ensuring strictly conservative collision detection.
 %
-Rather than work against the staggering quality of existing shape decimation
-techniques, we complement them. Our method takes as input an arbitrary
-decimation and works as a post process to nest each layer.
+Rather than work against the sophistication of existing shape decimation
+techniques, we complement them. Our method arbitrary decimations as input and
+nests them as a post process.
 
 \paragraph{Interference-aware processing} We credit
 \cite{ContactAwareModeling:2011} for their ground-breaking introduction of

@@ -1,19 +1,20 @@
 \begin{abstract} 
-
-\alec{rewrite to match intro}
 %
 Many tasks in geometry processing and physical simulation benefit from
-multiresolution hierarchies. Ideal coarse domain approximations should satisfy
-several desiderata for efficient and accurate multiresolution algorithms: the
-coarsened domain should respect the original topology, \emph{enclose} the
-original object, yet fit as tightly as possible.
+multiresolution hierarchies.
+%
+One important characteristic across a variety of applications is that coarser
+layers strictly \emph{encage} finer layers, nesting one another.
 %
 Existing techniques such as surface mesh decimation, voxelization, or
-contouring distance level sets, violate one or more of these desiderata.
+contouring distance level sets do not provide sufficient control over the
+\emph{quality} of the output surfaces while maintaining strict nesting.
 %
-We propose a solution that satisfies all three requirements by successively
-constructing each next-coarsest level of the hierarchy, using a sequence of
-decimation, flow, and contact-aware optimization steps.
+We propose a solution that enables use of application-specific decimation and
+quality metric.
+%
+The method constructs each next-coarsest level of the hierarchy, using a
+sequence of decimation, flow, and contact-aware optimization steps.
 %
 From coarse to fine, each layer then fully encages the next while retaining a
 snug fit and respecting the original surface topology.
@@ -24,6 +25,6 @@ geometry and topology.
 We demonstrate the effectiveness of our nested cages not only for
 multiresolution solvers, but also for conservative collision detection, domain
 discretization for elastic simulation, and cage-based geometric modeling. 
-
+%
 \end{abstract}
 
