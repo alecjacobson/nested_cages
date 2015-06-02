@@ -52,6 +52,7 @@ soups, point clouds, etc.), we say that $\Cout$ \emph{nests} $\Fout$ if:
 %
 (ii) there is a homotopy from $\Cout$ to $\Fout$ that remains at all times inside
 $\Cout$'s volume. 
+This definition extends naturally to polyhedra with voids or multiple connected components that are bounded by watertight meshes.
 \clearpage
 
 \begin{wrapfigure}[15]{r}{1.02in}
@@ -88,12 +89,11 @@ $\Cout$ of $\Cinp$ that nest $\Fout$.
 \end{figure}
 
 This problem in its full generality is intractable. For
-polygons in 2D, and simply-connected meshes in 3D, at least one nested
+single polygons in 2D, and simply-connected meshes in 3D, at least one nested
 embedding $\Cout$ always exists, but once $\Fout$ is allowed to have nontrivial
 topology, counterexamples exist where it is impossible to embed $\Cinp$ in a way
-that nests $\Fout$ (see \reffig{torus-counterexample}). In 3D, the decision
-problem of whether any nesting of $\Cinp$ around $\Fout$ exists is at least as hard
-as the graph isomorphism problem.
+that nests $\Fout$ (see \reffig{torus-counterexample}). The decision
+problem of whether any nesting of $\Cinp$ around $\Fout$ exists is NP-hard.
 Fortunately, in practice $\Cinp$ and $\Fout$ are not completely arbitrary; any
 reasonable decimation scheme will keep $\Cinp$ morphologically similar, and
 roughly aligned, to $\Fout$, and these favorable initial conditions can be
