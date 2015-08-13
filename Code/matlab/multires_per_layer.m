@@ -109,13 +109,13 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = multires_per_layer(V0
       end
   end
   
-  % fire a warning mesh if input mesh self-intersects
-  if (~shrink_points)
-      [~,~,IF] = selfintersect(V0,F0,'FirstOnly',true);
-      if (size(IF,1)>0)
-          warning('Input mesh self-intersects');
-      end
-  end
+%   % fire a warning mesh if input mesh self-intersects
+%   if (~shrink_points)
+%       [~,~,IF] = selfintersect(V0,F0,'FirstOnly',true);
+%       if (size(IF,1)>0)
+%           warning('Input mesh self-intersects');
+%       end
+%   end
 
   if (isempty(V_coarse)&&isempty(F_coarse))
       % coarsen the mesh with Qslim with different levels
@@ -185,7 +185,7 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = multires_per_layer(V0
         end
       timing.decimation = timing.decimation + toc;
     end
-
+    
     tic
 %     if (~new_flow)
 %         % shrink fine mesh, expand coarse mesh
@@ -212,8 +212,6 @@ function [cages_V,cages_F,Pall,V_coarse,F_coarse,timing] = multires_per_layer(V0
     Pall_all_times{k} = Pall;
     timing.flow = timing.flow + toc;
 
-    %% save partial result
-    %save('partial.mat','Pall','Pall_coarse','V_coarse','F_coarse','V0','F0');
 
     % push coarse mesh with physical simulation to obtain the cages
     [V_coarse_new,timing.per_layer{k},~] = ...

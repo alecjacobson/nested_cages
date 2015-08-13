@@ -159,7 +159,9 @@ function [V_coarse_final,timing,Pall_expansion] = ...
     [G,cb_data.E,cb_data.R,cb_data.arap_data] = ...
       arap_gradient(V0,F,V,'Data',cb_data.arap_data,'SinglePrecision',true);
     H = arap_hessian(V0,F,'EvaluationPoint',V,'Rotations',cb_data.R);
-    G = reshape(H\G(:),size(V));
+    M_reg = massmatrix(V0,F);
+    M_reg = blkdiag(M_reg,M_reg,M_reg);
+    G = reshape((H+1e-13*M_reg)\G(:),size(V));
     %warning('Saving arap state');
     %R = cb_data.R;
     %save('arap.mat','V0','F','V','G','R');
@@ -233,7 +235,9 @@ function [V_coarse_final,timing,Pall_expansion] = ...
     [G,cb_data.E] = arap_gradient(cb_data.TV0,cb_data.TT,cb_data.TV, ...
       'Energy','elements','Rotations',R,'Data',cb_data.arap_data);
     H = arap_hessian(cb_data.TV0,cb_data.TT,'EvaluationPoint',cb_data.TV,'Energy','elements','Rotations',R);
-    G = reshape(H\G(:),size(cb_data.TV));
+    M_reg = massmatrix(cb_data.TV0,cb_data.TT);
+    M_reg = blkdiag(M_reg,M_reg,M_reg);
+    G = reshape((H+1e-12*M_reg)\G(:),size(cb_data.TV));
     G = G(b,:);
   end
 

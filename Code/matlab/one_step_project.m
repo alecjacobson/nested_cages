@@ -194,6 +194,7 @@ function [CV_filtered,timing] = ...
           % try to increase beta
           beta = min(1.1*beta,beta_init);
         end
+        fprintf('%.8f', E_val);
         fprintf('-');
         break;
       end

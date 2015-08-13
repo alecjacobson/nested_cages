@@ -26,10 +26,10 @@ function [Pall_fine,Pall_coarse] = shrink_fine_expand_coarse_3D( ...
   %   the fine mesh at each time step
   
   
-  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  % Check for cached result, do NOT edit variables until cache is checked,
-  % your function code comes later. See below
-  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%   Check for cached result, do NOT edit variables until cache is checked,
+%   your function code comes later. See below
+%   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   [cache_exists,cache_name] = find_cache();
   if cache_exists
     fprintf('Using cache...\n');
@@ -180,8 +180,8 @@ function [Pall_fine,Pall_coarse] = shrink_fine_expand_coarse_3D( ...
   cameratoolbar;
   cameratoolbar('SetCoordSys','none');
 
-  %   input('');
-  hold off;
+%   %   input('');
+%   hold off;
   % for now, let's remove distance checking (some models were not going 
   % the distance inside)
   dist_int = 1e+16;
@@ -196,7 +196,7 @@ function [Pall_fine,Pall_coarse] = shrink_fine_expand_coarse_3D( ...
     if (mod(ii,expand_every)==0)
       [V_exp,moving_vertices_coarse,grad_energy,quad,grad_quadrature,C,~] = ...
         signed_distance_direction_quadrature_matrix(V_exp,F_exp,1,quadrature_order,...
-          V_coarse,F_coarse,moving_vertices_coarse,A_qv_coarse,M_coarse,w_lap_coarse,L_coarse,-1);
+          V_coarse,F_coarse,moving_vertices_coarse,A_qv_coarse,M_coarse,w_lap_coarse,L_coarse,-1,shrink_points);
 
       % Eltopo to remove intersections on the coarse mesh
       [V_exp,~] = collide_eltopo_mex(V_exp_prev,F_exp,V_exp,0,1e-4,1e-10);
@@ -224,7 +224,7 @@ function [Pall_fine,Pall_coarse] = shrink_fine_expand_coarse_3D( ...
       plot_struct.V_to_intersect = V_exp;
       plot_struct.F_to_intersect = F_exp;
       %       plot_struct.V_shrink_prev = V_exp_prev;
-      plot_struct = flow_plot_control(plot_struct,flow_step_vis);
+      plot_struct = flow_plot_control(plot_struct,flow_step_vis,shrink_points);
 
 
     else
