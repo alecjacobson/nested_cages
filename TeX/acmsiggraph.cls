@@ -129,7 +129,8 @@
 
 \newcommand{\copyrightspace}{%
   \renewcommand{\thefootnote}{}%
-  \footnotetext[0]{\rule[\ACMcopyrightspace]{2.71828in}{0in}}%
+  \footnotetext[0]{\vspace*{1in}}%
+  %\rule[\ACMcopyrightspace]{2.71828in}{0in}}%
   \renewcommand{\thefootnote}{\arabic{footnote}}
 }
 

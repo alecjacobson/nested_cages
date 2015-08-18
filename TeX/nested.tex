@@ -15,7 +15,7 @@
 %%%   numbers and anonymization of author and affiliation information.
 
 
-\documentclass[review]{acmsiggraph}
+\documentclass[annual]{acmsiggraph}
 
 \usepackage{graphicx}
 \usepackage[usenames,dvipsnames]{color}
@@ -74,11 +74,6 @@
 %%% icons to your document, in addition to hyperlinked icons which point to
 %%% the ACM Digital Library article page and the ACM Digital Library-held PDF.
 
-\TOGprojectURL{}
-\TOGvideoURL{}
-\TOGdataURL{}
-\TOGcodeURL{}
-
 %%% Replace ``PAPER TEMPLATE TITLE'' with the title of your paper or abstract.
 
 \title{Nested Cages}
@@ -89,17 +84,26 @@
 %%% For multiple authors, separate each author's information by the ``\and''
 %%% command.
 
-\author{}
+\author{
+Leonardo Sacht$^1$ \quad
+Etienne Vouga$^2$
+Alec Jacobson$^{3}$ \quad
+}
+\affiliation{
+$^1$Universidade Federal de Santa Catarina\quad
+$^2$University of Texas at Austin \quad
+$^3$Columbia University \quad
+}
 
 %%% The ``pdfauthor'' command accepts the authors of the work,
 %%% comma-delimited, and adds this information to the PDF metadata.
 
-\pdfauthor{}
+\pdfauthor{Leonardo Sacht, Etienne Vouga, Alec Jacobson}
 
 %%% Keywords that describe your work. The ``\keywordlist'' command will print
 %%% them out.
 
-\keywords{}
+\keywords{Mesh decimation, geometric flow, generalized barycentric coordinates, multigrid solver}
 
 %%% The ``\begin{document}'' command is the start of the document.
 
@@ -201,6 +205,7 @@ encaged \emph{Bunny}.}
 \input{method}
 \input{results}
 \input{conclusion}
+\input{acks}
 
 \begin{figure*}
   \includegraphics[width=\linewidth]{figs/zoo}
