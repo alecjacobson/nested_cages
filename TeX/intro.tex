@@ -1,6 +1,13 @@
 \section{Introduction}
 \label{sec:introduction}
 
+\begin{figure}[b]
+  \includegraphics[width=\linewidth]{figs/horse-25-layers}
+  \caption{Our tight nesting property is robust even when the number of cages
+  is large: 25 around this \emph{Horse}.}
+  \label{fig:horse-25-layers}
+\end{figure}
+
 As the complexity and size of computational objects continue to grow,
 acceleration algorithms become increasingly important. One powerful technique
 is to decompose a high-resolution mesh into a hierarchy of increasingly coarse
@@ -32,13 +39,6 @@ for prolongation is known to produce more robust, more efficient, and easier to
 implement solvers \cite{chan2000robust,dickopf2010multilevel}. This is
 particularly important for enforcing Neumann boundary conditions, common to
 simulation and geometry processing \cite{chan1999boundary}.
-
-\begin{figure}[b]
-  \includegraphics[width=\linewidth]{figs/horse-25-layers}
-  \caption{Our tight nesting property is robust even when the number of cages
-  is large: 25 around this \emph{Horse}.}
-  \label{fig:horse-25-layers}
-\end{figure}
 
 For these reasons, one would like a cage $\Cout$ that is \emph{nested} around
 $\Fout$: that surrounds $\Fout$ without intersecting it. More formally, given
