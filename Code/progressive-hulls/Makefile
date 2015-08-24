@@ -42,8 +42,8 @@ OBJ_FILES=$(addprefix obj/,$(notdir $(CPP_FILES:.cpp=.o)))
 
 CFLAGS+=-std=c++11
 
-progressive_hulls: obj $(OBJ_FILES)
-	${CXX} $(OPENMP) $(AFLAGS) $(CFLAGS) -o progressive_hulls $(OBJ_FILES) $(LIB)
+progressive_hulls: obj obj/progressive_hulls.o
+	${CXX} $(OPENMP) $(AFLAGS) $(CFLAGS) -o progressive_hulls obj/progressive_hulls.o $(LIB)
 
 obj:
 	mkdir -p obj
