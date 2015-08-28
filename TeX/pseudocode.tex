@@ -2,76 +2,112 @@
 %
 \label{app:pseudocode}
 
-\noindent Obs. Alg. 1: \textsc{Decimate} has to output an intersection-free mesh.
-
 \begin{algorithm}
-   \caption{Nested Cages algorithm (Section 3).}
-   \label{alg:NestedCages}
-   \begin{algorithmic}[1]
-      \Procedure{NestedCages}{$\widehat{M}_0,L,\Delta t,E,\beta_{\mathrm{init}},\beta_{\mathrm{min}},\Delta_C$} \Comment{$\widehat{M}_0 = (\mathbf{M}_0,\mathbf{T}_0)$}
-      \State $N \gets \textsc{Size}(L)$
-      \For{$i \in \{ 1, \ldots, N \}$}
-       \State $\widehat{M}_i \gets \textsc{Decimate}(M_{i-1},L(i))$  \Comment{$\widehat{M}_i = (\mathbf{M}_i,\mathbf{T}_i)$}
-       \State $\mathbf{F} \gets \textsc{ShrinkingFlow}(M_{i-1}, \widehat{M}_i,\Delta t)$
-       \State $\mathbf{M}_i \gets \textsc{ReInflate}(\textbf{F},\textbf{T}_{i-1},\widehat{M}_i,E,\beta_{\mathrm{init}},\beta_{\mathrm{min}},\Delta_C)$
-       \State $M_i \gets (\mathbf{M}_i,\mathbf{T}_i) $ \Comment{Output cage}
-      \EndFor
-      \State \textbf{return} $M$
-      \EndProcedure
-   \end{algorithmic}
+  \caption{$\text{Shrink}(\Cinp,\Fout) \rightarrow H$}
+  \KwData{\\
+    \begin{tabular}{ll}
+      $\Cinp$ &  Initial coarse mesh (will remain constant) \\
+      $\Fout$ &  Initial fine mesh (possibly overlapping with $\Cinp$) \\
+    \end{tabular}
+  }
+  \KwResult
+  {\\
+    \begin{tabular}{ll}
+      $H$  & history of shrinking $\Fout$ vertices inside $\Cinp$ so that \\
+      & $H_j \rightarrow \FVflow(j \Delta t)$ the shrinking fine mesh.
+    \end{tabular}
+  }
+  \Begin{
+    $\Delta t = 1\mbox{\text{e}-}3$ \comment{Default time step} \\
+    $H = \{ F \}$ \comment{Initialize history with input fine mesh} \\
+    \While{\upshape{$\Cinp$ does not nest $H$\text{.last}}}
+    {
+    $\nabla Φ  = 0$ \comment{Initialize gradients to zero} \\
+    \For{\upshape{each quadrature point $\pflow_i $ on $H$.last}}
+    {
+      $\q = \text{closest point to } \pflow_i \text{ on }\Cinp$ \\
+      $s = \left\{ \begin{array}{cl} 1, & \text{ if }\pflow_i\text{ is outside }\Cinp \\
+             -1, & \text{otherwise} \end{array} \right.$ \comment{distance sign} \\
+	 \uIf {$\| \pflow_i - \q \| > 1\mbox{\upshape{e}-}5$}
+	 {
+	 $\g = s \dfrac{\pflow_i-\q}{\|\pflow_i - \q\|}$ \\
+	 }
+	 \Else{
+         	$\g = \n(\q)$ \comment{if $\pflow_i$ is too close to $\q$ define} \\
+	        \comment {gradient as surface normal at $\q$} \\
+	        \comment{\cite{Baerentzen:2005:SDC}}  \\
+         }
+         \For{\upshape{each vertex $j$ in $H$.last}}
+         {
+         	$\nabla Φ (j) \mathrel{+}= w_i \lambda_{ij} \g$  \comment{$w_i$ is the weight of the} \\
+	\comment{ quadrature point and $\lambda_{ij}$} \\
+	\comment{ is the hat function of vertex } \\
+	\comment{$j$ evaluated at quadrature point $\pflow_i$} \\
+         }        
+         
+    }
+    $ H \text{.append}( H\text{.last} - \Delta t \cdot \nabla Φ$  )
+    }
+    \Return $H$ 
+  }
+  \label{alg:shrink}
 \end{algorithm}
 
-\noindent Obs. Alg.2: $\bullet$ We do not perform line search as written in the text (because it doesn't improve the quality
-of results and is more expensive). \\
-$\bullet$ $s^*(\textbf{F},\widehat{C})>0$ means signed distance of some point in $\mathbf{F}$ w.r.t. $\widehat{C}$ is positive. \\
-$\bullet$ Need to include quadrature order?
-
 \begin{algorithm}
-   \caption{Flow algorithm (Section 3.1).}
-   \label{alg:ShrinkingFlow}
-   \begin{algorithmic}[1]
-      \Procedure{ShrinkingFlow}{$\overline{F},\widehat{C},\Delta t$} \Comment{$\overline{F} = (\overline{\mathbf{F}},\overline{\mathbf{T}})$}
-      \State $i \gets 0$
-      \State $\textbf{F}_0 \gets \overline{\mathbf{F}}$
-      \While{$(\textbf{F}_i, \textbf{T}) \cap \widehat{C} \neq \emptyset \ || \ s^*(\textbf{F}_i,\widehat{C})>0 $}
-       \State $i \gets i+1 $
-       \State $\textbf{F}_i \gets \textbf{F}_{i-1} - \Delta t \cdot  \nabla_{\textbf{f}} \Phi(\textbf{F}_{i-1})$\Comment{Detials in (2) through (6)}
-      \EndWhile
-      \State \textbf{return} $\mathbf{F}$
-      \EndProcedure
-   \end{algorithmic}
-\end{algorithm}
+  \caption{$\text{Reinflate}(H,\Cinp,\text{Energy}) \rightarrow C$}
+  \KwData{\\
+    \begin{tabular}{ll}
+       $H$  & history of shrinking $\Fout$ vertices inside $\Cinp$ so that \\
+      & $H_j \rightarrow \FVflow(j \Delta t)$ the shrinking fine mesh. \\
+      $\Cinp$ &  Initial coarse mesh \\
+      Energy &  Function object to compute re-inflating energy and gradient \\
+    \end{tabular}
+  }
+  \KwResult
+  {\\
+    \begin{tabular}{ll}
+      $C$ & Final nested cage \\
+    \end{tabular}
+  }
+  \Begin{
+    $F0 = H$.first  \\
+    $F = H$.pop \\
+    $C = \Cinp$
+    \While{\upshape{$H$ is not empty}}
+    {
+    $\beta  = \beta_{\text{init}} ( \ = 1\mbox{\text{e}-}2)$ \comment{Initial step size} \\
+    $E_{\text{min}} = \infty$ \comment{Initialize energy value to infinity} \\
+    \Repeat{}
+    {
+      $\U_F = H\text{.pop} - F $ \\
+       \comment{Desired velocities for fine mesh} \\
+      $\U_C = - \beta \cdot \nabla \text{Energy} (F_0,C,\Cinp)$ \\
+       \comment{Desired velocities for coarse mesh} \\
+       $\U_C = \text{VelocityFilter}(F,\U_F,C,\U_C)$ \\
+        \comment{Filter velocities to prevent collisions} \\
+	 \uIf {\upshape{Energy}$(C+\U_C)>E_{\text{min}}$}
+	 {
+	 $\beta \mathrel{*} = 0.5$ \comment{Decrease step size} \\
+	 \If{$\beta < \beta_{\text{min}} ( \ = 1\mbox{\upshape{e}-}3)$} 
+	 {
+	    \textbf{break} \comment{Give up} \\
+	 }
+	}
+	 \Else{
+         	$E_{\text{min}} = \text{Energy}(C+\U_C)$ \comment{Update energy}\\
+		$C \mathrel{+}= \U_C$ \comment{Take step} \\
+		$\beta \mathrel{*}= 1.1$ \comment{Slightly increase step size}
+         }  
+         $\Delta C = 1\mbox{\upshape{e}-}5$ \comment{Smallest movement allowed} \\
+         \If{$\| \U_C \| < \Delta C$}
+	 {
+	    \textbf{break} \comment{Declare convergence} \\
+	 }
+         
+    }
 
-\noindent Obs. Alg.3 : $\bullet$ Standards: $\beta_{\mathrm{init}} = 10^{-2}$, $\beta_{\mathrm{min}} = 10^{-3}$,
-$\Delta_C = 10^{-5}$ \\
-$\bullet$ Do I need to explain details on \textsc{CollisionResponse}? For example, change of resolution of
-the spatial hierarchy, elimination of one of the phases that returned solution for the soft problem and substring?
-
-\begin{algorithm}
-   \caption{Reinflation algorithm (Section 3.2).}
-   \label{alg:ReInflation}
-   \begin{algorithmic}[1]
-      \Procedure{ReInflate}{$\textbf{F},\textbf{T},\widehat{C},E,\beta_{\mathrm{init}},\beta_{\mathrm{min}},\Delta_C$}
-      \State $n = \textsc{Size}(\textbf{F})+1$
-      \For{$i \in \{n, \ldots 1 \}$}
-      \State $E_{\mathrm{min}} \gets \infty$
-      \While{$progress> \Delta_C$}
-      \State $\widehat{C}_{\mathrm{prev}} \gets \widehat{C}$
-      \State $\mathbf{U}_C^* \gets -\nabla E (\widehat{C}) $ 
-      \State $\beta \gets \beta_{\mathrm{init}}$
-      \While{$\beta > \beta_{\mathrm{min}} \ \& \& \ progress> \Delta_C$}
-      \State $\widehat{C}_\mathrm{att} \gets \textsc{CollisionResponse}(...)$
-      \If{$E(\widehat{C}_{\mathrm{att}}) < E_{\mathrm{min}}$}
-      \State $\widehat{C} \gets \widehat{C}_{\mathrm{att}}$
-      \State $\beta = 1.1 \beta$
-      \State $E_{\mathrm{min}} \gets E(\widehat{C}_{\mathrm{att}})$
-      \Else
-      \State $\beta = 0.5 \beta$
-      \EndIf
-      \EndWhile
-      \EndWhile
-      \EndFor
-      \State \textbf{return} $\mathbf{C}$
-      \EndProcedure
-   \end{algorithmic}
+    }
+    \Return $C$ 
+  }
+  \label{alg:reinflate}
 \end{algorithm}
