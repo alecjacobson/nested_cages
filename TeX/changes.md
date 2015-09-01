@@ -3,6 +3,9 @@
  - removed point cloud result and its discussion in text
  - added pseudocode of main algorithms
  - added new result showing failure of expanding coarse mesh
+ - toned down claims of being "first" in intro
+ - curbed our enthusiasm about multigrid solver
+- removed erroneous line about line search
 
 # list of changes made since submission
 
