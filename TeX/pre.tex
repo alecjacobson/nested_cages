@@ -228,3 +228,17 @@ open-bracket={\text{-}}, close-bracket={}}
 %#1%
 %\caption{#2}%
 %\end{figure}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% PSEUDOCODE
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage[ruled]{algorithm2e}
+  \DontPrintSemicolon
+  \SetAlgoLined
+  \SetKwInput{KwData}{Inputs} 
+  \SetKwInput{KwResult}{Outputs}
+  \RestyleAlgo{ruled}
+ % disable begin-----end thing
+ \newcommand\newcolumn{\vfil\penalty-10000 }
+ \newcommand{\comment}[1]{\hspace{\fill}\emph{// #1}}
+\usepackage{array}
