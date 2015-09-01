@@ -72,25 +72,25 @@
   \Begin{
     $F0 = H$.first  \\
     $F = H$.pop \\
-    $C = \Cinp$
+    $C = \Cinp$ \\
     \While{\upshape{$H$ is not empty}}
     {
     $\beta  = \beta_{\text{init}} ( \ = 1\mbox{\text{e}-}2)$ \comment{Initial step size} \\
     $E_{\text{min}} = \infty$ \comment{Initialize energy value to infinity} \\
     \Repeat{}
     {
-      $\U_F = H\text{.pop} - F $ \\
+      $\U_F = H\text{.pop} - F $ 
        \comment{Desired velocities for fine mesh} \\
-      $\U_C = - \beta \cdot \nabla \text{Energy} (F_0,C,\Cinp)$ \\
-       \comment{Desired velocities for coarse mesh} \\
-       $\U_C = \text{VelocityFilter}(F,\U_F,C,\U_C)$ \\
-        \comment{Filter velocities to prevent collisions} \\
+      $\U_C = - \beta \cdot \nabla \text{Energy} (F_0,C,\Cinp)$
+       \comment{\ditto{} coarse mesh} \\
+       $\U_C = \text{Filter}(F,\U_F,C,\U_C)$
+        \comment{Prevent collisions} \\
 	 \uIf {\upshape{Energy}$(C+\U_C)>E_{\text{min}}$}
 	 {
 	 $\beta \mathrel{*} = 0.5$ \comment{Decrease step size} \\
 	 \If{$\beta < \beta_{\text{min}} ( \ = 1\mbox{\upshape{e}-}3)$} 
 	 {
-	    \textbf{break} \comment{Give up} \\
+	    \textbf{break} \comment{No progress.} \\
 	 }
 	}
 	 \Else{

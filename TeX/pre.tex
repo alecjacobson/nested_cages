@@ -242,3 +242,7 @@ open-bracket={\text{-}}, close-bracket={}}
  \newcommand\newcolumn{\vfil\penalty-10000 }
  \newcommand{\comment}[1]{\hspace{\fill}\emph{// #1}}
 \usepackage{array}
+
+\usepackage{xhfill}% http://ctan.org/pkg/xhfill
+%\newcommand{\ditto}[1][.4pt]{\xrfill{#1}~\textquotedbl~\xrfill{#1}}
+\newcommand*{\ditto}{---\textquotedbl---}
