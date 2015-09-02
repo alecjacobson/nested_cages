@@ -500,7 +500,7 @@
   \usepackage[hyperfootnotes=false,bookmarks=false]{hyperref}
 \fi
 \hypersetup{
-  colorlinks=true,linkcolor=black,citecolor=black,urlcolor=black
+  colorlinks=false,linkcolor=black,citecolor=black,urlcolor=black
 }
 
 % remove newlines ('\\') from \title when assigning \pdftitle

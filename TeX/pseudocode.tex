@@ -1,4 +1,4 @@
-\section*{Appendix: Pseudocode}
+\section*{Appendix B: Pseudocode}
 %
 \label{app:pseudocode}
 
@@ -13,42 +13,44 @@
   \KwResult
   {\\
     \begin{tabular}{ll}
-      $H$  & history of shrinking $\Fout$ vertices inside $\Cinp$ so that \\
-      & $H_j \rightarrow \FVflow(j \Delta t)$ the shrinking fine mesh.
+      $H$  & Fine mesh history:
+      $H \leftarrow \{\FVflow(0),\FVflow(∆t),\dots,\FVflow(N∆t)\}$
     \end{tabular}
   }
   \Begin{
-    $\Delta t = 1\mbox{\text{e}-}3$ \comment{Default time step} \\
-    $H = \{ F \}$ \comment{Initialize history with input fine mesh} \\
+    $H ← \{ F \}$ \comment{Initialize history with input fine mesh} \\
     \While{\upshape{$\Cinp$ does not nest $H$\text{.last}}}
     {
-    $\nabla Φ  = 0$ \comment{Initialize gradients to zero} \\
+    $\nabla Φ  ← 0$ \comment{Initialize gradients to zero} \\
     \For{\upshape{each quadrature point $\pflow_i $ on $H$.last}}
     {
-      $\q = \text{closest point to } \pflow_i \text{ on }\Cinp$ \\
-      $s = \left\{ \begin{array}{cl} 1, & \text{ if }\pflow_i\text{ is outside }\Cinp \\
-             -1, & \text{otherwise} \end{array} \right.$ \comment{distance sign} \\
+      $\q ← \text{closest point to } \pflow_i \text{ on }\Cinp$ \\
+      $s ← \left\{
+        \begin{array}{rl} 
+           1 & \text{ if }\pflow_i\text{ is outside }\Cinp \\
+          -1 & \text{otherwise} 
+        \end{array} 
+      \right.$ \comment{distance sign} \\
 	 \uIf {$\| \pflow_i - \q \| > 1\mbox{\upshape{e}-}5$}
 	 {
-	 $\g = s \dfrac{\pflow_i-\q}{\|\pflow_i - \q\|}$ \\
+          $\g ← s (\pflow_i-\q)/\|\pflow_i - \q\|$ \\
 	 }
 	 \Else{
-         	$\g = \n(\q)$ \comment{if $\pflow_i$ is too close to $\q$ define} \\
-	        \comment {gradient as surface normal at $\q$} \\
-	        \comment{\cite{Baerentzen:2005:SDC}}  \\
+           \longcomment{if too close use normal \cite{Baerentzen:2005:SDC}}\\
+           $\g ← \n(\q)$\\
          }
          \For{\upshape{each vertex $j$ in $H$.last}}
          {
-         	$\nabla Φ (j) \mathrel{+}= w_i \lambda_{ij} \g$  \comment{$w_i$ is the weight of the} \\
-	\comment{ quadrature point and $\lambda_{ij}$} \\
-	\comment{ is the hat function of vertex } \\
-	\comment{$j$ evaluated at quadrature point $\pflow_i$} \\
+            \longcomment{$w_i$ is the weight of the quadrature point and
+            $\lambda_{ij}$ is the hat function of vertex $j$ evaluated at
+            quadrature point $\pflow_i$}\\
+            $\nabla Φ (j) ← Φ(j) +  w_i \lambda_{ij} \g$\\
          }        
          
     }
-    $ H \text{.append}( H\text{.last} - \Delta t \cdot \nabla Φ$  )
+    $∆t ← 1\mbox{\text{e}-}3$ \comment{Default time step} \\
+    $ H \text{.append}( H\text{.last} - ∆t \cdot \nabla Φ$  )
     }
-    \Return $H$ 
   }
   \label{alg:shrink}
 \end{algorithm}
@@ -57,8 +59,8 @@
   \caption{$\text{Reinflate}(H,\Cinp,\text{Energy}) \rightarrow C$}
   \KwData{\\
     \begin{tabular}{ll}
-       $H$  & history of shrinking $\Fout$ vertices inside $\Cinp$ so that \\
-      & $H_j \rightarrow \FVflow(j \Delta t)$ the shrinking fine mesh. \\
+      $H$  & Fine mesh history:
+      $H \leftarrow \{\FVflow(0),\FVflow(∆t),\dots,\FVflow(N∆t)\}$ \\
       $\Cinp$ &  Initial coarse mesh \\
       Energy &  Function object to compute re-inflating energy and gradient \\
     \end{tabular}
@@ -70,44 +72,42 @@
     \end{tabular}
   }
   \Begin{
-    $F0 = H$.first  \\
-    $F = H$.pop \\
-    $C = \Cinp$ \\
+    $F_0 ← H$.first \comment{initial fine mesh}\\
+    $F ← H$.pop \comment{shrunken fine mesh}\\
+    $C ← \Cinp$ \comment{initialize output cage}\\
     \While{\upshape{$H$ is not empty}}
     {
-    $\beta  = \beta_{\text{init}} ( \ = 1\mbox{\text{e}-}2)$ \comment{Initial step size} \\
-    $E_{\text{min}} = \infty$ \comment{Initialize energy value to infinity} \\
-    \Repeat{}
-    {
-      $\U_F = H\text{.pop} - F $ 
+    $β ← β_{\text{init}} ( \ = 1\mbox{\text{e}-}2)$ \comment{Initial step size} \\
+    $E_{\text{min}} ← \infty$ \comment{Initial minimum energy} \\
+    \Repeat{
+      $\U_F ← H\text{.pop} - F $ 
        \comment{Desired velocities for fine mesh} \\
-      $\U_C = - \beta \cdot \nabla \text{Energy} (F_0,C,\Cinp)$
+      $\U_C ← - β \ \nabla \text{Energy} (F_0,C,\Cinp)$
        \comment{\ditto{} coarse mesh} \\
-       $\U_C = \text{Filter}(F,\U_F,C,\U_C)$
-        \comment{Prevent collisions} \\
+       \longcomment{Filter velocities, e.g.\ modified \cite{Brochu:2009} or
+        \cite{Ainsley:2012:SPA}}\\
+       $\U_C ← \text{Filter}(F,\U_F,C,\U_C)$\\
 	 \uIf {\upshape{Energy}$(C+\U_C)>E_{\text{min}}$}
 	 {
-	 $\beta \mathrel{*} = 0.5$ \comment{Decrease step size} \\
-	 \If{$\beta < \beta_{\text{min}} ( \ = 1\mbox{\upshape{e}-}3)$} 
+	 $β ← β/2$ \comment{Decrease step size} \\
+	 \lIf{$β < β_{\text{min}} ( \ = 1\mbox{\upshape{e}-}3)$} 
 	 {
-	    \textbf{break} \comment{No progress.} \\
+	    \textbf{break} \comment{No progress}
 	 }
 	}
 	 \Else{
-         	$E_{\text{min}} = \text{Energy}(C+\U_C)$ \comment{Update energy}\\
-		$C \mathrel{+}= \U_C$ \comment{Take step} \\
-		$\beta \mathrel{*}= 1.1$ \comment{Slightly increase step size}
+		$C ← C +\U_C$ \comment{Step coarse mesh} \\
+         	$E_{\text{min}} ← \text{Energy}(C)$ \comment{Update energy}\\
+		$β ← 1.1 β$ \comment{Slightly increase step size}
          }  
-         $\Delta C = 1\mbox{\upshape{e}-}5$ \comment{Smallest movement allowed} \\
-         \If{$\| \U_C \| < \Delta C$}
+         \lIf{$\| \U_C \| < ∆C (=1\mbox{\upshape{e}-}5)$}
 	 {
-	    \textbf{break} \comment{Declare convergence} \\
+	    \textbf{break} \comment{"Converged"} 
 	 }
-         
     }
+    $F ← F + \U_F$ \comment{Step fine mesh}
 
     }
-    \Return $C$ 
   }
   \label{alg:reinflate}
 \end{algorithm}

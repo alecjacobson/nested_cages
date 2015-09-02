@@ -232,15 +232,18 @@ open-bracket={\text{-}}, close-bracket={}}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % PSEUDOCODE
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\usepackage[ruled]{algorithm2e}
+\usepackage[ruled,noend]{algorithm2e}
   \DontPrintSemicolon
   \SetAlgoLined
   \SetKwInput{KwData}{Inputs} 
   \SetKwInput{KwResult}{Outputs}
   \RestyleAlgo{ruled}
+  \SetKwBlock{Repeat}{repeat}{}
+
  % disable begin-----end thing
  \newcommand\newcolumn{\vfil\penalty-10000 }
- \newcommand{\comment}[1]{\hspace{\fill}\emph{// #1}}
+ \newcommand{\comment}[1]{\hspace{\fill}\textcolor[rgb]{0.5,0.5,0.5}{\emph{// #1}}}
+ \newcommand{\longcomment}[1]{\textcolor[rgb]{0.5,0.5,0.5}{\noindent \emph{/* #1 */}}}
 \usepackage{array}
 
 \usepackage{xhfill}% http://ctan.org/pkg/xhfill
