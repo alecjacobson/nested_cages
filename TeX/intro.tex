@@ -44,14 +44,13 @@ For these reasons, one would like a cage $\Cout$ that is \emph{nested} around
 $\Fout$: that surrounds $\Fout$ without intersecting it. More formally, given
 two \newhl{watertight (connected, closed, self-intersecting-free and oriented) meshes}
 %
-$\Cout$ and $\Fout$ (later we generalize our method to build cages for polygon
-soups, point clouds, etc.), we say that $\Cout$ \emph{nests} $\Fout$ if: 
+$\Cout$ and $\Fout$ (later we generalize our method to build cages for \newhl{polygon
+soups}), we say that $\Cout$ \emph{nests} $\Fout$ if: 
 %
 (i) $\Fout$ is contained in the interior of $\Cout$, and 
 %
-(ii) there is a homotopy from $\Cout$ to $\Fout$ that remains at all times inside
-$\Cout$'s volume. \newhl{XXX TODO: FIX XXX}
-This definition extends naturally to polyhedra with voids or multiple connected components that are bounded by watertight meshes.
+(ii) \newhl{for every loop on $\Cout$, there is a homotopy from that loop to a loop on $\Fout$ that remains at all times inside $\Cout$'s volume. In other words, for every handle of $\Cout$ there is a corresponding one on $\Fout$, but not necessarily the other way around.}
+This definition extends naturally to when $\Fout$ is a polyhedron with voids or multiple connected components.
 
 \begin{wrapfigure}[15]{r}{1.02in}
 %
