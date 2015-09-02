@@ -49,7 +49,7 @@
          
     }
     $∆t ← 1\mbox{\text{e}-}3$ \comment{Default time step} \\
-    $ H \text{.append}( H\text{.last} - ∆t \cdot \nabla Φ$  )
+    $ H \text{.push}( H\text{.last} - ∆t \cdot \nabla Φ$  )
     }
   }
   \label{alg:shrink}
@@ -62,7 +62,7 @@
       $H$  & Fine mesh history:
       $H \leftarrow \{\FVflow(0),\FVflow(∆t),\dots,\FVflow(N∆t)\}$ \\
       $\Cinp$ &  Initial coarse mesh \\
-      Energy &  Function object to compute re-inflating energy and gradient \\
+      Energy &  Function object for re-inflation energy and gradient
     \end{tabular}
   }
   \KwResult
@@ -79,9 +79,8 @@
     {
     $β ← β_{\text{init}} ( \ = 1\mbox{\text{e}-}2)$ \comment{Initial step size} \\
     $E_{\text{min}} ← \infty$ \comment{Initial minimum energy} \\
+    $\U_F ← H\text{.pop} - F $ \comment{Desired velocities for fine mesh} \\
     \Repeat{
-      $\U_F ← H\text{.pop} - F $ 
-       \comment{Desired velocities for fine mesh} \\
       $\U_C ← - β \ \nabla \text{Energy} (F_0,C,\Cinp)$
        \comment{\ditto{} coarse mesh} \\
        \longcomment{Filter velocities, e.g.\ modified \cite{Brochu:2009} or
