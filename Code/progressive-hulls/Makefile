@@ -8,20 +8,23 @@ all: obj progressive_hulls
 #CXX=clang++ -D__ASSERT_MACROS_DEFINE_VERSIONS_WITHOUT_UNDERSCORES=0
 CXX=g++
 #CFLAGS+=-DIGL_STATIC_LIBRARY -fopenmp
-CFLAGS+=-fopenmp
+#CFLAGS+=-fopenmp
 CFLAGS+=-g -O3 -DNDEBUG
 #CFLAGS+=-g -O0 
 
 LIBIGL=/usr/local/igl/libigl/
-LIBIGL_INC=-I$(LIBIGL)/include -DIGL_STATIC_LIBRARY
-LIBIGL_LIB=-L$(LIBIGL)/lib -ligl -liglmosek -liglviewer
+LIBIGL_INC=-I$(LIBIGL)/include 
+#LIBIGL_INC=-I$(LIBIGL)/include -DIGL_STATIC_LIBRARY
+#LIBIGL_LIB=-L$(LIBIGL)/lib -ligl -liglmosek -liglviewer
 
-EIGEN3_INC=-I/opt/local/include/eigen3 -I/opt/local/include/eigen3/unsupported
+EIGEN3_INC=-I/usr/local/include/eigen3 -I/usr/local/include/eigen3/unsupported
 
 ANTTWEAKBAR_INC=-I$(LIBIGL)/external/AntTweakBar/include -I$(LIBIGL)/external/AntTweakBar/src
 ANTTWEAKBAR_LIB=-L$(LIBIGL)/external/AntTweakBar/lib -lAntTweakBar
-GLFW_INC=-I$(LIBIGL)/external/glfw/include 
-GLFW_LIB=-L$(LIBIGL)/external/glfw/lib -lglfw3 -framework Carbon -framework QuartzCore -framework IOKit
+GLFW_INC=-I$(LIBIGL)/external/nanogui/ext/glfw/include 
+GLFW_LIB=-L$(LIBIGL)/external/glfw/src -lglfw3 -framework Carbon -framework QuartzCore -framework IOKit
+NANOGUI_INC=-I$(LIBIGL)/external/nanogui/include  -I$(LIBIGL)/external/nanogui/ext/nanovg/src
+NANOGUI_LIB=-L$(LIBIGL)/external/nanogui/build -lnanogui
 
 UNAME := $(shell uname)
 ifeq ($(UNAME), Darwin)
@@ -34,10 +37,10 @@ endif
 
 OPENGL_LIB=-framework OpenGL
 
-INC=$(LIBIGL_INC) $(ANTTWEAKBAR_INC) $(EIGEN3_INC) $(GLFW_INC)
-LIB=$(OPENGL_LIB) $(GLUT_LIB) $(ANTTWEAKBAR_LIB) $(LIBIGL_LIB) $(GLFW_LIB)
+INC=$(LIBIGL_INC) $(ANTTWEAKBAR_INC) $(EIGEN3_INC) $(GLFW_INC) $(NANOGUI_INC)
+LIB=$(OPENGL_LIB) $(GLUT_LIB) $(ANTTWEAKBAR_LIB) $(LIBIGL_LIB) $(GLFW_LIB) $(NANOGUI_LIB)
 
-CPP_FILES=$(wildcard ./*.cpp)
+CPP_FILES=progressive_hulls.cpp
 OBJ_FILES=$(addprefix obj/,$(notdir $(CPP_FILES:.cpp=.o))) 
 
 CFLAGS+=-std=c++11
