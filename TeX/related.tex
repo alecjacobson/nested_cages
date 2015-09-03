@@ -87,6 +87,7 @@ not sought or guaranteed.
   \newhl{are loosely-fitting}, but more importantly self-intersections (orange) and
   intersections with the input model (yellow) eventually accumulate.}
   \label{fig:dane-vs-ben-chen}
+  \vspace*{-5mm}
 \end{figure}
 
 \paragraph{Progressive decimation.} of $\Finp$ using edge collapses, taking care
@@ -128,9 +129,29 @@ such methods quickly get stuck in local minima.
 Before settling on an inward flow of $\Finp$, we experimented with an outward
 flow of $\Cinp$ away from $\Finp$, along its signed distance field.
 %
-For convex meshes this works well\newhl{. However, extensive testing revealed this approach suffers from several difficulties on more complex geometries: 1) Flowing vertices along the signed distance field of $\Finp$ is not guaranteed to resolve all face-face collisions between the fine and coarse meshes; the flow is most robust when the flowing elements are small and the signed distance field does not have too many fine features. Flowing the coarse mesh outward is more fragile than flowing the fine mesh in as both of these factors are less favorable; 2) when flowing the fine mesh inside the coarse mesh we do not need to handle self-collisions within the fine mesh, whereas if inflating the coarse mesh, we do. Adding collision constraints aggravates the fragility of the outward flow; the constraints can prevent a flowing face from ever leaving the volume of the fine mesh (see Figure~\ref{fig:knight-exp-vs-sh}).}
+For convex meshes this works well\newhl{. However, extensive testing revealed
+this approach suffers from several difficulties on more complex geometries: 1)
+Flowing vertices along the signed distance field of $\Finp$ is not guaranteed
+to resolve all face-face collisions between the fine and coarse meshes; the
+flow is most robust when the flowing elements are small and the signed distance
+field does not have too many fine features. Flowing the coarse mesh outward is
+more fragile than flowing the fine mesh in as both of these factors are less
+favorable; 2) when flowing the fine mesh inside the coarse mesh we do not need
+to handle self-collisions within the fine mesh, whereas if inflating the coarse
+mesh, we do. Adding collision constraints aggravates the fragility of the
+outward flow; the constraints can prevent a flowing face from ever leaving the
+volume of the fine mesh (see Figure~\ref{fig:knight-exp-vs-sh}).}
 
-\paragraph{Multiresolution.}
+\begin{figure}
+  \includegraphics[width=\linewidth]{figs/knight-exp-vs-sh}
+  \caption{\newhl{Shrinking the fine mesh inside the coarse quickly removes overlaps
+  (yellow). Expanding the coarse mesh requires self-contact handling (e.g.\
+  between arms and body), blocking progress.}}
+  \label{fig:knight-exp-vs-sh}
+  \vspace*{-5mm}
+\end{figure}
+
+\paragraph{Multigrid.}
 %
 Methods based on regular grids or lattices naturally support multiresolution
 numerical methods.
@@ -162,16 +183,16 @@ multigrid numerical methods with expensive, SIMD-breaking boundary handling
 code: detracting from the performance gains of memory-efficient regular grids
 \cite{Demmel04}.
 
-Multiresolution on unstructured grids or tetrahedral meshes is more
-temperamental than regular grids and constructing each level requires care
+Multigrid on unstructured grids or tetrahedral meshes is more
+temperamental, and constructing each level requires care
 \cite{fish1995efficient}.
 %
-Geometric multiresolution schemes typically coarsen an input tetrahedral mesh
-by removing all but a subset of its vertices, attempting to connect them in a
-reasonable way \cite{guillard1993,Adams:1999:PMS}. Special care is required to
-maintain any semblance of the original boundary \cite{Brune:2011}, essentially
-devolving into constrained Delaunay tessellation with no guarantee that the
-coarsening will not \emph{eat away} large portions of the domain.
+Geometric multigrid schemes typically coarsen an input tetrahedral mesh by
+removing vertices, attempting to connect those remaining in a reasonable way
+\cite{guillard1993,Adams:1999:PMS}. Special care is required to maintain any
+semblance of the original boundary \cite{Brune:2011}, essentially devolving
+into constrained Delaunay tessellation with no guarantee that the coarsening
+will not \emph{eat away} large portions of the domain.
 %
 In many scenarios, the boundary of the domain is assumed to be only as
 irregular as the coarsest layer, simplifying level design \cite{feng1997non}.
@@ -195,13 +216,13 @@ We show cases where this fails to converge for common linear systems on
 irregular domains, and we show better convergence for strictly nesting cages
 where prolongation is a purely linear interpolation.
 
-Algebraic alternatives to geometric remeshing also exist
+Algebraic alternatives also exist
 \cite{ruge1987algebraic},
 but are recommended only when geometric information is not available
 \cite{falgout06}.
 %
 Recently, \cite{Krishnan:2013:EPL} proposed a
-multiresolution preconditioner for Laplace-based systems on images and
+multigrid preconditioner for Laplace-based systems on images and
 surfaces.
 %
 This method combines the elegance of algebraic techniques with some geometric

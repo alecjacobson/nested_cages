@@ -35,10 +35,10 @@ illusive.
 The correct assignment seems related to correctly matching medial axes of both
 meshes: perhaps an avenue of future improvement.
 
-\newhl{We believe the performance of our multiresolution solver could be further
+\newhl{We believe the performance of our multigrid solver could be further
 improved} by parameter tuning and experimenting with different coarsening
 gradations. We would also like to consider using our meshes to build
-multiresolution proconditioners for conjugate gradient solvers.
+multigrid proconditioners for conjugate gradient solvers.
 %
 We expect that higher order PDEs with more involved boundary conditions will
 receive an even greater benefit from our nested cages.
@@ -47,7 +47,8 @@ It would be interesting to analyze formally the convergence of our nested cages
 along the lines of \cite{chan1996convergence} who consider the then-available
 non-nested hierarchies.
 
-\newhl{Our cages are designed for \emph{volumetric} multiresolution solvers, and are not} immediately applicable to \emph{surface-based} multiresolution problems
+\newhl{Our cages are designed for \emph{volumetric} multigrid solvers, and are
+not} immediately applicable to \emph{surface-based} multiresolution problems
 (cf.\ \cite{Aksoylu2005msu,Chuang:2009:ELO}). Whether nesting is at all useful
 for surface problems remains an open question.
 
