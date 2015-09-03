@@ -58,7 +58,7 @@ int main(int argc, char * argv[])
   MatrixXd V,OV,U;
   MatrixXi F,OF,G;
   read_triangle_mesh(filename,OV,OF);
-  igl::Viewer viewer;
+  igl::viewer::Viewer viewer;
 
   if(OF.size() == 0)
   {
@@ -214,8 +214,8 @@ int main(int argc, char * argv[])
     }
   };
 
-  //cost_and_placement = shortest_edge_and_midpoint;
-  cost_and_placement = minimal_volume_and_outer_hull; 
+  cost_and_placement = shortest_edge_and_midpoint;
+  //cost_and_placement = minimal_volume_and_outer_hull; 
 
   const auto & reset = [&]()
   {
@@ -241,7 +241,7 @@ int main(int argc, char * argv[])
     viewer.data.set_face_based(true);
   };
 
-  const auto &pre_draw = [&](igl::Viewer & viewer)->bool
+  const auto &pre_draw = [&](igl::viewer::Viewer & viewer)->bool
   {
     if(viewer.core.is_animating && !Q.empty())
     {
@@ -270,7 +270,7 @@ int main(int argc, char * argv[])
     return false;
   };
 
-  const auto &key_down = [&](igl::Viewer &viewer,unsigned char key,int mod)->bool
+  const auto &key_down = [&](igl::viewer::Viewer &viewer,unsigned char key,int mod)->bool
   {
     switch(key)
     {
