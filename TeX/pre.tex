@@ -4,7 +4,7 @@
 \newcommand{\alec}[1]{{\bf\textcolor[rgb]{0.2,0.8,0.2}{Alec: #1}}}
 \newcommand{\etienne}[1]{{\bf\textcolor[rgb]{0.9,0.5,0.0}{Etienne: #1}}}
 \newcommand{\cheatvspace}[1]{}
-\newcommand{\newhl}[1]{#1}
+\newcommand{\newhl}[1]{\textcolor[rgb]{0.2,0.8,0.2}{#1}}
 
 % Nice table
 \usepackage[table]{xcolor}
@@ -228,3 +228,24 @@ open-bracket={\text{-}}, close-bracket={}}
 %#1%
 %\caption{#2}%
 %\end{figure}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% PSEUDOCODE
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage[ruled,noend]{algorithm2e}
+  \DontPrintSemicolon
+  \SetAlgoLined
+  \SetKwInput{KwData}{Inputs} 
+  \SetKwInput{KwResult}{Outputs}
+  \RestyleAlgo{ruled}
+  \SetKwBlock{Repeat}{repeat}{}
+
+ % disable begin-----end thing
+ \newcommand\newcolumn{\vfil\penalty-10000 }
+ \newcommand{\comment}[1]{\hspace{\fill}\textcolor[rgb]{0.5,0.5,0.5}{\emph{// #1}}}
+ \newcommand{\longcomment}[1]{\textcolor[rgb]{0.5,0.5,0.5}{\noindent \emph{/* #1 */}}}
+\usepackage{array}
+
+\usepackage{xhfill}% http://ctan.org/pkg/xhfill
+%\newcommand{\ditto}[1][.4pt]{\xrfill{#1}~\textquotedbl~\xrfill{#1}}
+\newcommand*{\ditto}{---\textquotedbl---}

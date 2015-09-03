@@ -230,7 +230,7 @@ tight fit allows the coarse cage to efficiently reject nearly all false
 positives during collision detection. As a proof of concept, we simulated
 dropping eighteen instances of the octopus mesh (\reffig{zoo},
 top-middle) one by one into a narrow tank, where they collide with each other
-and the tank walls nearly elastically (coefficient of restitution $0.99$) using
+and the tank walls (\newhl{with} coefficient of restitution $0.99$) using
 continuous-time collision detection (see inset). We compared the performance of
 two different broad phase strategies for collision detection: in the first,
 bounding cubes around swept spacetime volumes are used to prune distant pairs
@@ -294,7 +294,7 @@ choice of diagonals splitting each quad.
 \paragraph{Generalizations beyond watertight meshes.}
 %
 Though not strictly meeting our input criteria, we apply our method to
-polygon soups and point clouds.
+polygon soups.% and point clouds.
 %
 In \reffig{swat-cage}, we again adapt the optimization energy, this time to
 maintain the reflectional symmetry of the coarse input cage.
@@ -304,17 +304,17 @@ but we still flow it inside.
 %
 Though details on the expanding input mesh are asymmetric (see hip pockets or
 hands), the energy minimization keeps the cage symmetric.
-
-In \reffig{point-cloud}, we use Poisson surface reconstruction and decimation
-to compute an initial cage for a point cloud and then nest it around the points
-using our method.
-
-\begin{figure}
-  \includegraphics[width=\linewidth]{figs/point-cloud}
-  \caption{Our pipeline generalizes to non-polyhedral inputs such as point
-  clouds.}
-  \label{fig:point-cloud}
-\end{figure}
+%
+%In \reffig{point-cloud}, we use Poisson surface reconstruction and decimation
+%to compute an initial cage for a point cloud and then nest it around the points
+%using our method.
+%
+%\begin{figure}
+%  \includegraphics[width=\linewidth]{figs/point-cloud}
+%  \caption{Our pipeline generalizes to non-polyhedral inputs such as point
+%  clouds.}
+%  \label{fig:point-cloud}
+%\end{figure}
 
 \begin{figure}
   \includegraphics[width=\linewidth]{figs/swat-cage}

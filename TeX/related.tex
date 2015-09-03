@@ -69,7 +69,7 @@ violating the nestedness of the cage. A similar
 approach~\cite{Ben-Chen:2009:SDT} has been used for building deformation cages
 around input shapes, where an offset surface is created via Poisson surface
 reconstruction~\cite{PoissonSurfaceReconstruction06} (we compare against this
-approach in ~\reffig{dane-vs-ben-chen}).
+approach in ~\reffig{dane-vs-ben-chen}). \newhl{While the tightness of these cages could be controlled with post-hoc shrinking of the cage, the method can introduce topology changes that are not easily remedied.}
 %
 For meshes with well defined feature curves, it may be possible to merge coarse
 on-surface triangulations of patches \cite{Xian:2013}, though strict nesting is
@@ -79,11 +79,12 @@ not sought or guaranteed.
   \includegraphics[width=\linewidth]{figs/dane-horse-vs-ben-chen-vs-sander}
   \caption{Methods like \protect\cite{Ben-Chen:2009:SDT} use coarse cages as
   computational workhorses to reduce complexity. Their iterative offset
-  heuristic produces oversmoothed, loosely fitting cages.
+  heuristic \newhl{does not allow control of the cage topology.}
+% oversmoothed, loosely fitting cages.
   %
   Meanwhile, \protect\cite{Sander:2000:SC} attempt to
   maintain nestedness during greedy decimation with local constraints. Cages
-  are also loose, but more importantly self-intersections (orange) and
+  \newhl{are loosely-fitting}, but more importantly self-intersections (orange) and
   intersections with the input model (yellow) eventually accumulate.}
   \label{fig:dane-vs-ben-chen}
 \end{figure}
@@ -122,12 +123,12 @@ collision response methods (e.g.\
 \cite{Baraff:2003:UC,Volino:2006:RSC,Wicke:2006,Ye:2012:ICM}) could be used to
 separate $\Cinp$ from $\Finp$ if intersections are not too severe; otherwise
 such methods quickly get stuck in local minima.
-%
+
+\paragraph{\newhl{Outward Flow.}}
 Before settling on an inward flow of $\Finp$, we experimented with an outward
 flow of $\Cinp$ away from $\Finp$, along its signed distance field.
 %
-For convex meshes this works well, but for concave $\Finp$  the edges of
-$\Cinp$ will intersect $\Finp$ even in the limit of flowing for infinite time.
+For convex meshes this works well\newhl{. However, extensive testing revealed this approach suffers from several difficulties on more complex geometries: 1) Flowing vertices along the signed distance field of $\Finp$ is not guaranteed to resolve all face-face collisions between the fine and coarse meshes; the flow is most robust when the flowing elements are small and the signed distance field does not have too many fine features. Flowing the coarse mesh outward is more fragile than flowing the fine mesh in as both of these factors are less favorable; 2) when flowing the fine mesh inside the coarse mesh we do not need to handle self-collisions within the fine mesh, whereas if inflating the coarse mesh, we do. Adding collision constraints aggravates the fragility of the outward flow; the constraints can prevent a flowing face from ever leaving the volume of the fine mesh (see Figure~\ref{fig:knight-exp-vs-sh}).}
 
 \paragraph{Multiresolution.}
 %

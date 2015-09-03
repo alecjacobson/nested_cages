@@ -11,11 +11,15 @@
 #include <igl/boundary_facets.h>
 #include <igl/circulation.h>
 #include <igl/centroid.h>
+#include <igl/slice_mask.h>
+#include <igl/remove_unreferenced.h>
+#include <igl/REDRUM.h>
 #include <igl/matlab_format.h>
 #include <igl/edges.h>
 #include <igl/unique_edge_map.h>
 #include <igl/unique.h>
-#include <igl/writeOBJ.h>
+#include <igl/writePLY.h>
+#include <igl/pathinfo.h>
 #include <igl/intersect.h>
 #include <igl/list_to_matrix.h>
 #include <igl/Viewer/viewer.h>
@@ -34,6 +38,7 @@ int at(
   return M(i,j);
 }
 
+std::string out_filename;
 int main(int argc, char * argv[])
 {
   using namespace std;
@@ -44,9 +49,12 @@ int main(int argc, char * argv[])
   cout<<"  'r'  reset."<<endl;
   string filename("fandisk.off");
   double w = 0.5;
+  int min_faces = 0;
   switch(argc)
   {
     default:
+    case 4:
+      min_faces = strtod(argv[3],NULL);
     case 3:
       w = strtod(argv[2],NULL);
     case 2:
@@ -54,9 +62,15 @@ int main(int argc, char * argv[])
     case 1:
       break;
   }
+  {
+    string d,b,e,f;
+    pathinfo(filename,d,b,e,f);
+    out_filename = d + "/" + f + "-ph.ply";
+    cout<<GREENGIN("Output set to write to: "<<out_filename)<<endl;
+  }
 
-  MatrixXd V,OV,U;
-  MatrixXi F,OF,G;
+  MatrixXd V,OV;
+  MatrixXi F,OF;
   read_triangle_mesh(filename,OV,OF);
   igl::viewer::Viewer viewer;
 
@@ -247,7 +261,16 @@ int main(int argc, char * argv[])
     {
       bool something_collapsed = false;
       // collapse edge 
-      const int max_iter = std::ceil(0.01*Q.size());
+      int max_iter = std::ceil(0.01*Q.size());
+      if((m-min_faces)<100)
+      {
+        max_iter = 1;
+      }
+      if(m-min_faces < 3)
+      {
+        viewer.core.is_animating = false;
+        return false;
+      }
       for(int j = 0;j<max_iter;j++)
       {
         if(!collapse_edge(cost_and_placement,V,F,E,EMAP,EF,EI,Q,Qit,C))
@@ -281,6 +304,18 @@ int main(int argc, char * argv[])
       case 'r':
         reset();
         break;
+      case 'S':
+      case 's':
+      {
+        MatrixXi G,H;
+        MatrixXd U;
+        VectorXi _;
+        remove_unreferenced(V,F,U,G,_);
+        slice_mask(
+          G,(G.array()!=IGL_COLLAPSE_EDGE_NULL).rowwise().all().eval(),1,H);
+        writePLY(out_filename,U,H);
+      }
+      break;
       default:
         return false;
     }

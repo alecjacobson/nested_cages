@@ -42,18 +42,15 @@ simulation and geometry processing \cite{chan1999boundary}.
 
 For these reasons, one would like a cage $\Cout$ that is \emph{nested} around
 $\Fout$: that surrounds $\Fout$ without intersecting it. More formally, given
-two watertight (connected, closed, self-intersecting-free and oriented)
-homeomorphic meshes 
+two \newhl{watertight (connected, closed, self-intersecting-free and oriented) meshes}
 %
-$\Cout$ and $\Fout$ (later we generalize our method to build cages for polygon
-soups, point clouds, etc.), we say that $\Cout$ \emph{nests} $\Fout$ if: 
+$\Cout$ and $\Fout$ (later we generalize our method to build cages for \newhl{polygon
+soups}), we say that $\Cout$ \emph{nests} $\Fout$ if: 
 %
 (i) $\Fout$ is contained in the interior of $\Cout$, and 
 %
-(ii) there is a homotopy from $\Cout$ to $\Fout$ that remains at all times inside
-$\Cout$'s volume. 
-This definition extends naturally to polyhedra with voids or multiple connected components that are bounded by watertight meshes.
-\clearpage
+(ii) \newhl{for every loop on $\Cout$, there is a homotopy from that loop to a loop on $\Fout$ that remains at all times inside $\Cout$'s volume. In other words, for every handle of $\Cout$ there is a corresponding one on $\Fout$, but not necessarily the other way around.}
+This definition extends naturally to when $\Fout$ is a polyhedron with voids or multiple connected components.
 
 \begin{wrapfigure}[15]{r}{1.02in}
 %
@@ -102,8 +99,8 @@ leveraged by heuristics.
 
 \paragraph{Contribution.} We present a practical algorithm for solving the
 nested cage problem on meshes typically used in applications such as physical
-simulation and geometric modeling. Our method is the first to do so while
-remaining completely \emph{agnostic} to the decimation scheme used to create
+simulation and geometric modeling. Our method 
+remains completely \emph{agnostic} to the decimation scheme used to create
 $\Cinp$ and fitness function $E$. Briefly, the method first flows $\Fout$ inside $\Cinp$
 along $\Cinp$'s signed distance field; once inside, we rewind the flow while
 deforming $\Cinp$ to minimize $E$; contact forces guarantee that the coarse cage
