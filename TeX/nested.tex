@@ -1,13 +1,13 @@
 %%% The ``\documentclass'' command has one parameter, based on the kind of
 %%% document you are preparing.
 %%%
-%%% [annual] - Technical paper accepted for presentation at the ACM SIGGRAPH 
+%%% [annual] - Technical paper accepted for presentation at the ACM SIGGRAPH
 %%%   or SIGGRAPH Asia annual conference.
-%%% [sponsored] - Short or full-length technical paper accepted for 
+%%% [sponsored] - Short or full-length technical paper accepted for
 %%%   presentation at an event sponsored by ACM SIGGRAPH
 %%%   (but not the annual conference Technical Papers program).
 %%% [abstract] - A one-page abstract of your accepted content
-%%%   (Technical Sketches, Posters, Emerging Technologies, etc.). 
+%%%   (Technical Sketches, Posters, Emerging Technologies, etc.).
 %%%   Content greater than one page in length should use the "[sponsored]"
 %%%   parameter.
 %%% [preprint] - A preprint version of your final content.
@@ -15,7 +15,7 @@
 %%%   numbers and anonymization of author and affiliation information.
 
 
-\documentclass[annual]{acmsiggraph}
+\documentclass[final]{acmsiggraph}
 
 \usepackage{graphicx}
 \usepackage[usenames,dvipsnames]{color}
@@ -73,6 +73,11 @@
 %%% found just before the first section of your document will add hyperlinked
 %%% icons to your document, in addition to hyperlinked icons which point to
 %%% the ACM Digital Library article page and the ACM Digital Library-held PDF.
+
+\TOGprojectURL{}
+\TOGvideoURL{}
+\TOGdataURL{}
+\TOGcodeURL{}
 
 %%% Replace ``PAPER TEMPLATE TITLE'' with the title of your paper or abstract.
 
@@ -139,6 +144,7 @@ $^3$Columbia University \quad
 %%% ``\begin{document}'' and ``\maketitle.''
 
 \teaser{
+\vspace*{-0.5cm}
   \includegraphics[width=\textwidth]{\figs/bunny-shelf-teaser}
   \caption{
 Given an input shape (yellow on bottom right), our method constructs \emph{nested} cages:
@@ -206,21 +212,6 @@ encaged \emph{Bunny}.}
 \input{results}
 \input{conclusion}
 \input{acks}
-
-\begin{figure*}
-  \includegraphics[width=\linewidth]{figs/zoo}
-  \caption{Each triplet shows: input model, slice through all nested layers,
-  and outermost, coarsest layer. We fit 50 layers tightly around \emph{Max
-  Planck}'s head (top left). 
-  %
-  As a stress test, we purposefully continue nesting cages around \emph{Gargoyle} to a
-  very coarse level (bottom left).
-  %
-  The topological holes of the high-genus \emph{Fertility} are maintained
-  across all layers (top right). The deep concavity of the \emph{Mug} does not
-  get smoothed away in coarser levels (bottom right).}
-  \label{fig:zoo}
-\end{figure*}
 
 \bibliographystyle{acmsiggraph}
 \bibliography{references}

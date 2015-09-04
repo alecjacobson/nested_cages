@@ -12,7 +12,7 @@ As the complexity and size of computational objects continue to grow,
 acceleration algorithms become increasingly important. One powerful technique
 is to decompose a high-resolution mesh into a hierarchy of increasingly coarse
 approximations or \emph{cages} (see \reffig{teaser}). For example,
-multiresolution FEM techniques efficiently solve Eulerian PDEs on very fine
+multigrid FEM techniques efficiently solve Eulerian PDEs on very fine
 meshes by moving up and down the hierarchy; low frequency residual error
 disappears quickly on the coarsest levels while fine levels smooth away high
 frequency error. Coarse enclosing cages also find use in physical simulation,
@@ -33,10 +33,10 @@ a detailed object only guarantee small distortion of the object and lack of
 element-inversion artifacts if the object is entirely contained within the cage
 \cite{HarmonicCoodinates07,Ben-Chen:2009:VHM}; strict nesting is essential for
 accelerating collision detection \emph{conservatively}; and while nesting is
-not a necessary condition for multiresolution convergence
+not a necessary condition for multigrid convergence
 \cite{Chan96overlappingschwarz}, the ability to use simple linear interpolation
-for prolongation is known to produce more robust, more efficient, and easier to
-implement solvers \cite{chan2000robust,dickopf2010multilevel}. This is
+for prolongation is known to be more robust, more efficient, and easier to
+implement \cite{chan2000robust,dickopf2010multilevel}. This is
 particularly important for enforcing Neumann boundary conditions, common to
 simulation and geometry processing \cite{chan1999boundary}.
 
@@ -49,14 +49,15 @@ soups}), we say that $\Cout$ \emph{nests} $\Fout$ if:
 %
 (i) $\Fout$ is contained in the interior of $\Cout$, and 
 %
-(ii) \newhl{for every loop on $\Cout$, there is a homotopy from that loop to a loop on $\Fout$ that remains at all times inside $\Cout$'s volume. In other words, for every handle of $\Cout$ there is a corresponding one on $\Fout$, but not necessarily the other way around.}
+(ii) \newhl{for every loop on $\Cout$, there is a homotopy from that loop to a loop on $\Fout$ that remains at all times inside $\Cout$'s enclosed volume. In other words, for every handle of $\Cout$ there is a corresponding one on $\Fout$, but not necessarily the other way around.}
 This definition extends naturally to when $\Fout$ is a polyhedron with voids or multiple connected components.
 
-\begin{wrapfigure}[15]{r}{1.02in}
+\begin{wrapfigure}[14]{r}{1.02in}
 %
 \centering
 %
-\includegraphics[trim=4mm 0 0mm 0mm,width=\linewidth]{figs/boxer-cages-not-cages}
+\vspace{-0.7cm}
+\includegraphics[trim=3mm 0 0mm 0mm,width=\linewidth]{figs/boxer-cages-not-cages}
 %
 \end{wrapfigure}
 %
@@ -65,12 +66,11 @@ a 2D example (black outline). Given a $\Cinp$ that does not nest $\Fout$, we
 look for the best perturbation $\Cout$ of $\Cinp$ that does nest $\Fout$; where
 ``best'' is measured by an application-dependent fitness energy $E(\Fout,
 \Cinp, \Cout)$, penalizing, for example, total volume for tight fitting cages
-for efficient multiresolution solvers; distortion for simulation or collision
-handling; or violations of symmetry and quad-planarity for interactive
-deformation cages.  Finding $\Cout$,  entails solving the \emph{nested cage
-problem}:
+for efficient multigrid; distortion for simulation or collisions; or violations
+of symmetry and quad-planarity for interactive deformation cages.  Finding
+$\Cout$,  entails solving the \emph{nested cage problem}:
 
-Given an embedded polyhedron $\Fout$, a polyhedron $\Cinp$ homeomorphic to $\Fout$, and a
+Given an embedded polyhedron $\Fout$, a polyhedron $\Cinp$\newhl{, and} a
 fitness function $E$, minimize $E(\Fout, \Cinp, \Cout)$ over all embeddings
 $\Cout$ of $\Cinp$ that nest $\Fout$.
 

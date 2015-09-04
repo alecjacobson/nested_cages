@@ -1,20 +1,23 @@
-% Comments
-\newcommand{\leo}[1]{{\bf\textcolor[rgb]{0.9,0.0,0.0}{Leo: #1}}}
-\newcommand{\todo}[1]{{\bf\textcolor{red}{TODO: #1}}}
-\newcommand{\alec}[1]{{\bf\textcolor[rgb]{0.2,0.8,0.2}{Alec: #1}}}
-\newcommand{\etienne}[1]{{\bf\textcolor[rgb]{0.9,0.5,0.0}{Etienne: #1}}}
-\newcommand{\cheatvspace}[1]{}
-\newcommand{\newhl}[1]{\textcolor[rgb]{0.2,0.8,0.2}{#1}}
 
 % Nice table
-\usepackage[table]{xcolor}
+\usepackage[usenames,dvipsnames,table]{xcolor}
 \usepackage{tabularx}
 \usepackage{booktabs}
 \definecolor{lightbluishgrey}{rgb}{0.9,0.91,0.95}
 \newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
 \newcommand{\NO}{{\color{red}\textsf{X}}}
 \newcommand{\YES}{$\bullet$}
+
 % Comments
+\usepackage{pdfcomment}
+\usepackage[usenames,dvipsnames,table]{xcolor}
+\newcommand{\todo}[1]{{\bf\textcolor{red}{TODO: #1}}}
+\definecolor{offwhite}{rgb}{1.0, 1.0, 0.7}
+\newcommand{\alec}   [1]{\pdfcomment[color=offwhite,author=Alec]{Alec: #1}}
+\newcommand{\leo}    [1]{\pdfcomment[color=offwhite,author=Leo]{Leo: #1}}
+\newcommand{\etienne}[1]{\pdfcomment[color=offwhite,author=Etienne]{Etienne: #1}}
+\newcommand{\cheatvspace}[1]{}
+\newcommand{\newhl}[1]{\textcolor[rgb]{0.2,0.8,0.2}{#1}}
 
 \usepackage{layouts}
 
@@ -249,3 +252,11 @@ open-bracket={\text{-}}, close-bracket={}}
 \usepackage{xhfill}% http://ctan.org/pkg/xhfill
 %\newcommand{\ditto}[1][.4pt]{\xrfill{#1}~\textquotedbl~\xrfill{#1}}
 \newcommand*{\ditto}{---\textquotedbl---}
+
+% http://tex.stackexchange.com/a/94702/13600
+\newenvironment{absolutelynopagebreak}
+  {\par\nobreak\vfil\penalty0\vfilneg
+   \vtop\bgroup}
+  {\par\xdef\tpd{\the\prevdepth}\egroup
+   \prevdepth=\tpd}
+
