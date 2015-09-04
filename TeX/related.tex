@@ -90,7 +90,7 @@ not sought or guaranteed.
   \vspace*{-5mm}
 \end{figure}
 
-\paragraph{Progressive decimation.} of $\Finp$ using edge collapses, taking care
+\textbf{Progressive decimation} of $\Finp$ using edge collapses, taking care
 to place new vertices on the exterior of the current volume by solving a system
 of inequality constraints~\cite{Sander:2000:SC}, has found some success in
 real-time rendering and collision detection \cite{Platis:CGF}.  Although
@@ -108,7 +108,7 @@ but this technique relies on temperamental 3D tetrahedral meshing in tight
 regions near overlaps and does not consider face-/edge-intersections with
 the input model.
 
-\paragraph{Voxelization.} of $\Finp$ will create a nested cage, provided that
+\textbf{Voxelization} of $\Finp$ will create a nested cage, provided that
 the resolution is chosen fine enough to avoid topological
 artifacts (as in the case of contouring implicit functions). Naive voxelization
 yields dense, inefficient cages \cite{Mehra:2009:AMS}, possibly improved by
@@ -265,7 +265,7 @@ Rather than work against the sophistication of existing shape decimation
 techniques, we complement them. Our method arbitrary decimations as input and
 nests them as a post process.
 
-\paragraph{Interference-aware processing} We credit
+\paragraph{Interference-aware processing.} We credit
 \cite{ContactAwareModeling:2011} for their ground-breaking introduction of
 contact handling to mainstream geometry processing. Their work inspires us to
 consider the contact and collisions tool-set familiar to physically based
