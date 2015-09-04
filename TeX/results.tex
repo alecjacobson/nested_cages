@@ -19,6 +19,23 @@ meshes we compute seven layers, with fewer for lower resolution inputs.
 In our supplemental material, we attach all input models, corresponding output
 cages, and a small program to visualize volumetric slices.
 
+\begin{figure}
+  \includegraphics[width=\linewidth]{figs/zoo-single-column}
+  \caption{Each triplet shows: input model, slice through all nested layers,
+  and outermost, coarsest layer. 
+  As a stress test, we purposefully continue nesting cages around \emph{Gargoyle} to a
+  very coarse level (bottom left).
+  %
+  The topological holes of the high-genus \emph{Fertility} are maintained
+  across all layers (top right). 
+  %
+  The deep concavity of the \emph{Mug} does not
+  get smoothed away in coarser levels (bottom right).
+  }
+  \label{fig:zoo}
+  \vspace{-2mm}
+\end{figure}
+
 \input{timings_table}
 
 Our method is agnostic to the decimator used to create the input meshes
@@ -63,7 +80,7 @@ similar outermost cages.
 
 We also conducted stress tests to evaluate how well our method scales with the
 number of layers. We nest 25 tightly fitting layers around the \emph{Horse} in
-\reffig{horse-25-layers} and 50 around \emph{Max Planck} in \reffig{zoo}, top
+\reffig{horse-25-layers} and 50 around \emph{Max Planck} in \reffig{max-planck}, top
 left.
 %
 We purposefully continue nesting cages around the the \emph{Gargoyle} in
@@ -72,6 +89,13 @@ cage remain.
 
 \newhl{For some applications (e.g. conservative collision detection) there is no need
 for the output cage to be homeomorphic to the input mesh. Our definition of the problem in \refsec{introduction} allows the cage to have less handles than the input mesh. \reffig{elephants} illustrates this point, where we generate a cage that is homeomorphic to the input mesh (center) and another cage that has smaller genus (right).}
+
+\begin{figure}
+  \includegraphics[width=\linewidth]{figs/max-planck}
+  \caption{ We fit 50 layers tightly around \emph{Max Planck}'s head (top
+  left).}
+  \label{fig:max-planck}
+\end{figure}
 
 \begin{figure}
   \includegraphics[width=\linewidth]{figs/elephants_placeholder.png}
