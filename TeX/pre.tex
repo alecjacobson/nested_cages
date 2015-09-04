@@ -252,3 +252,11 @@ open-bracket={\text{-}}, close-bracket={}}
 \usepackage{xhfill}% http://ctan.org/pkg/xhfill
 %\newcommand{\ditto}[1][.4pt]{\xrfill{#1}~\textquotedbl~\xrfill{#1}}
 \newcommand*{\ditto}{---\textquotedbl---}
+
+% http://tex.stackexchange.com/a/94702/13600
+\newenvironment{absolutelynopagebreak}
+  {\par\nobreak\vfil\penalty0\vfilneg
+   \vtop\bgroup}
+  {\par\xdef\tpd{\the\prevdepth}\egroup
+   \prevdepth=\tpd}
+

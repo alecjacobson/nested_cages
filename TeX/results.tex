@@ -92,14 +92,15 @@ for the output cage to be homeomorphic to the input mesh. Our definition of the 
 
 \begin{figure}
   \includegraphics[width=\linewidth]{figs/max-planck}
-  \caption{ We fit 50 layers tightly around \emph{Max Planck}'s head (top
-  left).}
+  \caption{ We fit 50 layers tightly around \emph{Max Planck}'s head.}
   \label{fig:max-planck}
 \end{figure}
 
 \begin{figure}
   \includegraphics[width=\linewidth]{figs/elephants_placeholder.png}
-  \caption{\newhl{Depending on the target application, our method can generate cages that are homeomorphic to the input mesh (center) or with some handles removed (right).}}
+  \caption{\newhl{Depending on the target application, our method generates
+  cages homeomorphic to the input mesh (center) or with handles
+  removed (right).}}
   \label{fig:elephants}
 \end{figure}
 
@@ -154,23 +155,6 @@ Since all fine mesh vertices are inside coarse-mesh tetrahedra, we use linear
 interpolation for prolongation and its transpose for restriction
 \cite{Demmel04}.
 
-\begin{figure}
-  \includegraphics[width=\linewidth]{figs/armadillo-heat-plot}
-  \caption{We solve for smooth geodesics over volumetric tetrahedral mesh
-  inside the \emph{Armadillo}. Using naive overlapping and
-  shrinking decimations leads to divergence unless a very large number of
-  relaxation iterations is used.  Ours is always convergent.}
-  \label{fig:armadillo-heat-plot}
-\end{figure}
-\begin{figure}
-  \includegraphics[width=\linewidth]{figs/frankenstein-physics-02}
-  \caption{Extracting an outer hull with Jacobson et al~\protect\shortcite{Jacobson:WN:2013} fails to coarsen the domain (top
-  left). Contouring a distance field achieves nesting at a large
-  iso-level but fuses the legs (top center). Our coarse cage fits the input
-  tightly and provides a reduced domain for real-time physics.}
-  \label{fig:frankenstein-physics}
-\end{figure}
-
 \begin{wrapfigure}{r}{1.02in}
 %
 \centering
@@ -193,17 +177,27 @@ We employ Neumann boundary conditions and notice that naively decimating the
 input mesh leads to a divergent solver (inset), agreeing with previous analysis
 that nesting is important for such boundary conditions \cite{chan1999boundary}.
 %
-Because naive decimations do not nest eachother, the prolongation operator must
+Because naive decimations do not nest, the prolongation operator must
 extrapolate for fine mesh vertices lying outside the coarse domain.
 %
 It \emph{may} be
 possible to tweak extrapolation parameters to handle these cases with naive
-decimation, but an automatic method for determining correct extrapolation for
+decimation, but an automatic method for correcting extrapolation for
 convergence is not obvious.
 %
-For comparisons, we tried: linear extrapolation from nearest tet, constant
-interpolation of nearest vertex, linear interpolation of the closest point on
-nearest face. In our figures we compare to the most favorable choice.
+For comparisons, we tried: linear extrapolation from the nearest tet, constant
+interpolation of nearest vertex, linear interpolation at the closest point on
+nearest face. We compare to the most favorable choice.
+
+
+\begin{figure}
+  \includegraphics[width=\linewidth]{figs/armadillo-heat-plot}
+  \caption{We solve for smooth geodesics over volumetric tetrahedral mesh
+  inside the \emph{Armadillo}. Using naive overlapping and
+  shrinking decimations leads to divergence unless a very large number of
+  relaxation iterations is used.  Ours is always convergent.}
+  \label{fig:armadillo-heat-plot}
+\end{figure}
 
 On less challenging domains, naive decimations can be used, but may require
 many relaxation (a.k.a.\ smoothing) iterations on each level of each v-cycle.
@@ -240,15 +234,27 @@ suitable for elastic simulation with collision handling.
 The deformation of the volume inside the coarse cage is then propagated via
 linear interpolation to the embedded mesh (see also accompanying video).
 
-%
-\begin{wrapfigure}{r}{1.02in}
-%
-\centering
-%
-\includegraphics[trim=4mm 0 0 3mm,width=\linewidth]{figs/octopi-collisions}
-%
-\end{wrapfigure}
-%
+\begin{figure}
+  \includegraphics[width=\linewidth]{figs/frankenstein-physics-02}
+  \caption{Extracting an outer hull with Jacobson et al~\protect\shortcite{Jacobson:WN:2013} fails to coarsen the domain (top
+  left). Contouring a distance field achieves nesting at a large
+  iso-level but fuses the legs (top center). Our coarse cage fits the input
+  tightly and provides a reduced domain for real-time physics.}
+  \label{fig:frankenstein-physics}
+\end{figure}
+
+\begin{figure}
+  \includegraphics[width=\linewidth]{figs/hand-hc}
+  \caption{Left to right: a quad mesh is quickly sketched atop the \emph{Hand}
+  and our pipeline moves it outside the input while planarizing quads. A
+  cage-based deformation is applied via harmonic coordinates computed over the
+  volume inside the planar-quad polyhedron (a few coordinates visualized in
+  pseudocolor). These weights are smooth inside each quad. In contrast,
+  triangulating the quads would lead to non-smooth, meshing-dependent values in
+  each quad (two alternative triangulations).}
+  \label{fig:hand-hc}
+\end{figure}
+
 Another application area for nested cages is collision detection for rigid
 objects: if an object does not collide against a surface enclosing a second
 object, 
@@ -265,7 +271,18 @@ dropping eighteen instances of the octopus mesh (\reffig{zoo},
 top-middle) one by one into a narrow tank, where they collide with each other
 and the tank walls (\newhl{with} coefficient of restitution $0.99$) using
 continuous-time collision detection (see inset). We compared the performance of
-two different broad phase strategies for collision detection: in the first,
+two different broad phase strategies for collision detection: 
+%
+\begin{wrapfigure}[21]{r}{1.02in}
+%
+\vspace*{-5mm}
+\centering
+%
+\includegraphics[trim=4mm 0 0 1mm,width=\linewidth]{figs/octopi-collisions}
+%
+\end{wrapfigure}
+%
+in the first,
 bounding cubes around swept spacetime volumes are used to prune distant pairs
 of objects from consideration, then kDOP bounding volume hierarchies are built
 to find candidate colliding vertex-face pairs, which are then passed to the
@@ -311,18 +328,6 @@ are smooth functions inside each quad.
 %
 In contrast, coordinates of a triangulated cage would depend heavily on the
 choice of diagonals splitting each quad.
-
-\begin{figure}
-  \includegraphics[width=\linewidth]{figs/hand-hc}
-  \caption{Left to right: a quad mesh is quickly sketched atop the \emph{Hand}
-  and our pipeline moves it outside the input while planarizing quads. A
-  cage-based deformation is applied via harmonic coordinates computed over the
-  volume inside the planar-quad polyhedron (a few coordinates visualized in
-  pseudocolor). These weights are smooth inside each quad. In contrast,
-  triangulating the quads would lead to non-smooth, meshing-dependent values in
-  each quad (two alternative triangulations).}
-  \label{fig:hand-hc}
-\end{figure}
 
 \paragraph{Generalizations beyond watertight meshes.}
 %
