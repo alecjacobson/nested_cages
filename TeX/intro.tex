@@ -49,7 +49,7 @@ soups}), we say that $\Cout$ \emph{nests} $\Fout$ if:
 %
 (i) $\Fout$ is contained in the interior of $\Cout$, and 
 %
-(ii) \newhl{for every loop on $\Cout$, there is a homotopy from that loop to a loop on $\Fout$ that remains at all times inside $\Cout$'s volume. In other words, for every handle of $\Cout$ there is a corresponding one on $\Fout$, but not necessarily the other way around.}
+(ii) \newhl{for every loop on $\Cout$, there is a homotopy from that loop to a loop on $\Fout$ that remains at all times inside $\Cout$'s enclosed volume. In other words, for every handle of $\Cout$ there is a corresponding one on $\Fout$, but not necessarily the other way around.}
 This definition extends naturally to when $\Fout$ is a polyhedron with voids or multiple connected components.
 
 \begin{wrapfigure}[14]{r}{1.02in}
@@ -70,9 +70,7 @@ for efficient multigrid; distortion for simulation or collisions; or violations
 of symmetry and quad-planarity for interactive deformation cages.  Finding
 $\Cout$,  entails solving the \emph{nested cage problem}:
 
-Given an embedded polyhedron $\Fout$, a polyhedron $\Cinp$ homeomorphic to
-$\Fout$\leo{new definition here instead?},\alec{As opposed to 2 paragraphs
-above? Why?} and a
+Given an embedded polyhedron $\Fout$, a polyhedron $\Cinp$\newhl{, and} a
 fitness function $E$, minimize $E(\Fout, \Cinp, \Cout)$ over all embeddings
 $\Cout$ of $\Cinp$ that nest $\Fout$.
 
