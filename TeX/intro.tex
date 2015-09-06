@@ -3,8 +3,7 @@
 
 \begin{figure}[b]
   \includegraphics[width=\linewidth]{figs/horse-25-layers}
-  \caption{Our tight nesting property is robust even when the number of cages
-  is large: 25 around this \emph{Horse}.}
+  \caption{\newhl{25 increasingly coarse cages nested around a \emph{Horse}. Our tight nesting property is robust even for a large number of cages.}}
   \label{fig:horse-25-layers}
 \end{figure}
 
@@ -42,7 +41,7 @@ simulation and geometry processing \cite{chan1999boundary}.
 
 For these reasons, one would like a cage $\Cout$ that is \emph{nested} around
 $\Fout$: that surrounds $\Fout$ without intersecting it. More formally, given
-two \newhl{watertight (connected, closed, self-intersecting-free and oriented) meshes}
+two \newhl{watertight (connected, closed, self-intersection-free and oriented) meshes}
 %
 $\Cout$ and $\Fout$ (later we generalize our method to build cages for \newhl{polygon
 soups}), we say that $\Cout$ \emph{nests} $\Fout$ if: 
@@ -68,7 +67,7 @@ look for the best perturbation $\Cout$ of $\Cinp$ that does nest $\Fout$; where
 \Cinp, \Cout)$, penalizing, for example, total volume for tight fitting cages
 for efficient multigrid; distortion for simulation or collisions; or violations
 of symmetry and quad-planarity for interactive deformation cages.  Finding
-$\Cout$,  entails solving the \emph{nested cage problem}:
+$\Cout$ entails solving the \emph{nested cage problem}:
 
 Given an embedded polyhedron $\Fout$, a polyhedron $\Cinp$\newhl{, and} a
 fitness function $E$, minimize $E(\Fout, \Cinp, \Cout)$ over all embeddings
