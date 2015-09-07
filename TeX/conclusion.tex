@@ -19,7 +19,7 @@ these problem areas, but defining this relaxation direction is not obvious.
 
 \begin{figure}
   \includegraphics[width=\linewidth]{figs/homer-fail}
-  \caption{If a expanding coarse mesh collides with itself (green), it creates
+  \caption{If a\newhl{n} expanding coarse mesh collides with itself (green), it creates
   a \emph{pinch} preventing processing of further coarser layers.}
   \label{fig:homer}
 \end{figure}
@@ -30,7 +30,7 @@ triangle into opposite parts of the coarse mesh.
 %
 Adding a small amount of smoothing on the flowing fine mesh or expanding the
 coarse mesh alleviates some of these problems, but a general solution is
-illusive.
+\newhl{elusive}.
 %
 The correct assignment seems related to correctly matching medial axes of both
 meshes: perhaps an avenue of future improvement.
@@ -38,7 +38,7 @@ meshes: perhaps an avenue of future improvement.
 \newhl{We believe the performance of our multigrid solver could be further
 improved} by parameter tuning and experimenting with different coarsening
 gradations. We would also like to consider using our meshes to build
-multigrid proconditioners for conjugate gradient solvers.
+multigrid pr\newhl{e}conditioners for conjugate gradient solvers.
 %
 We expect that higher order PDEs with more involved boundary conditions will
 receive an even greater benefit from our nested cages.
@@ -65,7 +65,5 @@ deformation user interfaces.
 %
 We hope that our algorithm's success encourages more multiresolution volumetric
 methods using unstructured meshes in geometry processing, computer graphics,
-and beyond.
+and beyond\newhl{.}
 %
-We are also excited about possible practical solutions and theoretical
-questions yet to be imagined with nested cages.

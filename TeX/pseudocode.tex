@@ -1,3 +1,5 @@
+\clearpage
+
 \section*{Appendix B: Pseudocode}%
 \label{app:pseudocode}%
 \begin{algorithm}
@@ -28,13 +30,13 @@
            1 & \text{ if }\pflow_i\text{ is outside }\Cinp \\
           -1 & \text{otherwise} 
         \end{array} 
-      \right.$ \comment{distance sign} \\
+      \right.$ \comment{Distance sign} \\
 	 \uIf {$\| \pflow_i - \q \| > 1\mbox{\upshape{e}-}5$}
 	 {
           $\g ← s (\pflow_i-\q)/\|\pflow_i - \q\|$ \\
 	 }
 	 \Else{
-           \longcomment{if too close use normal \cite{Baerentzen:2005:SDC}}\\
+           \longcomment{If too close use normal \cite{Baerentzen:2005:SDC}}\\
            $\g ← \n(\q)$\\
          }
          \For{\upshape{each vertex $j$ in $H$.last}}
@@ -69,9 +71,9 @@
     \end{tabular}
   }
   \Begin{
-    $F_0 ← H$.first \comment{initial fine mesh}\\
-    $F ← H$.pop \comment{shrunken fine mesh}\\
-    $C ← \Cinp$ \comment{initialize output cage}\\
+    $F_0 ← H$.first \comment{Initial fine mesh}\\
+    $F ← H$.pop \comment{Shrunken fine mesh}\\
+    $C ← \Cinp$ \comment{Initialize output cage}\\
     \While{\upshape{$H$ is not empty}}
     {
     $β ← β_{\text{init}} ( \ = 1\mbox{\text{e}-}2)$ \comment{Initial step size} \\
