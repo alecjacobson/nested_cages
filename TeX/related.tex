@@ -2,8 +2,8 @@
 
 \newhl{Our method solves the nested cage problem for the large
 variety of input meshes shown in \refsec{results} \emph{while} interoperating
-with arbitrary problem-specific decimation algorithms and fitness functions; however}
-many related approaches have been proposed that work for special cases, or
+with arbitrary problem-specific decimation algorithms and fitness functions.}
+Many related approaches have been proposed that work for special cases, or
 relax requirements imposed above.
 
 If the algorithm is free to generate the coarse cage $\Cinp$, rather than
@@ -90,7 +90,7 @@ not sought or guaranteed.
   \vspace*{-5mm}
 \end{figure}
 
-\textbf{Progressive decimation} of $\Finp$ using edge collapses, taking care
+\paragraph{Progressive decimation} of $\Finp$ using edge collapses, taking care
 to place new vertices on the exterior of the current volume by solving a system
 of inequality constraints~\cite{Sander:2000:SC}, has found some success in
 real-time rendering and collision detection \cite{Platis:CGF}.  Although
@@ -108,7 +108,7 @@ but this technique relies on temperamental 3D tetrahedral meshing in tight
 regions near overlaps and does not consider face\newhl{- or }edge-intersections with
 the input model.
 
-\textbf{Voxelization} of $\Finp$ will create a nested cage, provided that
+\paragraph{Voxelization} of $\Finp$ will create a nested cage, provided that
 the resolution is chosen fine enough to avoid topological
 artifacts (as in the case of contouring implicit functions). Naive voxelization
 yields dense, inefficient cages \cite{Mehra:2009:AMS}, possibly improved by
@@ -254,7 +254,7 @@ hierarchy layers.
 Recent work has considered more elaborate decimation goals than appearance such
 as preserving haptic sensations \cite{Otaduy:2003:SPS}.
 %
-\cite{Otaduy:2003:CDH} also demonstrate how to combine mesh decimations and bounding
+\newhl{Otdauy and Lin} \shortcite{Otaduy:2003:CDH} also demonstrate how to combine mesh decimations and bounding
 volume hierarchies to achieve faster collision detectio\newhl{n w}ithout
 affecting visual appearance.
 %

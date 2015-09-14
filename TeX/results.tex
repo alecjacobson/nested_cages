@@ -145,8 +145,7 @@ earlier stage than system-matrix factorization: before determining constraints
 or boundary conditions and before even choosing the particular system being
 solved.
 %
-This is even true for inhomogeneous systems where local metrics are
-varying between solves. In this case, the internal tet-meshing might need to be
+This is even true for inhomogeneous systems where local metrics \newhl{vary} between solves. In this case, the internal tet-meshing might need to be
 recomputed (seconds for \emph{Octopus}), but our boundary cages can be reused.
 %
 Since all fine mesh vertices are inside coarse-mesh tetrahedra, we use linear
@@ -292,7 +291,7 @@ protruding arms causes it to easily nestle near other copies of itself, so that
 their convex hulls overlap but our tight, coarse \newhl{cages do} not.
 %
 Nesting is applicable for rigid or nearly rigid objects, but it is not obvious
-to track cages along with deformable bodies, unless, for example, deformations
+\newhl{how} to track cages along with deformable bodies, unless, for example, deformations
 could be precomputed.
 
 The ability to customize our optimization energy enables not just better cages,
