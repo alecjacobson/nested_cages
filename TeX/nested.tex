@@ -108,7 +108,7 @@ $^3$Columbia University \quad
 %%% Keywords that describe your work. The ``\keywordlist'' command will print
 %%% them out.
 
-\keywords{Mesh decimation, geometric flow, generalized barycentric coordinates, multigrid solver}
+\keywords{Mesh decimation, geometric flow, multigrid}
 
 %%% The ``\begin{document}'' command is the start of the document.
 
@@ -144,7 +144,7 @@ $^3$Columbia University \quad
 %%% ``\begin{document}'' and ``\maketitle.''
 
 \teaser{
-\vspace*{-0.5cm}
+\vspace*{-0.6cm}
   \includegraphics[width=\textwidth]{\figs/bunny-shelf-teaser}
   \caption{
 Given an input shape (yellow on bottom right), our method constructs \emph{nested} cages:
@@ -152,6 +152,7 @@ each subsequent mesh is coarser than the last and fully encloses it without
 intersections. A slice through all layers (left), shows a tightly
 encaged \emph{Bunny}.}
   \label{fig:teaser}  
+\vspace*{-0.3cm}
 }
 
 %%% The ``\maketitle'' command must appear after ``\begin{document}'' and,
@@ -169,13 +170,15 @@ encaged \emph{Bunny}.}
 %%% See <http://www.acm.org/class/1998/> for details.
 %%% The ``\CRcat'' command takes four arguments.
 
-%\begin{CRcatlist}
-%  \CRcat{}{}{}{}
-%\end{CRcatlist}
-%
-%%%% The ``\keywordlist'' command prints out the keywords.
-%
-%\keywordlist
+\begin{CRcatlist}
+  \CRcat{I.3.0}{Computer Graphics}{}{}
+  %\CRcat{I.3.5}{Computer Graphics}{Computational Geometry and Object Modeling}{}
+  %\CRcat{G.1.8}{Numerical Analysis}{Partial Differential Equations}{Multigrid and multilevel methods}
+\end{CRcatlist}
+
+%%% The ``\keywordlist'' command prints out the keywords.
+
+\keywordlist
 
 %%% The ``\TOGlinkslist'' command will insert hyperlinked icon(s) to your
 %%% paper. This includes, at a minimum, hyperlinked icons to the ACM article
