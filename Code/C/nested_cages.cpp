@@ -52,6 +52,11 @@ namespace SMS = CGAL::Surface_mesh_simplification ;
 typedef SMS::Edge_profile<Surface_mesh> Profile ;   
 // END of CGAL includes
 
+// useful namespaces
+using namespace std;
+using namespace Eigen;
+using namespace igl;
+
 // For debuggin'
 int at(
   Eigen::MatrixXi & M,
@@ -92,7 +97,7 @@ struct My_visitor : SMS::Edge_collapse_visitor_base<Surface_mesh>
   void OnCollected( Profile const&, boost::optional<double> const& )
   {
     ++ stats->collected ;
-    std::cerr << "\rEdges collected: " << stats->collected << std::flush ;
+    // std::cerr << "\rEdges collected: " << stats->collected << std::flush ;
   }                
   
   // Called during the processing phase for each edge selected.
@@ -107,9 +112,9 @@ struct My_visitor : SMS::Edge_collapse_visitor_base<Surface_mesh>
     if ( !cost )
       ++ stats->cost_uncomputable ;
       
-    if ( current == initial )
-      std::cerr << "\n" << std::flush ;
-    std::cerr << "\r" << current << std::flush ;
+    // if ( current == initial )
+    //   std::cerr << "\n" << std::flush ;
+    // std::cerr << "\r" << current << std::flush ;
   }                
   
   // Called during the processing phase for each edge being collapsed.
@@ -140,7 +145,7 @@ struct My_visitor : SMS::Edge_collapse_visitor_base<Surface_mesh>
 } ;
 
 // taken from edge_collapse_enriched_polyhedron.cpp (CGAL)
-void decimate_CGAL(Surface_mesh surface_mesh, float ratio){
+void decimate_CGAL(Surface_mesh* surface_mesh, float ratio){
 
   // Surface_mesh surface_mesh; 
   // std::ifstream is(filename) ; is >> surface_mesh ;
@@ -152,16 +157,16 @@ void decimate_CGAL(Surface_mesh surface_mesh, float ratio){
   // this id(), so we must do it here:
   int index = 0 ;
   
-  for( Surface_mesh::Halfedge_iterator eb = surface_mesh.halfedges_begin()
-     , ee = surface_mesh.halfedges_end()
+  for( Surface_mesh::Halfedge_iterator eb = (*surface_mesh).halfedges_begin()
+     , ee = (*surface_mesh).halfedges_end()
      ; eb != ee
      ; ++ eb
      ) 
     eb->id() = index++;
 
   index = 0 ;
-  for( Surface_mesh::Vertex_iterator vb = surface_mesh.vertices_begin()
-     , ve = surface_mesh.vertices_end()
+  for( Surface_mesh::Vertex_iterator vb = (*surface_mesh).vertices_begin()
+     , ve = (*surface_mesh).vertices_end()
      ; vb != ve
      ; ++ vb
      )  
@@ -179,23 +184,31 @@ void decimate_CGAL(Surface_mesh surface_mesh, float ratio){
   // function which differ from the default policies, ommited in
   // the previous example.
   int r = SMS::edge_collapse
-           (surface_mesh
+           (*surface_mesh
            ,stop
            ,CGAL::get_cost     (SMS::Edge_length_cost  <Surface_mesh>())
                  .get_placement(SMS::Midpoint_placement<Surface_mesh>())
                  .visitor      (vis)
            );
+
+  std::cout << "\nFinished...\n" << r << " edges removed.\n" 
+  << ((*surface_mesh).size_of_halfedges()/2) << " final edges.\n" ; 
   
   return;
 
 }
 
+// function to check is a char * is an integer
+bool legal_int(char *str) {
+    while (*str)
+        if (!isdigit(*str++))
+            return false;
+    return true;
+}
+
 std::string out_filename;
 int main(int argc, char * argv[])
 {
-  using namespace std;
-  using namespace Eigen;
-  using namespace igl;
 
   if (argc==1){
     cout<<"Usage: ./nested_cages [filename.(off)] L(1) L(2) ... L(k)"<<endl;
@@ -206,23 +219,34 @@ int main(int argc, char * argv[])
   // number of layers
   int k = argc-2;
   cout << "number of layers = " << k << endl;
-  // k-long kist of desired mesh resolutions  
-  int L[k];
-  for(int i = 0;i<k;i++){
-    L[i] = atoi(argv[i+2]);
-  } 
 
-  Surface_mesh surface_mesh; 
-  std::ifstream is(argv[1]) ; is >> surface_mesh ;
+  Surface_mesh M; 
+  std::ifstream is(argv[1]) ; is >> M ;
 
-  // number of faces of the original mesh
-  int nk = surface_mesh.size_of_facets();
+  // // number of faces of the original mesh
+  // int nk = surface_mesh.size_of_facets();
   // for now output CGAL decimations
+  int L[k];
+  Surface_mesh M_hat;
   for(int i = 0;i<k;i++){
-    float ratio = (1.*L[i])/(1.*nk); 
-    cout<<"  decimation ratio "<< ratio << endl;
-    // decimate_CGAL(surface_mesh,ratio);
+    std::ifstream is_file(argv[i+2]);
+    // cout << "is valid file? = " << is << endl;
+    if (is_file){
+      is_file >> M_hat;
+    } else{
+      // throw an error if argv[i+2] is a valid integer
+      if (!legal_int(argv[i+2])){
+        cout << "you have to pass integer values or valid input deimatations"  << endl;
+        cout << "the invalid argument you have passed is " << argv[i+2] << endl;
+        return 0;
+      }
+      L[i] = atoi(argv[i+2]);
+      float ratio = (1.*L[i])/(1.*M.size_of_facets()); 
+      M_hat = M;
+      decimate_CGAL(&M_hat,ratio);
+    }
   }
+  
 
   return 1;
 }
