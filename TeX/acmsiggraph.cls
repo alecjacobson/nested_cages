@@ -129,7 +129,10 @@
 
 \newcommand{\copyrightspace}{%
   \renewcommand{\thefootnote}{}%
-  \footnotetext[0]{\vspace*{1in}}%
+  \newlength{\crlen}
+  \setlength{\crlen}{1.5in}
+  \addtolength{\crlen}{-1.5\baselineskip}
+  \footnotetext[0]{\vspace*{\crlen}}%
   %\rule[\ACMcopyrightspace]{2.71828in}{0in}}%
   \renewcommand{\thefootnote}{\arabic{footnote}}
 }
@@ -440,7 +443,7 @@
 
 \newenvironment{CRcatlist}{%
     \vspace{0.5\baselineskip}%
-    \par\noindent \textbf{CR Categories: }%
+    \par\noindent \textbf{CR Category: }%
 }{}
 
 \newcommand{\CRcat}[4]{%
@@ -500,7 +503,7 @@
   \usepackage[hyperfootnotes=false,bookmarks=false]{hyperref}
 \fi
 \hypersetup{
-  colorlinks=false,linkcolor=black,citecolor=black,urlcolor=black
+  colorlinks=true,linkcolor=black,citecolor=black,urlcolor=black
 }
 
 % remove newlines ('\\') from \title when assigning \pdftitle

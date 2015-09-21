@@ -223,18 +223,15 @@ int main(int argc, char * argv[])
   Surface_mesh M; 
   std::ifstream is(argv[1]) ; is >> M ;
 
-  // // number of faces of the original mesh
-  // int nk = surface_mesh.size_of_facets();
   // for now output CGAL decimations
   int L[k];
   Surface_mesh M_hat;
   for(int i = 0;i<k;i++){
     std::ifstream is_file(argv[i+2]);
-    // cout << "is valid file? = " << is << endl;
     if (is_file){
       is_file >> M_hat;
     } else{
-      // throw an error if argv[i+2] is a valid integer
+      // throw an error if argv[i+2] is not a valid integer
       if (!legal_int(argv[i+2])){
         cout << "you have to pass integer values or valid input deimatations"  << endl;
         cout << "the invalid argument you have passed is " << argv[i+2] << endl;
@@ -244,6 +241,10 @@ int main(int argc, char * argv[])
       float ratio = (1.*L[i])/(1.*M.size_of_facets()); 
       M_hat = M;
       decimate_CGAL(&M_hat,ratio);
+
+      // Flow M inside M_hat
+
+      // Reinflate
     }
   }
   
