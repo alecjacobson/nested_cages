@@ -145,7 +145,7 @@ struct My_visitor : SMS::Edge_collapse_visitor_base<Surface_mesh>
 } ;
 
 // taken from edge_collapse_enriched_polyhedron.cpp (CGAL)
-void decimate_CGAL(Surface_mesh* surface_mesh, float ratio){
+void decimate_CGAL(Surface_mesh* surface_mesh, float ratio, bool adaptive){
 
   // Surface_mesh surface_mesh; 
   // std::ifstream is(filename) ; is >> surface_mesh ;
@@ -183,6 +183,13 @@ void decimate_CGAL(Surface_mesh* surface_mesh, float ratio){
   // On the other hand, we pass here explicit cost and placement
   // function which differ from the default policies, ommited in
   // the previous example.
+  if (adaptive){
+    int r = SMS::edge_collapse
+             (*surface_mesh
+             ,stop
+             ,CGAL::visitor      (vis)
+             );
+  } else {
   int r = SMS::edge_collapse
            (*surface_mesh
            ,stop
@@ -190,12 +197,23 @@ void decimate_CGAL(Surface_mesh* surface_mesh, float ratio){
                  .get_placement(SMS::Midpoint_placement<Surface_mesh>())
                  .visitor      (vis)
            );
+   }
 
-  std::cout << "\nFinished...\n" << r << " edges removed.\n" 
-  << ((*surface_mesh).size_of_halfedges()/2) << " final edges.\n" ; 
   
   return;
 
+}
+
+int remove_all_chars_and_count(char* str, char c) {
+    int removed = 0;
+    char *pr = str, *pw = str;
+    while (*pr) {
+        *pw = *pr++;
+        removed += (*pw == c);
+        pw += (*pw != c);
+    }
+    *pw = '\0';
+    return removed;
 }
 
 // function to check is a char * is an integer
@@ -206,7 +224,6 @@ bool legal_int(char *str) {
     return true;
 }
 
-std::string out_filename;
 int main(int argc, char * argv[])
 {
 
@@ -217,21 +234,36 @@ int main(int argc, char * argv[])
   }
   
   // number of layers
-  int k = argc-2;
+  int k = argc-3;
   cout << "number of layers = " << k << endl;
 
   Surface_mesh M; 
   std::ifstream is(argv[1]) ; is >> M ;
 
+  // // output input mesh as level 0
+  char* filename; 
+  char *suffix;
+  if (asprintf(&filename, "%s%s", argv[argc-1], "_0.off")!=-1){
+    std::ofstream os( filename ) ; os << M;
+  } else {
+    cout << "unable to allocate space for output file name"  << endl;
+    return 0;
+  }
+
+
   // for now output CGAL decimations
   int L[k];
+  bool adaptive = true;
   Surface_mesh M_hat;
   for(int i = 0;i<k;i++){
     std::ifstream is_file(argv[i+2]);
+    // check if argv is a valid file
     if (is_file){
       is_file >> M_hat;
     } else{
-      // throw an error if argv[i+2] is not a valid integer
+      // first check if last charcater of argv[i+2] is r. If it is, drop the 'r' and adaptive = false
+      adaptive = remove_all_chars_and_count(argv[i+2], 'r')==0;
+      // else check if argv[i+2] is a valid integer (throw an error if it is not)
       if (!legal_int(argv[i+2])){
         cout << "you have to pass integer values or valid input deimatations"  << endl;
         cout << "the invalid argument you have passed is " << argv[i+2] << endl;
@@ -240,14 +272,26 @@ int main(int argc, char * argv[])
       L[i] = atoi(argv[i+2]);
       float ratio = (1.*L[i])/(1.*M.size_of_facets()); 
       M_hat = M;
-      decimate_CGAL(&M_hat,ratio);
+      decimate_CGAL(&M_hat,ratio,adaptive);
 
       // Flow M inside M_hat
 
       // Reinflate
+
+      // Ouput cage
+      if ((asprintf(&suffix,"_%d.off",i+1)!=-1) && (asprintf(&filename, "%s%s", argv[argc-1], suffix)!=-1)){
+        std::ofstream os( filename ) ; os << M_hat;
+      } else {
+        cout << "unable to allocate space for output file name"  << endl;
+        return 0;
+      }
+
+      M = M_hat;
+      // back toi adaptive decimation (standard)
+      adaptive = true;
     }
   }
   
-
+  free(filename);
   return 1;
 }
