@@ -1,4 +1,43 @@
 function data = render_in_cage(V,F,CV,CF,varargin)
+  % Render a fine mesh (V,F) inside of a coarse cage (CV,CF) in the style used
+  % by the blue-and-gray figures in "Nested Cages" [Sacht et al. 2015].
+  %
+  % render_in_cage(V,F,CV,CF)
+  % data = render_in_cage(V,F,CV,CF,'ParameterName',ParameterValue, ...)
+  %
+  % Inputs:
+  %   V  #V by 3 list of fine mesh vertex positions 
+  %   F  #F by 3 list of triangle indices into V
+  %   CV  #CV by 3 list of coarse cage mesh vertex positions 
+  %   CF  #CF by 3 list of triangle indices into CV
+  %   Optional:
+  %     'AmbientOcclusion' followed by whether to compute ambient occlusion on
+  %       the fine mesh {true}
+  %     'AOFactor' followed by a scaler between [0,1] determining how much to
+  %       to modulate by ambient occlusion {1}
+  %     'BoundingBox'  followed by 2 by 3 matrix [min;max] where the first row
+  %       is the position of the minimum corner of the bounding box and the
+  %       second row the max. Axis will be adjust to contain this bounding box.
+  %     'ColorIntersections'  followed by whether to color intersections
+  %       (fine-coarse --> yellow) (coarse-coarse --> orange).
+  %     'Ground'  followed by coefficients for ground place (i.e. for shadows)
+  %       {[0 0 -1 min_z]}
+  %     'LightPosition'  followed by 1 by 3 position of light [0.3 -0.3 0.8]
+  %     'View'  followed by azimuth and elevation of view
+  %     'Data'  followed by data computed from previous call to
+  %        `render_in_cage` (see output)
+  % Output:
+  %    data  a struct containing the following fields:
+  %      .A  `axis` used by this call
+  %      .cc  handle to trisurf of cage mesh
+  %      .l  handle to light
+  %      .s  handle to trisurf of shadow of fine mesh
+  %      .sc  handle to trisurf of shadow of cage mesh
+  %      .t  handle to trisurf of fine mesh
+  %      .tc  handle to trisurf of cage mesh
+  %
+  % see also: add_shadow, apply_ambient_occlusion, tsurf
+  %
 
   % Delete a handle, but only if it's not empty and actually a handle
   %
