@@ -19,6 +19,9 @@
 #include <igl/pathinfo.h>
 #include <igl/intersect.h>
 #include <igl/list_to_matrix.h>
+#include <igl/cgal/remesh_self_intersections.h>
+#include <igl/cgal/polyhedron_to_mesh.h>
+#include <igl/massmatrix.h>
 #include <Eigen/Core>
 #include <iostream>
 #include <set>
@@ -273,6 +276,23 @@ int main(int argc, char * argv[])
       float ratio = (1.*L[i])/(1.*M.size_of_facets()); 
       M_hat = M;
       decimate_CGAL(&M_hat,ratio,adaptive);
+
+      // Check if decimations self-intersect. If they do, fix with Meshfix
+	  MatrixXd V_coarse;
+      MatrixXi F_coarse;
+      polyhedron_to_mesh(M_hat,V_coarse,F_coarse); 
+      RemeshSelfIntersectionsParam params;
+      params.detect_only = true;
+      params.first_only = true;
+      MatrixXd tempV;
+      MatrixXi tempF;
+      MatrixXi IF;
+      VectorXi J;
+      VectorXi IM;
+      remesh_self_intersections(V_coarse,F_coarse,params,tempV,tempF,IF,J,IM);
+      cout << "number of intersecting triangles " << IF.rows() << endl; 
+
+      // If it does interesct, try to fix with Meshfix      
 
       // Flow M inside M_hat
 
