@@ -10,8 +10,8 @@ CFLAGS+=-fopenmp
 CFLAGS+=-g -O3 -DNDEBUG
 
 LIBIGL=/home/leo/PHD_Work/Cage_Generation_2013/libigl/
-LIBIGL_INC=-I$(LIBIGL)/include -DIGL_STATIC_LIBRARY
-LIBIGL_LIB=-L$(LIBIGL)/lib -ligl
+LIBIGL_INC=-I$(LIBIGL)/include
+LIBIGL_LIB=-L$(LIBIGL)/lib -liglcgal -ligl
 
 EIGEN3_INC=-I/usr/include/Eigen -I/usr/include/Eigen/unsupported
 
@@ -28,8 +28,8 @@ OBJ_FILES=$(addprefix obj/,$(notdir $(CPP_FILES:.cpp=.o)))
 
 CFLAGS+=-std=c++11
 
-nested_cages: obj obj/nested_cages.o
-	${CXX} $(CFLAGS) -o nested_cages obj/nested_cages.o $(LIB)
+nested_cages: obj obj/io.o obj/cgal.o obj/flow.o obj/nested_cages.o
+	${CXX} $(CFLAGS) -o nested_cages obj/io.o obj/cgal.o obj/flow.o obj/nested_cages.o $(LIB)
 
 obj:
 	mkdir -p obj
