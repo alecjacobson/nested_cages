@@ -110,7 +110,7 @@ int main(int argc, char * argv[])
       gradQ_to_gradV(V0, F0, area_0, quad_order, A_qv);
   	  // Flow M inside M_hat
       MatrixXd V;
-      flow_fine_inside_coarse(V0,F0,V_coarse,F_coarse,quad_order,A_qv,V);
+      flow_fine_inside_coarse(V0,F0,V_coarse,F_coarse,A_qv,V);
 
       // Reinflate
 

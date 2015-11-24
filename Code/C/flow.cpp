@@ -122,13 +122,32 @@ void grad_energy(
   const Eigen::MatrixXi & F, 
   const Eigen::MatrixXd & V_coarse, 
   const Eigen::MatrixXi & F_coarse, 
-  int quad_order, 
   const Eigen::SparseMatrix<double> & A_qv, 
   Eigen::VectorXd & grad)
 {
   using namespace Eigen;
   using namespace std;
   using namespace igl;
+
+  // Compute quad_order from A_qv
+  int quad_order = [&F,&A_qv]()->int
+  {
+    if(A_qv.rows() == F.rows())
+    {
+      return 1;
+    }else if(A_qv.rows() == 3*F.rows())
+    {
+      return 2;
+    }else if(A_qv.rows() == 4*F.rows())
+    {
+      return 3;
+    }else
+    {
+      assert(false && "#A_qv should be multiple of #F");
+      return -1;
+    }
+  }();
+    
 
   if (quad_order==1)
   {
@@ -174,7 +193,6 @@ void flow_one_step(
   const Eigen::MatrixXi & F, 
   const Eigen::MatrixXd & V_coarse, 
   const Eigen::MatrixXi & F_coarse, 
-  const int quad_order, 
   const Eigen::SparseMatrix<double> & A_qv, 
   Eigen::MatrixXd & V_new)
 {
@@ -182,7 +200,7 @@ void flow_one_step(
   using namespace std;
   using namespace igl;
   VectorXd grad;
-  grad_energy(V, F, V_coarse, F_coarse, quad_order, A_qv, grad);
+  grad_energy(V, F, V_coarse, F_coarse, A_qv, grad);
 
   V_new = MatrixXd::Zero(V.rows(),3);
 }
@@ -194,7 +212,6 @@ void flow_fine_inside_coarse(
   const Eigen::MatrixXi & F0, 
   const Eigen::MatrixXd & V_coarse, 
   const Eigen::MatrixXi & F_coarse, 
-  int quad_order, 
   const Eigen::SparseMatrix<double> & A_qv,
   Eigen::MatrixXd & V)
 {
@@ -206,5 +223,5 @@ void flow_fine_inside_coarse(
 
   // **Alec: notice that we cannot pass V as input and output, instead wrap the 
   // input inside MatrixXd to force compiler to make a copy in this case.
-  flow_one_step(MatrixXd(V), F0, V_coarse, F_coarse, quad_order, A_qv, V);
+  flow_one_step(MatrixXd(V), F0, V_coarse, F_coarse, A_qv, V);
 }

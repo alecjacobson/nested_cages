@@ -51,15 +51,12 @@ void signed_distance_direction(
 // **Alec: I don't actually understand what this ones computing... Why is the
 // output a vector and not a matrix?**
 //
-// **Alec: Can't the quad_order be deduced from the size of A_qv?**
-//
 // Inputs:
 //   V  #V by 3 list of fine mesh positions
 //   F  #F by 3 list of fine mesh triangle indices into V
 //   V_coarse  #V_coarse by 3 list of coarse mesh positions
 //   F_coarse  #F_coarse by 3 list of coarse mesh triangle indices into
 //     V_coarse
-//   quad_order  quadrature rule order: 1, 2, or 3
 //   A   #V0 by #A matrix taking quadrature points to gradients at vertices.
 //     For quad_order=1,2,3 then #A=#F,3*#F,4*#F
 // Outputs:
@@ -69,7 +66,6 @@ void grad_energy(
   const Eigen::MatrixXi & F, 
   const Eigen::MatrixXd & V_coarse, 
   const Eigen::MatrixXi & F_coarse, 
-  int quad_order, 
   const Eigen::SparseMatrix<double> & A_qv, 
   Eigen::VectorXd & grad);
 
@@ -81,7 +77,6 @@ void grad_energy(
 //   F  #F by 3 fine mesh triangle indices into V
 //   V_coarse  #V_coarse by 3 list of coarse mesh positions
 //   F_coarse  #F_coarse by 3 list of coarse mesh triangle indices into
-//   quad_order  quadrature rule order: 1, 2, or 3
 //   A   #V0 by #A matrix taking quadrature points to gradients at vertices.
 //     For quad_order=1,2,3 then #A=#F,3*#F,4*#F
 // Output:
@@ -92,7 +87,6 @@ void flow_one_step(
   const Eigen::MatrixXi & F, 
   const Eigen::MatrixXd & V_coarse, 
   const Eigen::MatrixXi & F_coarse, 
-  const int quad_order, 
   const Eigen::SparseMatrix<double> & A_qv, 
   Eigen::MatrixXd & V_new);
 
@@ -103,7 +97,6 @@ void flow_one_step(
 //   F0  #F0 by 3 fine mesh triangle indices into V0
 //   V_coarse  #V_coarse by 3 list of coarse mesh positions
 //   F_coarse  #F_coarse by 3 list of coarse mesh triangle indices into
-//   quad_order  quadrature rule order: 1, 2, or 3
 //   A   #V0 by #A matrix taking quadrature points to gradients at vertices.
 //     For quad_order=1,2,3 then #A=#F0,3*#F,4*#F0
 // Output:
@@ -113,7 +106,6 @@ void flow_fine_inside_coarse(
   const Eigen::MatrixXi & F0, 
   const Eigen::MatrixXd & V_coarse, 
   const Eigen::MatrixXi & F_coarse, 
-  int quad_order, 
   const Eigen::SparseMatrix<double> & A_qv,
   Eigen::MatrixXd & V);
 #endif 
