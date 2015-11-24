@@ -4,6 +4,7 @@
 #include "flow.h"
 
 // libigl includes
+#include <igl/doublearea.h>
 #include <igl/copyleft/cgal/remesh_self_intersections.h>
 #include <igl/copyleft/cgal/polyhedron_to_mesh.h>
 
@@ -105,9 +106,11 @@ int main(int argc, char * argv[])
 	  doublearea(V0,F0,area_0);
 	  area_0 = 0.5*area_0;
       // Precompute matrix that convert gradients at quadrature points to gradients at mesh vertices
-  	  SparseMatrix<double> A_qv = gradQ_to_gradV(V0, F0, area_0, quad_order);
+  	  SparseMatrix<double> A_qv;
+      gradQ_to_gradV(V0, F0, area_0, quad_order, A_qv);
   	  // Flow M inside M_hat
-      flow_fine_inside_coarse(V0,F0,V_coarse,F_coarse,quad_order,A_qv);
+      MatrixXd V;
+      flow_fine_inside_coarse(V0,F0,V_coarse,F_coarse,quad_order,A_qv,V);
 
       // Reinflate
 
