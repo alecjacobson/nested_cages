@@ -1,5 +1,8 @@
 #include "flow.h"
 
+#include <CGAL/Cartesian.h>
+
+
 // convert gradient at quadrature points to gradient ate mesh vertices 
 // (follow grad_quadrature_to_vertices.m)
 
@@ -73,79 +76,12 @@ SparseMatrix<double> gradQ_to_gradV(MatrixXd V0, MatrixXi F0, MatrixXd area_0, i
 
 }
 
-void signed_distance(MatrixXd P, MatrixXd V, MatrixXi F, MatrixXd* C, MatrixXd* N, VectorXi* I, VectorXd* S){
-
-
-	typedef CGAL::Simple_cartesian<double> Kernel;
-	typedef 
-	  CGAL::AABB_tree<
-	  CGAL::AABB_traits<Kernel, 
-	    CGAL::AABB_triangle_primitive<Kernel, 
-	      std::vector<CGAL::Triangle_3<Kernel> >::iterator
-	    > > > 
-	  Tree;
-	static MatrixXd g_V;
-	static MatrixXi g_F;
-	static SignedDistanceType g_sign_type = NUM_SIGNED_DISTANCE_TYPE;
-	static Tree g_tree;
-	static vector<CGAL::Triangle_3<Kernel> > g_T;
-	static WindingNumberAABB<Eigen::Vector3d> g_hier;
-	static MatrixXd g_FN,g_VN,g_EN;
-	static MatrixXi g_E;
-	static VectorXi g_EMAP;
-
-	g_V = V;
-    g_F = F;
-    g_sign_type = SIGNED_DISTANCE_TYPE_PSEUDONORMAL;
-    g_tree.clear();
-    g_T.clear();
-
-    // Prepare distance computation
-    point_mesh_squared_distance_precompute(V,F,g_tree,g_T);
-
-    // "Signed Distance Computation Using the Angle Weighted Pseudonormal"
-    // [Bærentzen & Aanæs 2005]
-    per_face_normals(V,F,g_FN);
-    per_vertex_normals(V,F,PER_VERTEX_NORMALS_WEIGHTING_TYPE_ANGLE,g_FN,g_VN);
-    per_edge_normals(V,F,PER_EDGE_NORMALS_WEIGHTING_TYPE_UNIFORM,g_FN,g_EN,g_E,g_EMAP);
-
-    (*N).resize(P.rows(),3);
-  	(*S).resize(P.rows(),1);
-  	(*I).resize(P.rows(),1);
-  	(*C).resize(P.rows(),3);
-
-  	for(int p = 0;p<P.rows();p++){
-	    typedef typename Kernel::FT FT;
-	    typedef typename Kernel::Point_3 Point_3;
-	    typedef typename CGAL::Triangle_3<Kernel> Triangle_3;
-	    typedef typename std::vector<Triangle_3>::iterator Iterator;
-	    typedef typename CGAL::AABB_triangle_primitive<Kernel, Iterator> Primitive;
-	    typedef typename CGAL::AABB_traits<Kernel, Primitive> AABB_triangle_traits;
-	    typedef typename CGAL::AABB_tree<AABB_triangle_traits> Tree;
-	    typedef typename Tree::Point_and_primitive_id Point_and_primitive_id;
-	    const Point_3 q(P(p,0),P(p,1),P(p,2));
-	    double s,sqrd;
-	    Point_and_primitive_id pp;
-	    Vector3d n(0,0,0);
-	    signed_distance_pseudonormal(g_tree,g_T,g_F,g_FN,g_VN,g_EN,g_EMAP,q,s,sqrd,pp,n);
-	    (*N).row(p) = n;
-	    (*I)(p) = pp.second - g_T.begin();
-	    (*S)(p) = s*sqrt(sqrd);
-	    (*C)(p,0) = pp.first.x();
-	    (*C)(p,1) = pp.first.y();
-	    (*C)(p,2) = pp.first.z();
-  	}
-
-	return;
-
-}
-
 MatrixXd signed_distance_direction(MatrixXd P, MatrixXd V, MatrixXi F){
 	
 	MatrixXd C,N;
 	VectorXi I;
   	VectorXd S;
-  	signed_distance(P,V,F,&C,&N,&I,&S);
+  igl::signed_distance(P,V,F,igl::SIGNED_DISTANCE_TYPE_PSEUDONORMAL,S,I,C,N);
 
   	// next: continue writing as in signed_distance_direction.m, case 3 
 

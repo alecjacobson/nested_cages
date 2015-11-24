@@ -4,8 +4,8 @@
 #include "flow.h"
 
 // libigl includes
-#include <igl/cgal/remesh_self_intersections.h>
-#include <igl/cgal/polyhedron_to_mesh.h>
+#include <igl/copyleft/cgal/remesh_self_intersections.h>
+#include <igl/copyleft/cgal/polyhedron_to_mesh.h>
 
 // useful namespaces
 using namespace Eigen;
@@ -22,6 +22,7 @@ int at(
 
 int main(int argc, char * argv[])
 {
+  using namespace igl::copyleft::cgal;
 
   if (argc==1){
     cout<<"Usage: ./nested_cages [filename.(off)] q L(1) L(2) ... L(k)"<<endl;
