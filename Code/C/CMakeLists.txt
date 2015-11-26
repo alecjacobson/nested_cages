@@ -15,8 +15,8 @@ include_directories( "${EIGEN_INCLUDE_DIR}" )
 # Must be found before trying to find libraries in libigl/external
 find_package(LIBIGL REQUIRED)
 include_directories( "${LIBIGL_INCLUDE_DIR}" )
-find_package(EMBREE REQUIRED)
-include_directories( "${EMBREE_INCLUDE_DIR}" )
+#find_package(EMBREE REQUIRED)
+#include_directories( "${EMBREE_INCLUDE_DIR}" )
 find_package(ANTTWEAKBAR REQUIRED)
 include_directories( ${ANT_TWEAK_BAR_INCLUDE_DIR} )
 find_package(OpenGL REQUIRED)
@@ -25,15 +25,15 @@ find_package(GLUT REQUIRED)
 link_directories(
   /usr/local/lib
   /opt/local/lib
-  ${ANT_TWEAK_BAR_DIRS}
-  ${EIGEN_DIRS}
+  {ANT_TWEAK_BAR_DIRS}
+  {EIGEN_DIRS}
 )
 
 set(LIBS 
   ${LIBIGL_LIBRARIES} 
   ${OPENGL_LIBRARIES} 
   ${GLUT_LIBRARIES}
-  ${EMBREE_LIBRARIES}
+#  ${EMBREE_LIBRARIES}
   ${CGAL_LIBRARIES}
   ${SHARED_LIBRARIES}
   ${ANT_TWEAK_BAR_LIBRARY}
