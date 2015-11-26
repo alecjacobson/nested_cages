@@ -13,8 +13,8 @@
 #include <Eigen/Core>
 #include <Eigen/SparseCore>
 
-// convert gradient at quadrature points to gradient at mesh vertices 
-// (follow grad_quadrature_to_vertices.m)
+// compute the matrix that converts gradient at quadrature 
+// points to gradient at mesh vertices 
 //
 // Inputs:
 //   V0  #V0 by 3 list of mesh vertex positions
@@ -32,7 +32,7 @@ void gradQ_to_gradV(
   const int quad_order,
   Eigen::SparseMatrix<double> & A);
 
-// For a set of points P compute the direction of decrease according to the signe
+// For a set of points P compute the direction of decrease according to the signed
 // distance field of a mesh (V,F).
 //
 // Inputs:
@@ -67,7 +67,7 @@ void grad_energy(
   const Eigen::MatrixXd & V_coarse, 
   const Eigen::MatrixXi & F_coarse, 
   const Eigen::SparseMatrix<double> & A_qv, 
-  Eigen::VectorXd & grad);
+  Eigen::MatrixXd & grad);
 
 // Move the shrinking fine mesh one step along its flow inside the coarse mesh
 // using a specified quadrature order.

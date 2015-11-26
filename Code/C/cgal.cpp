@@ -1,35 +1,32 @@
 #include "cgal.h"
 
-// taken from edge_collapse_enriched_polyhedron.cpp (CGAL)
-void decimate_CGAL(Surface_mesh* surface_mesh, float ratio, bool adaptive){
+// computes (overlapping) decimations using CGAL's routines
+void decimate_CGAL(
+  Surface_mesh* surface_mesh, 
+  const float ratio, 
+  const bool adaptive)
 
-  // Surface_mesh surface_mesh; 
-  // std::ifstream is(filename) ; is >> surface_mesh ;
+{
 
-  // The items in this polyhedron have an "id()" field 
-  // which the default index maps used in the algorithm
-  // need to get the index of a vertex/edge.
-  // However, the Polyhedron_3 class doesn't assign any value to
-  // this id(), so we must do it here:
   int index = 0 ;
   
   for( Surface_mesh::Halfedge_iterator eb = (*surface_mesh).halfedges_begin()
-     , ee = (*surface_mesh).halfedges_end()
-     ; eb != ee
-     ; ++ eb
-     ) 
+    , ee = (*surface_mesh).halfedges_end()
+    ; eb != ee
+    ; ++ eb
+    ) 
     eb->id() = index++;
 
   index = 0 ;
   for( Surface_mesh::Vertex_iterator vb = (*surface_mesh).vertices_begin()
-     , ve = (*surface_mesh).vertices_end()
-     ; vb != ve
-     ; ++ vb
-     )  
+    , ve = (*surface_mesh).vertices_end()
+    ; vb != ve
+    ; ++ vb
+    )  
     vb->id() = index++;
     
   // Decimate to output 10% resolution mesh
-    SMS::Count_ratio_stop_predicate<Surface_mesh> stop(ratio);
+  SMS::Count_ratio_stop_predicate<Surface_mesh> stop(ratio);
  
   Stats stats ;
   My_visitor vis(&stats) ;
@@ -41,18 +38,18 @@ void decimate_CGAL(Surface_mesh* surface_mesh, float ratio, bool adaptive){
   // the previous example.
   if (adaptive){
     int r = SMS::edge_collapse
-             (*surface_mesh
-             ,stop
-             ,CGAL::visitor      (vis)
-             );
+      (*surface_mesh
+      ,stop
+      ,CGAL::visitor      (vis)
+      );
   } else {
   int r = SMS::edge_collapse
-           (*surface_mesh
-           ,stop
-           ,CGAL::get_cost     (SMS::Edge_length_cost  <Surface_mesh>())
-                 .get_placement(SMS::Midpoint_placement<Surface_mesh>())
-                 .visitor      (vis)
-           );
+    (*surface_mesh
+    ,stop
+    ,CGAL::get_cost     (SMS::Edge_length_cost  <Surface_mesh>())
+    .get_placement(SMS::Midpoint_placement<Surface_mesh>())
+    .visitor      (vis)
+    );
    }
 
   

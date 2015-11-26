@@ -10,9 +10,8 @@
 
 #include <iostream>
 
-
-// convert gradient at quadrature points to gradient ate mesh vertices 
-// (follow grad_quadrature_to_vertices.m)
+// compute the matrix that converts gradient at quadrature 
+// points to gradient at mesh vertices
 
 void gradQ_to_gradV(
   const Eigen::MatrixXd & V0, 
@@ -123,7 +122,7 @@ void grad_energy(
   const Eigen::MatrixXd & V_coarse, 
   const Eigen::MatrixXi & F_coarse, 
   const Eigen::SparseMatrix<double> & A_qv, 
-  Eigen::VectorXd & grad)
+  Eigen::MatrixXd & grad)
 {
   using namespace Eigen;
   using namespace std;
@@ -179,10 +178,12 @@ void grad_energy(
     cout << "grad_energy, quadrature order " << quad_order << " is not implemented"  << endl;
   }
 
-  grad.resize(V.rows());
+  grad.resize(V.rows(),3);
   for (int k=0;k<grad.rows();k++)
   {
-    grad(k) = 0.0;
+    grad(k,0) = 0.0;
+    grad(k,1) = 0.0;
+    grad(k,2) = 0.0;
   }
 
 }
@@ -199,7 +200,7 @@ void flow_one_step(
   using namespace Eigen;
   using namespace std;
   using namespace igl;
-  VectorXd grad;
+  MatrixXd grad;
   grad_energy(V, F, V_coarse, F_coarse, A_qv, grad);
 
   V_new = MatrixXd::Zero(V.rows(),3);

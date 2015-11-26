@@ -1,3 +1,14 @@
+#ifndef CGAL_H
+#define CGAL_H
+
+// This file contains CGAL routines for decimating meshes,
+// most of them adapted from CGAL's example
+// Surface_Mesh_Simplification/edge_collapse_enriched_polyhedron.cpp
+//   - decimate_CGAL
+
+// *Leo*: I wasn't able to move all these headers to
+// cgal.cpp, so I kept as it is.
+
 // BEGIN of CGAL includes
 #include <fstream>
 #include <CGAL/Simple_cartesian.h>
@@ -69,10 +80,6 @@ struct My_visitor : SMS::Edge_collapse_visitor_base<Surface_mesh>
     ++ stats->processed ;
     if ( !cost )
       ++ stats->cost_uncomputable ;
-      
-    // if ( current == initial )
-    //   std::cerr << "\n" << std::flush ;
-    // std::cerr << "\r" << current << std::flush ;
   }                
   
   // Called during the processing phase for each edge being collapsed.
@@ -102,4 +109,18 @@ struct My_visitor : SMS::Edge_collapse_visitor_base<Surface_mesh>
   Stats* stats ;
 } ;
 
-void decimate_CGAL(Surface_mesh* , float , bool );
+
+// computes (overlapping) decimations using CGAL's routines
+//
+// Inputs:
+//   surface_mesh  Pointer to the input mesh in Surface_mesh CGAL's format
+//   ratio  percentage of faces of the decimated mesh compared to original
+//   adaptive  true for adaptive decimation, false for regular
+// Output:
+//   surface_mesh   Decimated mesh (overwrites input)
+void decimate_CGAL(
+  Surface_mesh* surface_mesh, 
+  const float ratio, 
+  const bool adpative);
+
+#endif 
