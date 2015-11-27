@@ -115,6 +115,8 @@ void signed_distance_direction(
   igl::signed_distance(P,V,F,igl::SIGNED_DISTANCE_TYPE_PSEUDONORMAL,S,I,C,N);
   // MatrixXd dif = C-P;
   // igl::normalize_row_lengths(dif,D);
+
+  D = MatrixXd::Zero(P.rows(),3);
   // next: continue writing as in signed_distance_direction.m, case 3 
 }
 
