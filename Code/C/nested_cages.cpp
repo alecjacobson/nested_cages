@@ -11,6 +11,7 @@
 // useful namespaces
 using namespace Eigen;
 using namespace igl;
+using namespace std;
 
 // For debuggin'
 int at(
@@ -82,7 +83,7 @@ int main(int argc, char * argv[])
 
       // Check if decimations self-intersect. If they do, throw an error and quit 
       // (replace by Meshfix in the future)
-	  MatrixXd V_coarse;
+	    MatrixXd V_coarse;
       MatrixXi F_coarse;
       polyhedron_to_mesh(M_hat,V_coarse,F_coarse); 
       RemeshSelfIntersectionsParam params;
@@ -100,11 +101,11 @@ int main(int argc, char * argv[])
       }
 
 
-	  // calculate triangle areas for initial mesh (will be used
-	  // to define the integral at _every_ step - the metric is fixed)
-	  VectorXd area_0;
-	  doublearea(V0,F0,area_0);
-	  area_0 = 0.5*area_0;
+	    // calculate triangle areas for initial mesh (will be used
+	    // to define the integral at _every_ step - the metric is fixed)
+	    VectorXd area_0;
+	    doublearea(V0,F0,area_0);
+	    area_0 = 0.5*area_0;
       // Precompute matrix that convert gradients at quadrature points to gradients at mesh vertices
   	  SparseMatrix<double> A_qv;
       gradQ_to_gradV(V0, F0, area_0, quad_order, A_qv);

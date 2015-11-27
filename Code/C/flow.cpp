@@ -6,6 +6,7 @@
 #include <igl/per_edge_normals.h>
 #include <igl/per_face_normals.h>
 #include <igl/normalize_row_lengths.h>
+#include <igl/massmatrix.h>
 
 #include <CGAL/Cartesian.h>
 
@@ -112,10 +113,11 @@ void signed_distance_direction(
   MatrixXd C,N;
   VectorXi I;
   VectorXd S;
-  igl::signed_distance(P,V,F,igl::SIGNED_DISTANCE_TYPE_PSEUDONORMAL,S,I,C,N);
+  // igl::signed_distance(P,V,F,igl::SIGNED_DISTANCE_TYPE_PSEUDONORMAL,S,I,C,N);
   // MatrixXd dif = C-P;
   // igl::normalize_row_lengths(dif,D);
   // next: continue writing as in signed_distance_direction.m, case 3 
+  D = MatrixXd::Zero(P.rows(),3);
 }
 
 
@@ -124,7 +126,8 @@ void grad_energy(
   const Eigen::MatrixXi & F, 
   const Eigen::MatrixXd & V_coarse, 
   const Eigen::MatrixXi & F_coarse, 
-  const Eigen::SparseMatrix<double> & A_qv, 
+  const Eigen::SparseMatrix<double> & A_qv,
+  const Eigen::SparseMatrix<double> & M, 
   Eigen::MatrixXd & grad)
 {
   using namespace Eigen;
@@ -149,7 +152,6 @@ void grad_energy(
       return -1;
     }
   }();
-    
 
   if (quad_order==1)
   {
@@ -166,13 +168,81 @@ void grad_energy(
 
     MatrixXd grad_Q(F.rows(),3);
     signed_distance_direction(quad_points,V_coarse,F_coarse,grad_Q);
+    grad = A_qv*grad_Q;
+    // the correct would be grad = M\(A_qv*grad_Q). Ask Alec waht solver he uses
 
   } else if (quad_order==2)
   {
     cout << "grad_energy, quadrature order = " << quad_order  << endl;
+
+    MatrixXd p12(F.rows(),3);
+    MatrixXd p23(F.rows(),3);
+    MatrixXd p31(F.rows(),3);
+    for (int k=0; k<F.rows(); k++)
+    {
+      p12(k,0) = (1.0/2.0)*(V(F(k,0),0)+V(F(k,1),0));
+      p12(k,1) = (1.0/2.0)*(V(F(k,0),1)+V(F(k,1),1));
+      p12(k,2) = (1.0/2.0)*(V(F(k,0),2)+V(F(k,1),2));
+
+      p23(k,0) = (1.0/2.0)*(V(F(k,1),0)+V(F(k,2),0));
+      p23(k,1) = (1.0/2.0)*(V(F(k,1),1)+V(F(k,2),1));
+      p23(k,2) = (1.0/2.0)*(V(F(k,1),2)+V(F(k,2),2));
+
+      p31(k,0) = (1.0/2.0)*(V(F(k,2),0)+V(F(k,0),0));
+      p31(k,1) = (1.0/2.0)*(V(F(k,2),1)+V(F(k,0),1));
+      p31(k,2) = (1.0/2.0)*(V(F(k,2),2)+V(F(k,0),2));
+    }
+
+    // concatenate quadrature points
+    MatrixXd quad_points(p12.rows()+p23.rows()+p31.rows(), p12.cols());
+    quad_points << p12,
+         p23,
+         p31;
+
+    MatrixXd grad_Q(3*F.rows(),3);
+    signed_distance_direction(quad_points,V_coarse,F_coarse,grad_Q);
+    grad = A_qv*grad_Q;
+    // the correct would be grad = M\(A_qv*grad_Q). Ask Alec waht solver he uses
+
   } else if (quad_order==3)
   {
     cout << "grad_energy, quadrature order = " << quad_order  << endl;
+
+    MatrixXd p1(F.rows(),3);
+    MatrixXd p2(F.rows(),3);
+    MatrixXd p3(F.rows(),3);
+    MatrixXd p4(F.rows(),3);
+    for (int k=0; k<F.rows(); k++)
+    {
+      p1(k,0) = (1.0/3.0)*(V(F(k,0),0)+V(F(k,1),0)+V(F(k,2),0));
+      p1(k,1) = (1.0/3.0)*(V(F(k,0),1)+V(F(k,1),1)+V(F(k,2),1));
+      p1(k,2) = (1.0/3.0)*(V(F(k,0),2)+V(F(k,1),2)+V(F(k,2),2));
+
+      p2(k,0) = (2.0/15.0)*V(F(k,0),0) + (11.0/15.0)*V(F(k,1),0)+ (2.0/15.0)*V(F(k,2),0);
+      p2(k,1) = (2.0/15.0)*V(F(k,0),1) + (11.0/15.0)*V(F(k,1),1)+ (2.0/15.0)*V(F(k,2),1);
+      p2(k,2) = (2.0/15.0)*V(F(k,0),2) + (11.0/15.0)*V(F(k,1),2)+ (2.0/15.0)*V(F(k,2),2);
+
+      p3(k,0) = (2.0/15.0)*V(F(k,0),0) + (2.0/15.0)*V(F(k,1),0)+ (11.0/15.0)*V(F(k,2),0);
+      p3(k,1) = (2.0/15.0)*V(F(k,0),1) + (2.0/15.0)*V(F(k,1),1)+ (11.0/15.0)*V(F(k,2),1);
+      p3(k,2) = (2.0/15.0)*V(F(k,0),2) + (2.0/15.0)*V(F(k,1),2)+ (11.0/15.0)*V(F(k,2),2);
+
+      p4(k,0) = (11.0/15.0)*V(F(k,0),0) + (2.0/15.0)*V(F(k,1),0)+ (2.0/15.0)*V(F(k,2),0);
+      p4(k,1) = (11.0/15.0)*V(F(k,0),1) + (2.0/15.0)*V(F(k,1),1)+ (2.0/15.0)*V(F(k,2),1);
+      p4(k,2) = (11.0/15.0)*V(F(k,0),2) + (2.0/15.0)*V(F(k,1),2)+ (2.0/15.0)*V(F(k,2),2);
+    }
+
+    // concatenate quadrature points
+    MatrixXd quad_points(p1.rows()+p2.rows()+p3.rows()+p4.rows(), p1.cols());
+    quad_points << p1,
+         p2,
+         p3,
+         p4;
+
+    MatrixXd grad_Q(4*F.rows(),3);
+    signed_distance_direction(quad_points,V_coarse,F_coarse,grad_Q);
+    grad = A_qv*grad_Q;
+    // the correct would be grad = M\(A_qv*grad_Q). Ask Alec waht solver he uses
+
   } else
   {
     assert(false && "quad_order should be 1, 2, or 3");
@@ -190,13 +260,14 @@ void flow_one_step(
   const Eigen::MatrixXd & V_coarse, 
   const Eigen::MatrixXi & F_coarse, 
   const Eigen::SparseMatrix<double> & A_qv, 
+  const Eigen::SparseMatrix<double> & M, 
   Eigen::MatrixXd & V_new)
 {
   using namespace Eigen;
   using namespace std;
   using namespace igl;
   MatrixXd grad;
-  grad_energy(V, F, V_coarse, F_coarse, A_qv, grad);
+  grad_energy(V, F, V_coarse, F_coarse, A_qv, M, grad);
 
   V_new = MatrixXd::Zero(V.rows(),3);
 }
@@ -216,8 +287,10 @@ void flow_fine_inside_coarse(
   using namespace igl;
 
   // while there are intersections or some negative winding number, keep flowing
+  SparseMatrix<double> M;
+  massmatrix(V0,F0,MASSMATRIX_TYPE_BARYCENTRIC,M);
 
   // **Alec: notice that we cannot pass V as input and output, instead wrap the 
   // input inside MatrixXd to force compiler to make a copy in this case.
-  flow_one_step(MatrixXd(V), F0, V_coarse, F_coarse, A_qv, V);
+  flow_one_step(MatrixXd(V), F0, V_coarse, F_coarse, A_qv, M, V);
 }

@@ -57,8 +57,9 @@ void signed_distance_direction(
 //   V_coarse  #V_coarse by 3 list of coarse mesh positions
 //   F_coarse  #F_coarse by 3 list of coarse mesh triangle indices into
 //     V_coarse
-//   A   #V0 by #A matrix taking quadrature points to gradients at vertices.
-//     For quad_order=1,2,3 then #A=#F,3*#F,4*#F
+//   A_qv   #V0 by #A_qv matrix taking quadrature points to gradients at vertices.
+//     For quad_order=1,2,3 then #A_qv=#F,3*#F,4*#F
+//   M   mass matrix of the input fine matrix
 // Outputs:
 //   grad  ?
 void grad_energy(
@@ -67,6 +68,7 @@ void grad_energy(
   const Eigen::MatrixXd & V_coarse, 
   const Eigen::MatrixXi & F_coarse, 
   const Eigen::SparseMatrix<double> & A_qv, 
+  const Eigen::SparseMatrix<double> & M, 
   Eigen::MatrixXd & grad);
 
 // Move the shrinking fine mesh one step along its flow inside the coarse mesh
