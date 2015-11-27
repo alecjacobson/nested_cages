@@ -5,6 +5,7 @@
 #include <igl/per_vertex_normals.h>
 #include <igl/per_edge_normals.h>
 #include <igl/per_face_normals.h>
+#include <igl/normalize_row_lengths.h>
 
 #include <CGAL/Cartesian.h>
 
@@ -36,7 +37,7 @@ void gradQ_to_gradV(
 
     for (int k=0;k<F0.rows();k++)
     {
-      IJV.push_back(Tripletd(F0(k,0),k,area_0(k)/3.));
+      IJV.push_back(Tripletd(F0(k,0),k,area_0(k)/3));
       IJV.push_back(Tripletd(F0(k,1),k,area_0(k)/3));
       IJV.push_back(Tripletd(F0(k,2),k,area_0(k)/3));
     }
@@ -112,6 +113,8 @@ void signed_distance_direction(
   VectorXi I;
   VectorXd S;
   igl::signed_distance(P,V,F,igl::SIGNED_DISTANCE_TYPE_PSEUDONORMAL,S,I,C,N);
+  // MatrixXd dif = C-P;
+  // igl::normalize_row_lengths(dif,D);
   // next: continue writing as in signed_distance_direction.m, case 3 
 }
 
@@ -131,13 +134,13 @@ void grad_energy(
   // Compute quad_order from A_qv
   int quad_order = [&F,&A_qv]()->int
   {
-    if(A_qv.rows() == F.rows())
+    if(A_qv.cols() == F.rows())
     {
       return 1;
-    }else if(A_qv.rows() == 3*F.rows())
+    }else if(A_qv.cols() == 3*F.rows())
     {
       return 2;
-    }else if(A_qv.rows() == 4*F.rows())
+    }else if(A_qv.cols() == 4*F.rows())
     {
       return 3;
     }else
@@ -161,10 +164,8 @@ void grad_energy(
     }
     MatrixXd quad_points = p123;
 
-    MatrixXd grad_Q;
+    MatrixXd grad_Q(F.rows(),3);
     signed_distance_direction(quad_points,V_coarse,F_coarse,grad_Q);
-
-    // [S,I,C,N] = signed_distance(P,V,F,'SignedDistanceType','pseudonormal');
 
   } else if (quad_order==2)
   {
@@ -178,13 +179,7 @@ void grad_energy(
     cout << "grad_energy, quadrature order " << quad_order << " is not implemented"  << endl;
   }
 
-  grad.resize(V.rows(),3);
-  for (int k=0;k<grad.rows();k++)
-  {
-    grad(k,0) = 0.0;
-    grad(k,1) = 0.0;
-    grad(k,2) = 0.0;
-  }
+  grad = MatrixXd::Zero(V.rows(),3);
 
 }
 
