@@ -32,9 +32,6 @@ set(LIBS
   ${SHARED_LIBRARIES}
 )
 
-set_source_files_properties(flow.cpp
-    PROPERTIES COMPILE_FLAGS "-O0 -UNDEBUG")
-
 FILE(GLOB SRCFILES *.cpp)
 add_executable(nested_cages_demo ${SRCFILES})
 target_link_libraries(nested_cages_demo ${LIBS})
