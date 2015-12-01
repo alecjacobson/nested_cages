@@ -12,6 +12,7 @@
 
 #include <Eigen/Core>
 #include <Eigen/SparseCore>
+#include <stack>
 
 // compute the matrix that converts gradient at quadrature 
 // points to gradient at mesh vertices 
@@ -28,7 +29,7 @@
 void gradQ_to_gradV(
   const Eigen::MatrixXd & V0, 
   const Eigen::MatrixXi & F0, 
-  const Eigen::MatrixXd & area_0, 
+  const Eigen::VectorXd & area_0, 
   const int quad_order,
   Eigen::SparseMatrix<double> & A);
 
@@ -68,7 +69,7 @@ void grad_energy(
   const Eigen::MatrixXd & V_coarse, 
   const Eigen::MatrixXi & F_coarse, 
   const Eigen::SparseMatrix<double> & A_qv, 
-  const Eigen::SparseMatrix<double> & M, 
+  const Eigen::SparseMatrix<double> & M_inv, 
   Eigen::MatrixXd & grad);
 
 // Move the shrinking fine mesh one step along its flow inside the coarse mesh
@@ -81,6 +82,7 @@ void grad_energy(
 //   F_coarse  #F_coarse by 3 list of coarse mesh triangle indices into
 //   A   #V0 by #A matrix taking quadrature points to gradients at vertices.
 //     For quad_order=1,2,3 then #A=#F,3*#F,4*#F
+//   M_inv inverse of the mass matrix of the fine mesh
 // Output:
 //  V_new  #V by 3 list of new fine mesh vertex positions
 //   
@@ -90,6 +92,7 @@ void flow_one_step(
   const Eigen::MatrixXd & V_coarse, 
   const Eigen::MatrixXi & F_coarse, 
   const Eigen::SparseMatrix<double> & A_qv, 
+  const double delta_t, 
   Eigen::MatrixXd & V_new);
 
 // Flow the fine mesh inside the coarse mesh using a specified quadrature order
@@ -101,6 +104,7 @@ void flow_one_step(
 //   F_coarse  #F_coarse by 3 list of coarse mesh triangle indices into
 //   A   #V0 by #A matrix taking quadrature points to gradients at vertices.
 //     For quad_order=1,2,3 then #A=#F0,3*#F,4*#F0
+//   delta_t  time step of the flow
 // Output:
 //  V  #V0 by 3 list of new fine mesh vertex positions
 void flow_fine_inside_coarse(
@@ -109,5 +113,5 @@ void flow_fine_inside_coarse(
   const Eigen::MatrixXd & V_coarse, 
   const Eigen::MatrixXi & F_coarse, 
   const Eigen::SparseMatrix<double> & A_qv,
-  Eigen::MatrixXd & V);
+  std::stack<Eigen::MatrixXd> & H);
 #endif 

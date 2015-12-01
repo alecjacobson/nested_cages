@@ -80,53 +80,60 @@ int main(int argc, char * argv[])
       float ratio = (1.*L[i])/(1.*M.size_of_facets()); 
       M_hat = M;
       decimate_CGAL(&M_hat,ratio,adaptive);
-
-      // Check if decimations self-intersect. If they do, throw an error and quit 
-      // (replace by Meshfix in the future)
-	    MatrixXd V_coarse;
-      MatrixXi F_coarse;
-      polyhedron_to_mesh(M_hat,V_coarse,F_coarse); 
-      RemeshSelfIntersectionsParam params;
-      params.detect_only = true;
-      params.first_only = true;
-      MatrixXd tempV;
-      MatrixXi tempF;
-      MatrixXi IF;
-      VectorXi J;
-      VectorXi IM;
-      remesh_self_intersections(V_coarse,F_coarse,params,tempV,tempF,IF,J,IM);
-      if (IF.rows()>0){
-      	cout << i+1 << "-th input decimation self-intersects. Quitting...  " << endl;  
-      	return 0;
-      }
-
-
-	    // calculate triangle areas for initial mesh (will be used
-	    // to define the integral at _every_ step - the metric is fixed)
-	    VectorXd area_0;
-	    doublearea(V0,F0,area_0);
-	    area_0 = 0.5*area_0;
-      // Precompute matrix that convert gradients at quadrature points to gradients at mesh vertices
-  	  SparseMatrix<double> A_qv;
-      gradQ_to_gradV(V0, F0, area_0, quad_order, A_qv);
-  	  // Flow M inside M_hat
-      MatrixXd V;
-      flow_fine_inside_coarse(V0,F0,V_coarse,F_coarse,A_qv,V);
-
-      // Reinflate
-
-      // Ouput cage
-      if ((asprintf(&suffix,"_%d.off",i+1)!=-1) && (asprintf(&filename, "%s%s", argv[argc-1], suffix)!=-1)){
-        std::ofstream os( filename ) ; os << M_hat;
-      } else {
-        cout << "unable to allocate space for output file name"  << endl;
-        return 0;
-      }
-
-      M = M_hat;
-      // back toi adaptive decimation (standard)
-      adaptive = true;
     }
+
+    // Check if decimations self-intersect. If they do, throw an error and quit 
+    // (replace by Meshfix in the future)
+	  MatrixXd V_coarse;
+    MatrixXi F_coarse;
+    polyhedron_to_mesh(M_hat,V_coarse,F_coarse); 
+    RemeshSelfIntersectionsParam params;
+    params.detect_only = true;
+    params.first_only = true;
+    MatrixXd tempV;
+    MatrixXi tempF;
+    MatrixXi IF;
+    VectorXi J;
+    VectorXi IM;
+    remesh_self_intersections(V_coarse,F_coarse,params,tempV,tempF,IF,J,IM);
+    if (IF.rows()>0){
+    	cout << i+1 << "-th input decimation self-intersects. Quitting...  " << endl;  
+    	return 0;
+    }
+
+
+	  // calculate triangle areas for initial mesh (will be used
+	  // to define the integral at _every_ step - the metric is fixed)
+	  VectorXd area_0;
+	  doublearea(V0,F0,area_0);
+	  area_0 = 0.5*area_0;
+    // Precompute matrix that convert gradients at quadrature points to gradients at mesh vertices
+  	SparseMatrix<double> A_qv;
+    gradQ_to_gradV(V0, F0, area_0, quad_order, A_qv);
+  	// Flow M inside M_hat
+    stack<MatrixXd> H;
+    flow_fine_inside_coarse(V0,F0,V_coarse,F_coarse,A_qv,H);
+
+    // Reinflate
+    // clear flow history (replace by top, pop, step back)
+    while ( ! H.empty() )
+    {
+      cout << "cleaning stack" << H.size() << endl;
+      H.pop();
+    }
+
+    // Ouput cage
+    if ((asprintf(&suffix,"_%d.off",i+1)!=-1) && (asprintf(&filename, "%s%s", argv[argc-1], suffix)!=-1)){
+      std::ofstream os( filename ) ; os << M_hat;
+    } else {
+      cout << "unable to allocate space for output file name"  << endl;
+      return 0;
+    }
+
+    // output cage is the input for the next level
+    M = M_hat;
+    // back to adaptive decimation (standard)
+    adaptive = true;
   }
   
   free(filename);

@@ -7,6 +7,9 @@
 #include <igl/per_face_normals.h>
 #include <igl/normalize_row_lengths.h>
 #include <igl/massmatrix.h>
+#include <igl/invert_diag.h>
+#include <igl/copyleft/cgal/intersect_other.h>
+#include <igl/winding_number.h>
 
 #include <CGAL/Cartesian.h>
 
@@ -18,7 +21,7 @@
 void gradQ_to_gradV(
   const Eigen::MatrixXd & V0, 
   const Eigen::MatrixXi & F0, 
-  const Eigen::MatrixXd & area_0, 
+  const Eigen::VectorXd & area_0, 
   const int quad_order,
   Eigen::SparseMatrix<double> & A)
 {
@@ -38,6 +41,8 @@ void gradQ_to_gradV(
 
     for (int k=0;k<F0.rows();k++)
     {
+      assert(F0(k,0)<V0.rows() && F0(k,1)<V0.rows() && F0(k,2)<V0.rows());
+      assert(k<F0.rows());
       IJV.push_back(Tripletd(F0(k,0),k,area_0(k)/3));
       IJV.push_back(Tripletd(F0(k,1),k,area_0(k)/3));
       IJV.push_back(Tripletd(F0(k,2),k,area_0(k)/3));
@@ -81,14 +86,14 @@ void gradQ_to_gradV(
       IJV.push_back(Tripletd(F0(k,0),3*F0.rows()+k,(55.0/144.0)*area_0(k)));
 
       IJV.push_back(Tripletd(F0(k,1),k,-(3.0/16.0)*area_0(k)));
-      IJV.push_back(Tripletd(F0(k,1),F0.rows()+k,(5.0/72.0)*area_0(k)));
+      IJV.push_back(Tripletd(F0(k,1),F0.rows()+k,(55.0/144.0)*area_0(k)));
       IJV.push_back(Tripletd(F0(k,1),2*F0.rows()+k,(5.0/72.0)*area_0(k)));
-      IJV.push_back(Tripletd(F0(k,1),3*F0.rows()+k,(55.0/144.0)*area_0(k)));
+      IJV.push_back(Tripletd(F0(k,1),3*F0.rows()+k,(5.0/72.0)*area_0(k)));
 
       IJV.push_back(Tripletd(F0(k,2),k,-(3.0/16.0)*area_0(k)));
       IJV.push_back(Tripletd(F0(k,2),F0.rows()+k,(5.0/72.0)*area_0(k)));
-      IJV.push_back(Tripletd(F0(k,2),2*F0.rows()+k,(5.0/72.0)*area_0(k)));
-      IJV.push_back(Tripletd(F0(k,2),3*F0.rows()+k,(55.0/144.0)*area_0(k)));
+      IJV.push_back(Tripletd(F0(k,2),2*F0.rows()+k,(55.0/144.0)*area_0(k)));
+      IJV.push_back(Tripletd(F0(k,2),3*F0.rows()+k,(5.0/72.0)*area_0(k)));
     }
     A.setFromTriplets(IJV.begin(),IJV.end());
 
@@ -113,11 +118,17 @@ void signed_distance_direction(
   MatrixXd C,N;
   VectorXi I;
   VectorXd S;
-  // igl::signed_distance(P,V,F,igl::SIGNED_DISTANCE_TYPE_PSEUDONORMAL,S,I,C,N);
-  // MatrixXd dif = C-P;
-  // igl::normalize_row_lengths(dif,D);
-  // next: continue writing as in signed_distance_direction.m, case 3 
-  D = MatrixXd::Zero(P.rows(),3);
+  igl::signed_distance(P,V,F,igl::SIGNED_DISTANCE_TYPE_PSEUDONORMAL,S,I,C,N);
+  MatrixXd dif = C-P;
+  igl::normalize_row_lengths(dif,D);
+  for (int k=0; k<S.rows(); k++){
+    if (S(k)<=-1e-5){
+      D.row(k) = -D.row(k);
+    }
+    else if (S(k)<1e-5){
+      D.row(k) = -N.row(k);
+    }
+  }
 }
 
 
@@ -127,7 +138,7 @@ void grad_energy(
   const Eigen::MatrixXd & V_coarse, 
   const Eigen::MatrixXi & F_coarse, 
   const Eigen::SparseMatrix<double> & A_qv,
-  const Eigen::SparseMatrix<double> & M, 
+  const Eigen::SparseMatrix<double> & M_inv, 
   Eigen::MatrixXd & grad)
 {
   using namespace Eigen;
@@ -168,8 +179,8 @@ void grad_energy(
 
     MatrixXd grad_Q(F.rows(),3);
     signed_distance_direction(quad_points,V_coarse,F_coarse,grad_Q);
-    grad = A_qv*grad_Q;
-    // the correct would be grad = M\(A_qv*grad_Q). Ask Alec waht solver he uses
+    grad_Q = -grad_Q;
+    grad = M_inv*(A_qv*grad_Q);
 
   } else if (quad_order==2)
   {
@@ -201,7 +212,8 @@ void grad_energy(
 
     MatrixXd grad_Q(3*F.rows(),3);
     signed_distance_direction(quad_points,V_coarse,F_coarse,grad_Q);
-    grad = A_qv*grad_Q;
+    grad_Q = -grad_Q;
+    grad = M_inv*(A_qv*grad_Q);
     // the correct would be grad = M\(A_qv*grad_Q). Ask Alec waht solver he uses
 
   } else if (quad_order==3)
@@ -240,7 +252,8 @@ void grad_energy(
 
     MatrixXd grad_Q(4*F.rows(),3);
     signed_distance_direction(quad_points,V_coarse,F_coarse,grad_Q);
-    grad = A_qv*grad_Q;
+    grad_Q = -grad_Q;
+    grad = M_inv*(A_qv*grad_Q);
     // the correct would be grad = M\(A_qv*grad_Q). Ask Alec waht solver he uses
 
   } else
@@ -248,8 +261,6 @@ void grad_energy(
     assert(false && "quad_order should be 1, 2, or 3");
     cout << "grad_energy, quadrature order " << quad_order << " is not implemented"  << endl;
   }
-
-  grad = MatrixXd::Zero(V.rows(),3);
 
 }
 
@@ -260,7 +271,8 @@ void flow_one_step(
   const Eigen::MatrixXd & V_coarse, 
   const Eigen::MatrixXi & F_coarse, 
   const Eigen::SparseMatrix<double> & A_qv, 
-  const Eigen::SparseMatrix<double> & M, 
+  const Eigen::SparseMatrix<double> & M,
+  const double delta_t,  
   Eigen::MatrixXd & V_new)
 {
   using namespace Eigen;
@@ -269,7 +281,7 @@ void flow_one_step(
   MatrixXd grad;
   grad_energy(V, F, V_coarse, F_coarse, A_qv, M, grad);
 
-  V_new = MatrixXd::Zero(V.rows(),3);
+  V_new = V - delta_t*grad;
 }
 
 
@@ -280,17 +292,33 @@ void flow_fine_inside_coarse(
   const Eigen::MatrixXd & V_coarse, 
   const Eigen::MatrixXi & F_coarse, 
   const Eigen::SparseMatrix<double> & A_qv,
-  Eigen::MatrixXd & V)
+  std::stack<Eigen::MatrixXd> & H)
 {
   using namespace Eigen;
   using namespace std;
   using namespace igl;
+  using namespace igl::copyleft::cgal;
 
   // while there are intersections or some negative winding number, keep flowing
   SparseMatrix<double> M;
   massmatrix(V0,F0,MASSMATRIX_TYPE_BARYCENTRIC,M);
+  SparseMatrix<double> M_inv;
+  invert_diag(M,M_inv);
 
-  // **Alec: notice that we cannot pass V as input and output, instead wrap the 
-  // input inside MatrixXd to force compiler to make a copy in this case.
-  flow_one_step(MatrixXd(V), F0, V_coarse, F_coarse, A_qv, M, V);
+  MatrixXd V = V0;
+  H.push(V);
+  double delta_t = 1e-3;
+  MatrixXi IF;
+  intersect_other(V,F0,V_coarse,F_coarse,true,IF);
+  VectorXd W(1); // winding number of the first point
+  winding_number(V_coarse,F_coarse,V.row(0),W);
+  while (IF.rows()>0 || W[0]<1e-10){
+    cout << "number of intersections " << IF.rows() << endl;
+    flow_one_step(MatrixXd(V), F0, V_coarse, F_coarse, A_qv, M_inv, delta_t, V);
+    intersect_other(V,F0,V_coarse,F_coarse,true,IF);
+    // **Alec: notice that we cannot pass V as input and output, instead wrap the 
+    // input inside MatrixXd to force compiler to make a copy in this case.
+    winding_number(V_coarse,F_coarse,V.row(0),W);
+    H.push(V);
+  }
 }
