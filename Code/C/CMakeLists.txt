@@ -18,6 +18,13 @@ include_directories( "${LIBIGL_INCLUDE_DIR}" )
 find_package(OpenGL REQUIRED)
 find_package(GLUT REQUIRED)
 
+find_package(ELTOPO REQUIRED)
+include_directories( "${LIBELTOPO_INCLUDE_DIR}" )
+find_package(COMMON REQUIRED)
+include_directories( "${LIBCOMMON_INCLUDE_DIR}" )
+find_package(TALPA REQUIRED)
+include_directories( "${LIBTALPA_INCLUDE_DIR}" "${LIBTALPA_INCLUDE_DIR}/drivers" )
+
 link_directories(
   /usr/local/lib
   /opt/local/lib
@@ -30,6 +37,7 @@ set(LIBS
   ${GLUT_LIBRARIES}
   ${CGAL_LIBRARIES}
   ${SHARED_LIBRARIES}
+  ${LIBELTOPO_LIBRARY}
 )
 
 FILE(GLOB SRCFILES *.cpp)

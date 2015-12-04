@@ -2,12 +2,13 @@
 #include "io.h"
 #include "cgal.h"
 #include "flow.h"
+#include "reinflate.h"
 
 // libigl includes
 #include <igl/doublearea.h>
 #include <igl/copyleft/cgal/remesh_self_intersections.h>
 #include <igl/copyleft/cgal/polyhedron_to_mesh.h>
-
+ 
 // useful namespaces
 using namespace Eigen;
 using namespace igl;
@@ -115,12 +116,14 @@ int main(int argc, char * argv[])
     flow_fine_inside_coarse(V0,F0,V_coarse,F_coarse,A_qv,H);
 
     // Reinflate
-    // clear flow history (replace by top, pop, step back)
-    while ( ! H.empty() )
-    {
-      cout << "cleaning stack" << H.size() << endl;
-      H.pop();
-    }
+    MatrixXd C;
+    reinflate(H,F0,V_coarse,F_coarse,"DispStep","None",C);
+    // // clear flow history (replace by top, pop, step back)
+    // while ( ! H.empty() )
+    // {
+    //   cout << "cleaning stack" << H.size() << endl;
+    //   H.pop();
+    // }
 
     // Ouput cage
     if ((asprintf(&suffix,"_%d.off",i+1)!=-1) && (asprintf(&filename, "%s%s", argv[argc-1], suffix)!=-1)){

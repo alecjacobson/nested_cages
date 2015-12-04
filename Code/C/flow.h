@@ -104,7 +104,7 @@ void flow_one_step(
 //   F_coarse  #F_coarse by 3 list of coarse mesh triangle indices into
 //   A   #V0 by #A matrix taking quadrature points to gradients at vertices.
 //     For quad_order=1,2,3 then #A=#F0,3*#F,4*#F0
-//   delta_t  time step of the flow
+//   H  history of flow mesh positions
 // Output:
 //  V  #V0 by 3 list of new fine mesh vertex positions
 void flow_fine_inside_coarse(
