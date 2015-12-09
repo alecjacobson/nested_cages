@@ -8,7 +8,7 @@ include(${CGAL_USE_FILE})
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g -Wall -Wextra -Wno-reorder -Wno-unknown-pragmas -march=native")
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
-endif()
+endif() 
 
 find_package(EIGEN REQUIRED)
 include_directories( "${EIGEN_INCLUDE_DIR}" )
@@ -16,7 +16,7 @@ include_directories( "${EIGEN_INCLUDE_DIR}" )
 find_package(LIBIGL REQUIRED)
 include_directories( "${LIBIGL_INCLUDE_DIR}" )
 find_package(OpenGL REQUIRED)
-find_package(GLUT REQUIRED)
+find_package(GLUT REQUIRED) 
 
 find_package(ELTOPO REQUIRED)
 include_directories( "${LIBELTOPO_INCLUDE_DIR}" )
@@ -24,7 +24,7 @@ find_package(COMMON REQUIRED)
 include_directories( "${LIBCOMMON_INCLUDE_DIR}" )
 find_package(TALPA REQUIRED)
 include_directories( "${LIBTALPA_INCLUDE_DIR}" "${LIBTALPA_INCLUDE_DIR}/drivers" )
-
+ 
 link_directories(
   /usr/local/lib
   /opt/local/lib
@@ -37,7 +37,7 @@ set(LIBS
   ${GLUT_LIBRARIES}
   ${CGAL_LIBRARIES}
   ${SHARED_LIBRARIES}
-  ${LIBELTOPO_LIBRARY}
+  ${LIBELTOPO_LIBRARY} -llapack -lblas
 )
 
 FILE(GLOB SRCFILES *.cpp)

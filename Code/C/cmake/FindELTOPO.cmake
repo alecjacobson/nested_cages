@@ -10,7 +10,7 @@ FIND_PATH(LIBELTOPO_INCLUDE_DIR eltopo.h
    ${PROJECT_SOURCE_DIR}/../../include
    ${PROJECT_SOURCE_DIR}/../include
    ${PROJECT_SOURCE_DIR}/include
-   ${PROJECT_SOURCE_DIR}/../eltopo/eltopo3d
+   ${PROJECT_SOURCE_DIR}/../../../eltopo/eltopo3d
    /usr/include
    /usr/local/include
 )
