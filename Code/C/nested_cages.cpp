@@ -8,6 +8,7 @@
 #include <igl/doublearea.h>
 #include <igl/copyleft/cgal/remesh_self_intersections.h>
 #include <igl/copyleft/cgal/polyhedron_to_mesh.h>
+#include <igl/copyleft/cgal/mesh_to_polyhedron.h>
  
 // useful namespaces
 using namespace Eigen;
@@ -125,16 +126,16 @@ int main(int argc, char * argv[])
     //   H.pop();
     // }
 
+    // output cage is the input for the next level
+    mesh_to_polyhedron(C,F_coarse,M); 
+
     // Ouput cage
     if ((asprintf(&suffix,"_%d.off",i+1)!=-1) && (asprintf(&filename, "%s%s", argv[argc-1], suffix)!=-1)){
-      std::ofstream os( filename ) ; os << M_hat;
+      std::ofstream os( filename ) ; os << M;
     } else {
       cout << "unable to allocate space for output file name"  << endl;
       return 0;
     }
-
-    // output cage is the input for the next level
-    M = M_hat;
     // back to adaptive decimation (standard)
     adaptive = true;
   }

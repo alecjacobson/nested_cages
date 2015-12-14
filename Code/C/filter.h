@@ -13,7 +13,7 @@
 //   Uc  Desired velocities of the fine mesh
 // Output:
 //  Uc  Corrected coarse mesh velocities
-void reinflate(
+void filter(
   const Eigen::MatrixXd & Vf, 
   const Eigen::MatrixXi & T, 
   const Eigen::MatrixXd & Uf, 

@@ -25,7 +25,7 @@
 #include <scriptinit.h>
 #include <simulation.h>
 
-void reinflate(
+void filter(
   const Eigen::MatrixXd & Vf, 
   const Eigen::MatrixXi & T, 
   const Eigen::MatrixXd & Uf, 
@@ -36,14 +36,16 @@ void reinflate(
   using namespace Eigen;
   using namespace std;
   // Define concataned meshes (treat fine and coarse meshes as a big single mesh)
-  MatrixXd V0,V1;
+  MatrixXd V0(Vf.rows()+C.rows(),3);
+  MatrixXd V1(Vf.rows()+C.rows(),3);
   V0.block(0,0,Vf.rows(),3) = Vf;
   V0.block(Vf.rows(),0,C.rows(),3) = C;
   V1.block(0,0,Vf.rows(),3) = Vf+Uf;
   V1.block(Vf.rows(),0,C.rows(),3) = C+Uc;
-  MatrixXi F_all;
+  MatrixXi F_all(T.rows()+F_hat.rows(),3);
   F_all.block(0,0,T.rows(),3) = T;
   F_all.block(T.rows(),0,F_hat.rows(),3) = F_hat;
+
 
   // set vertex masses (=infty for fine mesh vertices 
   // and =1.0 for the last ones)
@@ -54,15 +56,39 @@ void reinflate(
   for (int i=Vf.rows(); i<V0.rows(); i++){
       masses[i] = 1.0;
   }
+
+  // Convert from Eigen matrix to array
+  double V0a[3*V0.rows()];
+  for (int k=0; k<V0.rows(); k++)
+  {
+    V0a[3*k] = V0(k,0);
+    V0a[3*k+1] = V0(k,1);
+    V0a[3*k+2] = V0(k,2);
+  } 
+
+  int F_alla[3*F_all.rows()];
+  for (int k=0; k<V0.rows(); k++)
+  {
+    F_alla[3*k] = F_all(k,0);
+    F_alla[3*k+1] = F_all(k,1);
+    F_alla[3*k+2] = F_all(k,2);
+  } 
+
   // encapsulate all data into an ElTopoMesh
   ElTopoMesh eltopo_time0;
   eltopo_time0.num_vertices = V0.rows();
-  eltopo_time0.vertex_locations = V0.data();
+  eltopo_time0.vertex_locations = V0a;
   eltopo_time0.num_triangles = F_all.rows();
-  eltopo_time0.triangles = F_all.data();
+  eltopo_time0.triangles = F_alla;
   eltopo_time0.vertex_masses = masses;
 
-  double *V1a = V1.data();
+  double V1a[3*V1.rows()];
+  for (int k=0; k<V1.rows(); k++)
+  {
+    V1a[3*k] = V1(k,0);
+    V1a[3*k+1] = V1(k,1);
+    V1a[3*k+2] = V1(k,2);
+  } 
 
   // Set general parameters
   ElTopoGeneralOptions sim_general_options;
@@ -73,10 +99,12 @@ void reinflate(
   // separation between colliding meshes 
   sim_general_options.m_proximity_epsilon = 1e-3; 
 
+
   // Set Simulation parameters
   ElTopoIntegrationOptions sim_integration_options;
   sim_integration_options.m_friction_coefficient = 0.0;
   sim_integration_options.m_dt = 1.0;
+
 
   double* V_final;
   double out_dt = 0.0;

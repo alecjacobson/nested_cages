@@ -1,4 +1,6 @@
 #include "reinflate.h"
+#include "filter.h"
+#include <stdio.h>
 
 // Need to include some IGL header to have igl namespace
 #include <igl/signed_distance.h>
@@ -27,7 +29,11 @@ void reinflate(
   	MatrixXd Uc = MatrixXd::Zero(C_hat.rows(), 3);
   	MatrixXd Uf = H.top()-F;
   	H.pop();
-  	// filter(F,T,Uf,C,F_hat,Uc);
+  	filter(F,T,Uf,C,F_hat,Uc);
+    // step size search
+
+    // update
+    C = C+Uc;
 
   }
 
