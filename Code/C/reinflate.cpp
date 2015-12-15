@@ -50,10 +50,10 @@ void reinflate(
       {
         cout << "Reinflation step " << step << ": Energy = " << EnergyInflation  << endl;
         MatrixXd grad;
-        gradient(C,C_hat,C_prev,EnergyInflation,grad);
+        gradient(C,C_hat,C_prev,F_hat,EnergyInflation,grad);
         MatrixXd Uc = -beta*grad;
         filter(F,T,Uf,C,F_hat,Uc);
-        double new_energy = energy(C+Uc,C_hat,C_prev,EnergyInflation);
+        double new_energy = energy(C+Uc,C_hat,C_prev,F_hat,EnergyInflation);
         if (new_energy>current_energy)
         {
           beta = 0.5*beta;
@@ -71,7 +71,7 @@ void reinflate(
           cout << "energy decreased to " << current_energy << ", increasing beta to " << beta << endl;
         }
         // If tiny step, then brak
-        if (((C-C_hat).rowwise().norm()).norm()<1e-5) break;
+        if (((Uc).rowwise().norm()).norm()<1e-5) break;
       }
     }
 
