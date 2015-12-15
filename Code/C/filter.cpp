@@ -44,8 +44,14 @@ void filter(
   V1.block(Vf.rows(),0,C.rows(),3) = C+Uc;
   MatrixXi F_all(T.rows()+F_hat.rows(),3);
   F_all.block(0,0,T.rows(),3) = T;
-  F_all.block(T.rows(),0,F_hat.rows(),3) = F_hat;
 
+  F_all.block(T.rows(),0,F_hat.rows(),3) = F_hat;
+  for (int k=T.rows();k<F_all.rows();k++)
+  {
+    F_all(k,0) = F_all(k,0)+Vf.rows();
+    F_all(k,1) = F_all(k,1)+Vf.rows();
+    F_all(k,2) = F_all(k,2)+Vf.rows();
+  }
 
   // set vertex masses (=infty for fine mesh vertices 
   // and =1.0 for the last ones)
@@ -67,7 +73,7 @@ void filter(
   } 
 
   int F_alla[3*F_all.rows()];
-  for (int k=0; k<V0.rows(); k++)
+  for (int k=0; k<F_all.rows(); k++)
   {
     F_alla[3*k] = F_all(k,0);
     F_alla[3*k+1] = F_all(k,1);
@@ -112,6 +118,13 @@ void filter(
   if (out_dt<1.0){
   	cout << "Failed to reach final positions out_dt = " << out_dt << endl;
   	return;
+  }
+  // output corrected velocities
+  for (int k=0; k<C.rows(); k++)
+  {
+    Uc(k,0) = V_final[3*Vf.rows()+3*k]-C(k,0);
+    Uc(k,1) = V_final[3*Vf.rows()+3*k+1]-C(k,1);
+    Uc(k,2) = V_final[3*Vf.rows()+3*k+2]-C(k,2); 
   }
 
   

@@ -36,7 +36,7 @@ int main(int argc, char * argv[])
   }
   
   // number of layers
-  int k = argc-4;
+  int k = argc-6;
   cout << "number of layers = " << k << endl;
 
   // quadrature order
@@ -60,7 +60,10 @@ int main(int argc, char * argv[])
   MatrixXi F0;
   polyhedron_to_mesh(M,V0,F0); 
 
-  // for now output CGAL decimations
+  // Fine mesh starts as the input one
+  MatrixXd V = V0;
+  MatrixXi F = F0;
+
   int L[k];
   bool adaptive = true;
   Surface_mesh M_hat;
@@ -107,27 +110,24 @@ int main(int argc, char * argv[])
 	  // calculate triangle areas for initial mesh (will be used
 	  // to define the integral at _every_ step - the metric is fixed)
 	  VectorXd area_0;
-	  doublearea(V0,F0,area_0);
+	  doublearea(V,F,area_0);
 	  area_0 = 0.5*area_0;
     // Precompute matrix that convert gradients at quadrature points to gradients at mesh vertices
   	SparseMatrix<double> A_qv;
-    gradQ_to_gradV(V0, F0, area_0, quad_order, A_qv);
+    gradQ_to_gradV(V, F, area_0, quad_order, A_qv);
   	// Flow M inside M_hat
     stack<MatrixXd> H;
-    flow_fine_inside_coarse(V0,F0,V_coarse,F_coarse,A_qv,H);
+    flow_fine_inside_coarse(V,F,V_coarse,F_coarse,A_qv,H);
 
     // Reinflate
     MatrixXd C;
-    reinflate(H,F0,V_coarse,F_coarse,"DispStep","None",C);
-    // // clear flow history (replace by top, pop, step back)
-    // while ( ! H.empty() )
-    // {
-    //   cout << "cleaning stack" << H.size() << endl;
-    //   H.pop();
-    // }
+    reinflate(H,F,V_coarse,F_coarse,argv[argc-3],argv[argc-2],C);
 
     // output cage is the input for the next level
+    M.clear();
     mesh_to_polyhedron(C,F_coarse,M); 
+    V = C;
+    F = F_coarse;
 
     // Ouput cage
     if ((asprintf(&suffix,"_%d.off",i+1)!=-1) && (asprintf(&filename, "%s%s", argv[argc-1], suffix)!=-1)){

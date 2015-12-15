@@ -313,7 +313,7 @@ void flow_fine_inside_coarse(
   VectorXd W(1); // winding number of the first point
   winding_number(V_coarse,F_coarse,V.row(0),W);
   while (IF.rows()>0 || W[0]<1e-10){
-    cout << "number of intersections " << IF.rows() << endl;
+    cout << "Coarse and fine mesh intersect " << endl;
     flow_one_step(MatrixXd(V), F0, V_coarse, F_coarse, A_qv, M_inv, delta_t, V);
     intersect_other(V,F0,V_coarse,F_coarse,true,IF);
     // **Alec: notice that we cannot pass V as input and output, instead wrap the 
