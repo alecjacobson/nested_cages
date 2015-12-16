@@ -2,6 +2,7 @@
 #include "filter.h"
 #include "gradient.h"
 #include "energy.h"
+#include <igl/arap.h>
 #include <stdio.h>
 
 // Need to include some IGL header to have igl namespace
@@ -46,14 +47,29 @@ void reinflate(
     }
     else if (strcmp(EnergyInflation,"None")!=0)
     {
+      ARAPData data; // precompute ARAP data for ARAP energies
+      if (strcmp(EnergyInflation,"SurfARAP")==0)
+      {
+        VectorXi b;
+        b.resize(0);
+        if (arap_precomputation(C_hat,F_hat,3,b,data))
+        {
+          cout << "ARAP precomputation successfully done " << endl;
+        }
+        else
+        {
+          cout << "ARAP precomputation failed, returning... " << endl;
+          return;
+        }
+      }
       while (true)
       {
         cout << "Reinflation step " << step << ": Energy = " << EnergyInflation  << endl;
         MatrixXd grad;
-        gradient(C,C_hat,C_prev,F_hat,EnergyInflation,grad);
+        gradient(C,C_hat,C_prev,F_hat,data,EnergyInflation,grad);
         MatrixXd Uc = -beta*grad;
         filter(F,T,Uf,C,F_hat,Uc);
-        double new_energy = energy(C+Uc,C_hat,C_prev,F_hat,EnergyInflation);
+        double new_energy = energy(C+Uc,C_hat,C_prev,F_hat,data,EnergyInflation);
         if (new_energy>current_energy)
         {
           beta = 0.5*beta;

@@ -3,6 +3,7 @@
 
 #include <Eigen/Core>
 #include <Eigen/SparseCore>
+#include <igl/arap.h>
 
 // add description
 double energy_displacement(
@@ -13,7 +14,8 @@ double energy_displacement(
 double energy_surface_arap(
   const Eigen::MatrixXd & V, 
   const Eigen::MatrixXi & F,
-  const Eigen::MatrixXd & U);
+  const Eigen::MatrixXd & U,
+  const igl::ARAPData & data);
 
 // add description
 double energy_volume(
@@ -26,6 +28,7 @@ double energy(
   const Eigen::MatrixXd & C_hat, 
   const Eigen::MatrixXd & C_prev, 
   const Eigen::MatrixXi & F,
+  const igl::ARAPData & data,
   const char* Energy);
 
 #endif 

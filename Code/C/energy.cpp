@@ -1,7 +1,6 @@
 #include "energy.h"
 #include "gradient.h"
 #include <stdio.h>
-// Need to include some IGL header to have igl namespace
 #include <igl/centroid.h>
 
 double energy_displacement(
@@ -15,7 +14,8 @@ double energy_displacement(
 double energy_surface_arap(
   const Eigen::MatrixXd & V, 
   const Eigen::MatrixXi & F,
-  const Eigen::MatrixXd & U)
+  const Eigen::MatrixXd & U,
+  const igl::ARAPData & data)
 {
 
 	using namespace Eigen;
@@ -48,7 +48,8 @@ double energy(
   const Eigen::MatrixXd & C, 
   const Eigen::MatrixXd & C_hat, 
   const Eigen::MatrixXd & C_prev,
-  const Eigen::MatrixXi &F, 
+  const Eigen::MatrixXi & F, 
+  const igl::ARAPData & data, 
   const char* Energy)
 {
 	if (strcmp(Energy,"DispStep")==0){
@@ -60,7 +61,7 @@ double energy(
 	}
 	else if (strcmp(Energy,"SurfARAP")==0)
 	{
-		return energy_surface_arap(C_hat,F,C);
+		return energy_surface_arap(C_hat,F,C,data);
 	}
 	else if (strcmp(Energy,"Volume")==0)
 	{

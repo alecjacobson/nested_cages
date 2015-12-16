@@ -3,6 +3,7 @@
 #include <igl/covariance_scatter_matrix.h>
 #include <igl/arap_rhs.h>
 #include <igl/repmat.h>
+#include <igl/fit_rotations.h>
 #include <stdio.h>
 
 void gradient_displacement(
@@ -19,6 +20,7 @@ void gradient_surface_arap(
   const Eigen::MatrixXd & V, 
   const Eigen::MatrixXi & F,
   const Eigen::MatrixXd & U, 
+  const igl::ARAPData & data,
   Eigen::MatrixXd & grad)
 {
 
@@ -26,32 +28,48 @@ void gradient_surface_arap(
   	using namespace std;
   	using namespace igl;
 
-    MatrixXd ref_V = V;
-    MatrixXi ref_F = F;
+    // MatrixXd ref_V = V;
+    // MatrixXi ref_F = F;
+
+    // ARAPData data_;
+    // VectorXi b;
+    // b.resize(0);
+    // if (arap_precomputation(ref_V,ref_F,3,b,data_)){
+    // 	cout << "ARAP precomputation successfully done " << endl;
+    // }
+    // else{
+    // 	cout << "ARAP precomputation failed " << endl;
+    // }
 
     SparseMatrix<double> data_L;
     cotmatrix(V,F,data_L);
 
-    SparseMatrix<double> data_CSM;
-    covariance_scatter_matrix(ref_V,ref_F,ARAP_ENERGY_TYPE_SPOKES_AND_RIMS,data_CSM);
+ //    SparseMatrix<double> data_CSM;
+ //    covariance_scatter_matrix(ref_V,ref_F,ARAP_ENERGY_TYPE_SPOKES_AND_RIMS,data_CSM);
 
-	SparseMatrix<double> data_K;
-    arap_rhs(ref_V,ref_F,3,ARAP_ENERGY_TYPE_SPOKES_AND_RIMS,data_K);
+	// SparseMatrix<double> data_K;
+ //    arap_rhs(ref_V,ref_F,3,ARAP_ENERGY_TYPE_SPOKES_AND_RIMS,data_K);
 
-    MatrixXd S = MatrixXd::Zero(data_CSM.rows(), 3);
-    MatrixXd U_rep;
-    repmat(U,3,1,U_rep);
-    S = data_CSM*U_rep;
+    // MatrixXd S = MatrixXd::Zero(data_CSM.rows(), 3);
+    // MatrixXd U_rep;
+    // repmat(U,3,1,U_rep);
+    // S = data_CSM*U_rep;
 
+    MatrixXd S = data.CSM*U;
 
-    // How do I translate the line below to Eigen?
-    // 1) How to reshape into 3 dimensions?
-    // 2) Is there an analogue of the permute function below (generalization of tranposing for more than 2 dimnesions)
-    // SS = permute(reshape(S,[size(data.CSM,1)/dim dim dim]),[2 3 1]);
+    MatrixXd R;
+    fit_rotations(S,true,R);
 
+    // Dirichlket energy with data_L (computed inside this function)
+    // works fine
+	grad = -(data_L*U);
 
+	// the following makes Eltopo stuck (probably baqd direction)
+    // grad = -(data.M*U);
+    // the following makes Eltopo stuck (probably baqd direction)
+    // grad = -(data.M*U + data.K*R);
 
-    grad = MatrixXd::Zero(V.rows(),3);
+    // grad = MatrixXd::Zero(V.rows(),3);
 
 }
 
@@ -75,6 +93,7 @@ void gradient(
   const Eigen::MatrixXd & C_hat, 
   const Eigen::MatrixXd & C_prev, 
   const Eigen::MatrixXi & F,
+  const igl::ARAPData & data,
   const char* Energy,
   Eigen::MatrixXd & grad)
 {
@@ -88,7 +107,7 @@ void gradient(
 	}
 	else if (strcmp(Energy,"SurfARAP")==0)
 	{
-		gradient_surface_arap(C_hat,F,C,grad);
+		gradient_surface_arap(C_hat,F,C,data,grad);
 	}
 	else if (strcmp(Energy,"Volume")==0)
 	{
