@@ -28,46 +28,34 @@ void gradient_surface_arap(
   	using namespace std;
   	using namespace igl;
 
-    // MatrixXd ref_V = V;
-    // MatrixXi ref_F = F;
-
-    // ARAPData data_;
-    // VectorXi b;
-    // b.resize(0);
-    // if (arap_precomputation(ref_V,ref_F,3,b,data_)){
-    // 	cout << "ARAP precomputation successfully done " << endl;
-    // }
-    // else{
-    // 	cout << "ARAP precomputation failed " << endl;
-    // }
+    MatrixXd ref_V = V;
+    MatrixXi ref_F = F;
 
     SparseMatrix<double> data_L;
-    cotmatrix(V,F,data_L);
+    cotmatrix(ref_V,ref_F,data_L);
 
- //    SparseMatrix<double> data_CSM;
- //    covariance_scatter_matrix(ref_V,ref_F,ARAP_ENERGY_TYPE_SPOKES_AND_RIMS,data_CSM);
+    SparseMatrix<double> data_CSM;
+    covariance_scatter_matrix(ref_V,ref_F,ARAP_ENERGY_TYPE_SPOKES_AND_RIMS,data_CSM);
 
-	// SparseMatrix<double> data_K;
- //    arap_rhs(ref_V,ref_F,3,ARAP_ENERGY_TYPE_SPOKES_AND_RIMS,data_K);
+	SparseMatrix<double> data_K;
+    arap_rhs(ref_V,ref_F,3,ARAP_ENERGY_TYPE_SPOKES_AND_RIMS,data_K);
 
-    // MatrixXd S = MatrixXd::Zero(data_CSM.rows(), 3);
-    // MatrixXd U_rep;
-    // repmat(U,3,1,U_rep);
-    // S = data_CSM*U_rep;
-
-    MatrixXd S = data.CSM*U;
+    MatrixXd U_rep;
+    repmat(U,3,1,U_rep);
+    MatrixXd S = data_CSM*U_rep;
+    // cout << S.block(3950,0,100,3) << endl;
+    // cout << S.rows() << " " << S.cols() << endl;
 
     MatrixXd R;
-    fit_rotations(S,true,R);
+    fit_rotations(S,false,R);
+    cout << R.block(0,0,9,3) << endl; // should be a stack of identities, but it isn't
+    cout << R.rows() << " " << R.cols() << endl;
 
-    // Dirichlket energy with data_L (computed inside this function)
-    // works fine
-	grad = -(data_L*U);
+    // Dirichlket energy works fine
+	grad = (data_L*U);
 
-	// the following makes Eltopo stuck (probably baqd direction)
-    // grad = -(data.M*U);
-    // the following makes Eltopo stuck (probably baqd direction)
-    // grad = -(data.M*U + data.K*R);
+    // the following makes Eltopo stuck (probably bad direction)
+    // grad = -(data.M*U + data_K*R);
 
     // grad = MatrixXd::Zero(V.rows(),3);
 
