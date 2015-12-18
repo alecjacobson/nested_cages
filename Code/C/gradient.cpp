@@ -4,6 +4,8 @@
 #include <igl/arap_rhs.h>
 #include <igl/repmat.h>
 #include <igl/fit_rotations.h>
+#include <igl/doublearea.h>
+#include <igl/per_face_normals.h>
 #include <stdio.h>
 
 void gradient_displacement(
@@ -67,11 +69,36 @@ void gradient_volume(
   Eigen::MatrixXd & grad)
 {
 
-	// Is there an analogue to 'normals' in Matlab 
+	using namespace Eigen;
+  	using namespace std;
+  	using namespace igl;
 
-	//N = normals(CV,CF)/2;
-    //grad_vol = full(sparse( ...
-    //  repmat(CF(:),1,3),repmat(1:3,numel(CF),1),repmat(N,3,1),size(CV,1),3));
+	MatrixXd N;
+	per_face_normals(V,F,N); // unit normals
+	VectorXd area;
+	doublearea(V,F,area);
+	for (int k=0; k<F.rows(); k++)
+	{
+		N(k,0) = (area(k)/2.0)*N(k,0);
+		N(k,1) = (area(k)/2.0)*N(k,1);
+		N(k,2) = (area(k)/2.0)*N(k,2);
+	}
+
+	grad.resize(V.rows(),3);
+	for (int k=0; k<F.rows(); k++)
+	{
+		grad(F(k,0),0) = N(k,0);
+		grad(F(k,0),1) = N(k,1);
+		grad(F(k,0),2) = N(k,2);
+
+		grad(F(k,1),0) = N(k,0);
+		grad(F(k,1),1) = N(k,1);
+		grad(F(k,1),2) = N(k,2);
+
+		grad(F(k,2),0) = N(k,0);
+		grad(F(k,2),1) = N(k,1);
+		grad(F(k,2),2) = N(k,2);
+	}
 
 	return;
 }
