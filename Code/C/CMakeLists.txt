@@ -40,7 +40,8 @@ set(LIBS
   ${GLUT_LIBRARIES}
   ${CGAL_LIBRARIES}
   ${SHARED_LIBRARIES}
-  ${LIBELTOPO_LIBRARY} -llapack -lblas
+  ${LIBELTOPO_LIBRARY} 
+  -llapack -lblas -ltet
 )
 
 FILE(GLOB SRCFILES *.cpp)
