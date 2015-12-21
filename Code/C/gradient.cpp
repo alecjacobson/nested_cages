@@ -21,8 +21,7 @@ void gradient_displacement(
 void gradient_surface_arap(
   const Eigen::MatrixXd & V, 
   const Eigen::MatrixXi & F,
-  const Eigen::MatrixXd & U, 
-  const igl::ARAPData & data,
+  const Eigen::MatrixXd & U,
   Eigen::MatrixXd & grad)
 {
 
@@ -30,7 +29,7 @@ void gradient_surface_arap(
   	using namespace std;
   	using namespace igl;
 
-    MatrixXd ref_V = V;
+    MatrixXd ref_V = V; 
     MatrixXi ref_F = F;
 
     SparseMatrix<double> data_L;
@@ -45,21 +44,21 @@ void gradient_surface_arap(
     MatrixXd U_rep;
     repmat(U,3,1,U_rep);
     MatrixXd S = data_CSM*U_rep;
-    // cout << S.block(3950,0,100,3) << endl;
-    // cout << S.rows() << " " << S.cols() << endl;
 
     MatrixXd R;
     fit_rotations(S,false,R);
-    cout << R.block(0,0,9,3) << endl; // should be a stack of identities, but it isn't
-    cout << R.rows() << " " << R.cols() << endl;
 
-    // Dirichlket energy works fine
-	grad = (data_L*U);
+    VectorXd Rcol;
+	columnize(R,R.cols()/3,2,Rcol);
 
-    // the following makes Eltopo stuck (probably bad direction)
-    // grad = -(data.M*U + data_K*R);
+	MatrixXd dV;
+	dV = data_K*Rcol;
+	MatrixXd dV3(U.rows(),U.cols());
+	dV3.col(0) = dV.block(0,0,U.rows(),1);
+	dV3.col(1) = dV.block(U.rows(),0,U.rows(),1);
+	dV3.col(2) = dV.block(2*U.rows(),0,U.rows(),1);
 
-    // grad = MatrixXd::Zero(V.rows(),3);
+	grad = -(data_L*U + dV3);
 
 }
 
@@ -108,7 +107,6 @@ void gradient(
   const Eigen::MatrixXd & C_hat, 
   const Eigen::MatrixXd & C_prev, 
   const Eigen::MatrixXi & F,
-  const igl::ARAPData & data,
   const char* Energy,
   Eigen::MatrixXd & grad)
 {
@@ -122,7 +120,7 @@ void gradient(
 	}
 	else if (strcmp(Energy,"SurfARAP")==0)
 	{
-		gradient_surface_arap(C_hat,F,C,data,grad);
+		gradient_surface_arap(C_hat,F,C,grad);
 	}
 	else if (strcmp(Energy,"Volume")==0)
 	{

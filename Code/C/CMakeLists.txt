@@ -10,6 +10,9 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
 endif() 
 
+find_package(TETGEN REQUIRED) 
+include_directories( "${TETGEN_INCLUDE_DIR}" )
+
 find_package(EIGEN REQUIRED)
 include_directories( "${EIGEN_INCLUDE_DIR}" )
 # Must be found before trying to find libraries in libigl/external
@@ -17,8 +20,6 @@ find_package(LIBIGL REQUIRED)
 include_directories( "${LIBIGL_INCLUDE_DIR}" )
 find_package(OpenGL REQUIRED)
 find_package(GLUT REQUIRED) 
-find_package(TETGEN REQUIRED) 
-include_directories( "${TETGEN_INCLUDE_DIR}" )
 
 find_package(ELTOPO REQUIRED)
 include_directories( "${LIBELTOPO_INCLUDE_DIR}" )

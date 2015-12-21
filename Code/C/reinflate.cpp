@@ -7,6 +7,7 @@
 
 // Need to include some IGL header to have igl namespace
 #include <igl/signed_distance.h>
+#include <igl/copyleft/tetgen/tetrahedralize.h>
 
 void reinflate(
   std::stack<Eigen::MatrixXd> & H, 
@@ -20,12 +21,14 @@ void reinflate(
   using namespace Eigen;
   using namespace std;
   using namespace igl;
+  using namespace igl::copyleft::tetgen;
 
   MatrixXd F = H.top();
   H.pop();
   C = C_hat;
   MatrixXd C_prev = C; // needed for energies that depend on the previous step (e.g. DispStep)
   int step = 1;
+  int total_steps = H.size();
 
   // reinflation
   while (!H.empty()){
@@ -41,37 +44,40 @@ void reinflate(
     
     if (strcmp(EnergyInflation,"None")==0)
     {
-    	// First, find a feasible state (before stepping and projecting)
     	MatrixXd Uc = MatrixXd::Zero(C_hat.rows(), 3);
-      filter(F,T,Uf,C,F_hat,Uc);
+      // this eps=5e-3 is chosen so that there is space for the final optimization
+      filter(F,T,Uf,C,F_hat,5e-3,Uc);
       F = F+Uf;
       C = C+Uc;
-      cout << "Reinflation step " << step << ": Energy = None (fesible state only)" << endl;
+      cout << "Reinflation step " << step << "/" << total_steps << ": Energy = None (feasible state only)" << endl;
     }
     else if (strcmp(EnergyInflation,"None")!=0)
     {
-      ARAPData data; // precompute ARAP data for ARAP energies
-      if (strcmp(EnergyInflation,"SurfARAP")==0)
-      {
-        VectorXi b;
-        b.resize(0);
-        if (arap_precomputation(C_hat,F_hat,3,b,data))
-        {
-          cout << "ARAP precomputation successfully done " << endl;
-        }
-        else
-        {
-          cout << "ARAP precomputation failed, returning... " << endl;
-          return;
-        }
+      // // First, find a feasible state (before stepping and projecting)
+      // MatrixXd Uc = MatrixXd::Zero(C_hat.rows(), 3);
+      // filter(F,T,Uf,C,F_hat,1e-3,Uc);
+      // F = F+Uf;
+      // Uf = MatrixXd::Zero(F.rows(), 3);
+
+      // double current_energy = energy(C+Uc,C_hat,C_prev,F_hat,EnergyInflation);
+      // C = C+Uc;
+      // cout << "Reinflation step " << step << "/" << total_steps << ". Feasible state only. With energy = " << current_energy << endl;
+      
+      MatrixXd TV;
+      MatrixXi TT;
+      MatrixXi TF;
+      if (strcmp(EnergyInflation,"VolARAP")==0){
+        string tetgen_flags ("-Cpg -q100");
+        // tetrahedralize(C_hat,F_hat,tetgen_flags,TV,TT,TF);
       }
+
       while (true)
       {
-        cout << "Reinflation step " << step << ": Energy = " << EnergyInflation  << endl;
+        cout << "Reinflation step " << step << "/" << total_steps << ": Energy = " << EnergyInflation  << endl;
         MatrixXd grad;
-        gradient(C,C_hat,C_prev,F_hat,data,EnergyInflation,grad);
+        gradient(C,C_hat,C_prev,F_hat,EnergyInflation,grad);
         MatrixXd Uc = -beta*grad;
-        filter(F,T,Uf,C,F_hat,Uc);
+        filter(F,T,Uf,C,F_hat,1e-3,Uc);
 
         // update fine mesh (it has to be bone here, beacuse
         // otherwise the collision solver wilkl check intersections 
@@ -80,7 +86,7 @@ void reinflate(
         F = F+Uf;
         Uf = MatrixXd::Zero(F.rows(), 3);
 
-        double new_energy = energy(C+Uc,C_hat,C_prev,F_hat,data,EnergyInflation);
+        double new_energy = energy(C+Uc,C_hat,C_prev,F_hat,EnergyInflation);
         if (new_energy>current_energy)
         {
           beta = 0.5*beta;
@@ -98,7 +104,11 @@ void reinflate(
           cout << "energy decreased to " << current_energy << ", increasing beta to " << beta << endl;
         }
         // If tiny step, then brak
-        if (((Uc).rowwise().norm()).norm()<1e-5) break;
+        if (((Uc).rowwise().norm()).maxCoeff()<1e-5) 
+        {
+          cout << "Max change in postion = " << ((Uc).rowwise().norm()).maxCoeff() << " too small. Quitting line search loop " << endl;
+          break;
+        }
       }
     }
 
@@ -111,36 +121,33 @@ void reinflate(
   if (strcmp(EnergyFinal,"None")!=0)
   {
 
-    ARAPData data; // precompute ARAP data for ARAP energies
-    if (strcmp(EnergyFinal,"SurfARAP")==0)
-    {
-      VectorXi b;
-      b.resize(0);
-      if (arap_precomputation(C_hat,F_hat,3,b,data))
-      {
-        cout << "ARAP precomputation successfully done " << endl;
-      }
-      else
-      {
-        cout << "ARAP precomputation failed, returning... " << endl;
-        return;
-      }
-    }
-
     // Intialize energy as infinity
     double current_energy = std::numeric_limits<double>::infinity();
     double beta = 1e-2;
 
     MatrixXd Uf = MatrixXd::Zero(F.rows(), 3);
 
-    while (true)
+    // to avoid tons of collisions
+    bool final_minimization = true;
+    // cout << "current volume = " << energy(C,C_hat,C_prev,F_hat,"Volume") << ", original volume = " <<  energy(F,C_hat,C_prev,T,"Volume") << endl;
+    // if (strcmp(EnergyFinal,"Volume")==0)
+    // {
+    //   if (energy(C,C_hat,C_prev,F_hat,"Volume") < 1.05*energy(F,C_hat,C_prev,T,"Volume"))
+    //   {
+    //     cout << "current cage volume is too close to fine mesh volume. Skipping final minimization" << endl;
+    //     final_minimization = false;
+    //   }
+    // }
+
+    while (final_minimization)
       {
         cout << "Final optimization. Energy = " << EnergyFinal  << endl;
         MatrixXd grad;
-        gradient(C,C_hat,C_prev,F_hat,data,EnergyFinal,grad);
+        gradient(C,C_hat,C_prev,F_hat,EnergyFinal,grad);
         MatrixXd Uc = -beta*grad;
-        filter(F,T,Uf,C,F_hat,Uc);
-        double new_energy = energy(C+Uc,C_hat,C_prev,F_hat,data,EnergyFinal);
+        // this eps=5e-4 is chosen so that tere's is space for final optimizarion
+        filter(F,T,Uf,C,F_hat,5e-4,Uc); 
+        double new_energy = energy(C+Uc,C_hat,C_prev,F_hat,EnergyFinal);
         if (new_energy>current_energy)
         {
           beta = 0.5*beta;

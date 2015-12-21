@@ -31,6 +31,7 @@ void filter(
   const Eigen::MatrixXd & Uf, 
   const Eigen::MatrixXd & C, 
   const Eigen::MatrixXi & F_hat, 
+  double eps_prox,
   Eigen::MatrixXd & Uc)
 {
   using namespace Eigen;
@@ -103,7 +104,7 @@ void filter(
   // do avoid self-intersections
   sim_general_options.m_collision_safety = 1;
   // separation between colliding meshes 
-  sim_general_options.m_proximity_epsilon = 1e-3; 
+  sim_general_options.m_proximity_epsilon = eps_prox; 
 
 
   // Set Simulation parameters
@@ -114,10 +115,22 @@ void filter(
 
   double* V_final;
   double out_dt = 0.0;
-  el_topo_integrate(&eltopo_time0, V1a, &sim_general_options, &sim_integration_options, &V_final, &out_dt);
-  if (out_dt<1.0){
-  	cout << "Failed to reach final positions out_dt = " << out_dt << endl;
-  	return;
+  double rest_dt = 1.0;
+  while (rest_dt>1e-6)
+  {
+    el_topo_integrate(&eltopo_time0, V1a, &sim_general_options, &sim_integration_options, &V_final, &out_dt);
+    rest_dt = (1-out_dt)*rest_dt;
+    if (out_dt < 1.0)
+    {
+      cout << "out_dt = " << out_dt << endl;
+      eltopo_time0.vertex_locations = V_final;
+    }
+    if (out_dt<1e-6){
+    	cout << "Eltopo couldn't reach final positions." << endl;
+      cout << "It steped " << (1-rest_dt) << "< 1.0" << endl;
+      cout << "Have to call Asyncronous Contact Mechanics" << endl;
+    	return;
+    }
   }
   // output corrected velocities
   for (int k=0; k<C.rows(); k++)

@@ -166,7 +166,6 @@ void grad_energy(
 
   if (quad_order==1)
   {
-    cout << "grad_energy, quadrature order = " << quad_order  << endl;
     // quadrature points: barycenters of triangles
     MatrixXd p123(F.rows(),3);
     for (int k=0; k<F.rows(); k++)
@@ -184,7 +183,6 @@ void grad_energy(
 
   } else if (quad_order==2)
   {
-    cout << "grad_energy, quadrature order = " << quad_order  << endl;
 
     MatrixXd p12(F.rows(),3);
     MatrixXd p23(F.rows(),3);
@@ -218,7 +216,6 @@ void grad_energy(
 
   } else if (quad_order==3)
   {
-    cout << "grad_energy, quadrature order = " << quad_order  << endl;
 
     MatrixXd p1(F.rows(),3);
     MatrixXd p2(F.rows(),3);
@@ -312,10 +309,14 @@ void flow_fine_inside_coarse(
   intersect_other(V,F0,V_coarse,F_coarse,true,IF);
   VectorXd W(1); // winding number of the first point
   winding_number(V_coarse,F_coarse,V.row(0),W);
+
+  int step = 1;
+
   while (IF.rows()>0 || W[0]<1e-10){
-    cout << "Coarse and fine mesh intersect " << endl;
+    cout << "Flow step " << step << ":Coarse and fine mesh intersect " << endl;
     flow_one_step(MatrixXd(V), F0, V_coarse, F_coarse, A_qv, M_inv, delta_t, V);
     intersect_other(V,F0,V_coarse,F_coarse,true,IF);
+    step = step+1;
     // **Alec: notice that we cannot pass V as input and output, instead wrap the 
     // input inside MatrixXd to force compiler to make a copy in this case.
     winding_number(V_coarse,F_coarse,V.row(0),W);

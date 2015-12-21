@@ -6,9 +6,11 @@
 
 // libigl includes
 #include <igl/doublearea.h>
+#include <igl/writeOFF.h>
 #include <igl/copyleft/cgal/remesh_self_intersections.h>
 #include <igl/copyleft/cgal/polyhedron_to_mesh.h>
 #include <igl/copyleft/cgal/mesh_to_polyhedron.h>
+#include <igl/copyleft/cgal/intersect_other.h>
  
 // useful namespaces
 using namespace Eigen;
@@ -123,6 +125,18 @@ int main(int argc, char * argv[])
     MatrixXd C;
     reinflate(H,F,V_coarse,F_coarse,argv[argc-3],argv[argc-2],C);
 
+    remesh_self_intersections(C,F_coarse,params,tempV,tempF,IF,J,IM);
+    if (IF.rows()>0){
+      cout << i+1 << "-th output cage self-intersects. ERROR! Quitting...  " << endl;  
+      return 0;
+    }
+
+    intersect_other(C,F_coarse,V,F,true,IF);
+    if (IF.rows()>0){
+      cout << i+1 << "-th output cage intersect previous cage. ERROR! Quitting...  " << endl;  
+      return 0;
+    }
+
     // output cage is the input for the next level
     M.clear();
     mesh_to_polyhedron(C,F_coarse,M); 
@@ -131,7 +145,7 @@ int main(int argc, char * argv[])
 
     // Ouput cage
     if ((asprintf(&suffix,"_%d.off",i+1)!=-1) && (asprintf(&filename, "%s%s", argv[argc-1], suffix)!=-1)){
-      std::ofstream os( filename ) ; os << M;
+      writeOFF(filename,C,F_coarse);
     } else {
       cout << "unable to allocate space for output file name"  << endl;
       return 0;

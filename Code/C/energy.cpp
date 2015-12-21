@@ -14,15 +14,43 @@ double energy_displacement(
 double energy_surface_arap(
   const Eigen::MatrixXd & V, 
   const Eigen::MatrixXi & F,
-  const Eigen::MatrixXd & U,
-  const igl::ARAPData & data)
+  const Eigen::MatrixXd & U)
 {
 
 	using namespace Eigen;
-  	using namespace std;
-  	using namespace igl;
+  using namespace std;
+  using namespace igl;
 
-    return 0.0;
+  MatrixXd ref_V = V;
+  MatrixXi ref_F = F;
+
+  SparseMatrix<double> data_L;
+  cotmatrix(ref_V,ref_F,data_L);
+
+  SparseMatrix<double> data_CSM;
+  covariance_scatter_matrix(ref_V,ref_F,ARAP_ENERGY_TYPE_SPOKES_AND_RIMS,data_CSM);
+
+  SparseMatrix<double> data_K;
+  arap_rhs(ref_V,ref_F,3,ARAP_ENERGY_TYPE_SPOKES_AND_RIMS,data_K);
+
+  MatrixXd U_rep;
+  repmat(U,3,1,U_rep);
+  MatrixXd S = data_CSM*U_rep;
+
+  MatrixXd R;
+  fit_rotations(S,false,R);
+
+  VectorXd Rcol;
+  columnize(R,R.cols()/3,2,Rcol);
+
+  MatrixXd dV;
+  dV = data_K*Rcol;
+  MatrixXd dV3(U.rows(),U.cols());
+  dV3.col(0) = dV.block(0,0,U.rows(),1);
+  dV3.col(1) = dV.block(U.rows(),0,U.rows(),1);
+  dV3.col(2) = dV.block(2*U.rows(),0,U.rows(),1);
+
+  return (-U.transpose()*(0.5*data_L)*U - U.transpose()*dV3 - V.transpose()*(0.5*data_L)*V).trace();
 
 }
 
@@ -49,7 +77,6 @@ double energy(
   const Eigen::MatrixXd & C_hat, 
   const Eigen::MatrixXd & C_prev,
   const Eigen::MatrixXi & F, 
-  const igl::ARAPData & data, 
   const char* Energy)
 {
 	if (strcmp(Energy,"DispStep")==0){
@@ -61,7 +88,7 @@ double energy(
 	}
 	else if (strcmp(Energy,"SurfARAP")==0)
 	{
-		return energy_surface_arap(C_hat,F,C,data);
+		return energy_surface_arap(C_hat,F,C);
 	}
 	else if (strcmp(Energy,"Volume")==0)
 	{
