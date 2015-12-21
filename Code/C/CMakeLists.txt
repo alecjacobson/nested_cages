@@ -17,6 +17,8 @@ find_package(LIBIGL REQUIRED)
 include_directories( "${LIBIGL_INCLUDE_DIR}" )
 find_package(OpenGL REQUIRED)
 find_package(GLUT REQUIRED) 
+find_package(TETGEN REQUIRED) 
+include_directories( "${TETGEN_INCLUDE_DIR}" )
 
 find_package(ELTOPO REQUIRED)
 include_directories( "${LIBELTOPO_INCLUDE_DIR}" )
