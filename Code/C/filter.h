@@ -4,6 +4,10 @@
 #include <Eigen/Core>
 #include <Eigen/SparseCore>
 
+// This file implements the filter subroutine of the algorithm in "Nested Cages"
+// [Sacht et al. 2015]. It consists of subroutines:
+//   - filter
+
 // Inputs:
 //   Vf  fine mesh positions before stepping
 //   T   fine mesh vertex indices into Vf 

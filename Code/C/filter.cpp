@@ -39,13 +39,17 @@ void filter(
   // Define concataned meshes (treat fine and coarse meshes as a big single mesh)
   MatrixXd V0(Vf.rows()+C.rows(),3);
   MatrixXd V1(Vf.rows()+C.rows(),3);
+  // Initial positions
   V0.block(0,0,Vf.rows(),3) = Vf;
   V0.block(Vf.rows(),0,C.rows(),3) = C;
+  // Final positions
   V1.block(0,0,Vf.rows(),3) = Vf+Uf;
   V1.block(Vf.rows(),0,C.rows(),3) = C+Uc;
+  
+  // First part of F
   MatrixXi F_all(T.rows()+F_hat.rows(),3);
+  // Second part of F
   F_all.block(0,0,T.rows(),3) = T;
-
   F_all.block(T.rows(),0,F_hat.rows(),3) = F_hat;
   for (int k=T.rows();k<F_all.rows();k++)
   {
@@ -54,7 +58,7 @@ void filter(
     F_all(k,2) = F_all(k,2)+Vf.rows();
   }
 
-  // set vertex masses (=infty for fine mesh vertices 
+  // set vertex masses (= infty for fine mesh vertices 
   // and =1.0 for the last ones)
   double masses[V0.rows()];
   for (int i=0; i<Vf.rows(); i++){
@@ -64,7 +68,7 @@ void filter(
       masses[i] = 1.0;
   }
 
-  // Convert from Eigen matrix to array
+  // Convert V0 from Eigen matrix to array
   double V0a[3*V0.rows()];
   for (int k=0; k<V0.rows(); k++)
   {
@@ -73,6 +77,7 @@ void filter(
     V0a[3*k+2] = V0(k,2);
   } 
 
+  // Convert F_all from Eigen matrix to array
   int F_alla[3*F_all.rows()];
   for (int k=0; k<F_all.rows(); k++)
   {
@@ -89,6 +94,7 @@ void filter(
   eltopo_time0.triangles = F_alla;
   eltopo_time0.vertex_masses = masses;
 
+  // Convert V1 from Eigen matrix to array
   double V1a[3*V1.rows()];
   for (int k=0; k<V1.rows(); k++)
   {
@@ -115,16 +121,23 @@ void filter(
 
   double* V_final;
   double out_dt = 0.0;
+  // We start with 1.0 to step
   double rest_dt = 1.0;
+  // While we haven't reached final positions
   while (rest_dt>1e-6)
   {
+    // call Eltopo main function
     el_topo_integrate(&eltopo_time0, V1a, &sim_general_options, &sim_integration_options, &V_final, &out_dt);
+    // update the rest to go
     rest_dt = (1-out_dt)*rest_dt;
+    // if we haven't reached final positions, print how much we have stepped
+    // and update vertex positions 
     if (out_dt < 1.0)
     {
       cout << "out_dt = " << out_dt << endl;
       eltopo_time0.vertex_locations = V_final;
     }
+    // if stepped too little, give up. To-do: call Asynchronous Contact Mechanincs
     if (out_dt<1e-6){
     	cout << "Eltopo couldn't reach final positions." << endl;
       cout << "It steped " << (1-rest_dt) << "< 1.0" << endl;

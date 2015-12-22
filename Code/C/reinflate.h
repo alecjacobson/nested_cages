@@ -5,18 +5,18 @@
 #include <Eigen/SparseCore>
 #include <stack>
 
-// Given a history of fine flown meshes H, reinflate the fine
+// Given a history of fine flown meshes H, reinflates the fine
 // mesh pushing the coarse mesh (C_hat,F_hat) away to new positions (C,F_hat).
 // 
 // Inputs:
 //   H  history of flow mesh positions
 //   T  connectivity of the fine meshes (same for all meshes in H)
-//   C_hat  #V_hat by 3 list of coarse mesh initial positions
+//   C_hat  #C_hat by 3 list of coarse mesh initial positions
 //   F_hat  #F_hat by 3 list of coarse mesh triangle indices C_hat
 //   EnergyInflation  either "None", or "DispInitial", or "DispStep" or
-//           "Volume" or "SurfaceARAP" or "VolumetricARAP"
+//           "Volume" or "SurfARAP" or "VolARAP"
 //   EnergyFinal  either "None", or "DispInitial", or "DispStep" or
-//           "Volume" or "SurfaceARAP" or "VolumetricARAP"
+//           "Volume" or "SurfARAP" or "VolARAP"
 // Output:
 //  C  #C by 3 list of final coarse mesh vertex positions (optimal cage)
 void reinflate(
