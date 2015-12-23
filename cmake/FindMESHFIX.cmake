@@ -10,6 +10,8 @@ FIND_PATH(LIBMESHFIX_INCLUDE_DIR meshfix.h
    ${PROJECT_SOURCE_DIR}/../../include
    ${PROJECT_SOURCE_DIR}/../include
    ${PROJECT_SOURCE_DIR}/include
+   ${PROJECT_SOURCE_DIR}/../meshfix/
+   ${PROJECT_SOURCE_DIR}/../../meshfix/
    ${PROJECT_SOURCE_DIR}/../../../meshfix/
    /usr/include
    /usr/local/include

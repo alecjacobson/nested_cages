@@ -10,14 +10,22 @@ FIND_PATH(LIBCOLLISIONS_INCLUDE_DIR CTCD.h
    ${PROJECT_SOURCE_DIR}/../../include
    ${PROJECT_SOURCE_DIR}/../include
    ${PROJECT_SOURCE_DIR}/include
+   ${PROJECT_SOURCE_DIR}/../collisiondetection/include/
+   ${PROJECT_SOURCE_DIR}/../../collisiondetection/include/
    ${PROJECT_SOURCE_DIR}/../../../collisiondetection/include/
+   ${PROJECT_SOURCE_DIR}/../code/collisiondetection/include/
+   ${PROJECT_SOURCE_DIR}/../../code/collisiondetection/include/
    ${PROJECT_SOURCE_DIR}/../../../code/collisiondetection/include/
    /usr/include
    /usr/local/include
 )
 
 FIND_PATH(LIBCOLLISIONS_MAIN_DIR Makefile
+   ${PROJECT_SOURCE_DIR}/../collisiondetection/
+   ${PROJECT_SOURCE_DIR}/../../collisiondetection/
    ${PROJECT_SOURCE_DIR}/../../../collisiondetection/
+   ${PROJECT_SOURCE_DIR}/../code/collisiondetection/
+   ${PROJECT_SOURCE_DIR}/../../code/collisiondetection/
    ${PROJECT_SOURCE_DIR}/../../../code/collisiondetection/
 )
 
