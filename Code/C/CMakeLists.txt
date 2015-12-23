@@ -27,6 +27,9 @@ find_package(COMMON REQUIRED)
 include_directories( "${LIBCOMMON_INCLUDE_DIR}" )
 find_package(TALPA REQUIRED)
 include_directories( "${LIBTALPA_INCLUDE_DIR}" "${LIBTALPA_INCLUDE_DIR}/drivers" )
+
+find_package(MESHFIX REQUIRED)
+include_directories( "${LIBMESHFIX_INCLUDE_DIR}" "${LIBMESHFIX_INCLUDE_DIR}/JMeshExt-1.0alpha_src/include" "${LIBMESHFIX_INCLUDE_DIR}/JMeshLib-1.2/include")
  
 link_directories(
   /usr/local/lib
@@ -40,6 +43,7 @@ set(LIBS
   ${GLUT_LIBRARIES}
   ${CGAL_LIBRARIES}
   ${SHARED_LIBRARIES}
+  ${LIBMESHFIX_LIBRARY}
   ${LIBELTOPO_LIBRARY} -llapack -lblas
   -ltet
 )

@@ -15,7 +15,7 @@ git clone ??
 
 1) libigl
 git clone https://github.com/libigl/libigl.git
-Note: This is a header library, it doesn't need to be compiled (only included).
+Note: This is a header library, it doesn't need to be compiled.
 
 2) CGAL
 Please install following the instructions at http://www.cgal.org/
@@ -23,7 +23,7 @@ Note: We are using CGAL 4.7 in this project, not guaranteed to be compatible wit
 
 3) Eigen
 Download from http://eigen.tuxfamily.org/index.php?title=Main_Page
-Note: this is a header-only library.
+Note: this is a header-only library. For this project we are using Eigen 3.3.
 
 4) Eltopo
 git clone https://github.com/leokollersacht/eltopo.git
@@ -36,7 +36,12 @@ Note: This is our fork of Eltopo, contains small changes specific to our project
 Please install following the instructions at http://wias-berlin.de/software/tetgen/
 
 6) Meshfix
-Please download at http://sourceforge.net/projects/meshfix/
+git clone https://github.com/alecjacobson/meshfix.git
+Notes: - This repository consists of the original Meshfix by Marco Attene 
+with additional functionalities to support Eigen/libigl meshes. 
+- You need to compile and link against OpenNL and SuperLU. For Linux systems
+you should edit the Makefile to remove '-framework Accelerate' and set the 
+paths to OpenNL and SuperLU accordingly.
 
 ------------- Compiling Nested Cages: -------------
 

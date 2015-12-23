@@ -1,3 +1,7 @@
+// Meshfix include
+#define MESHFIX_WITH_EIGEN
+#include <meshfix.h>
+
 // Our header files
 #include "io.h"
 #include "cgal.h"
@@ -118,7 +122,7 @@ int main(int argc, char * argv[])
     // (replace by Meshfix in the future)
 	  MatrixXd V_coarse;
     MatrixXi F_coarse;
-    // Cnvert decimation to LibIGL/Eigen format
+    // Convert decimation to LibIGL/Eigen format
     polyhedron_to_mesh(M_hat,V_coarse,F_coarse); 
     // Parameters to call function to check for decimation's self-intersections
     RemeshSelfIntersectionsParam params;
@@ -132,8 +136,17 @@ int main(int argc, char * argv[])
     remesh_self_intersections(V_coarse,F_coarse,params,tempV,tempF,IF,J,IM);
     // If input coarse mesh self-intersect, remove self-intersections with Meshfix (to-do)
     if (IF.rows()>0){
-    	cout << i+1 << "-th input decimation self-intersects. Quitting...  " << endl;  
-    	return 0;
+    	cout << i+1 << "-th input decimation self-intersects. Fixing with Meshfix " << endl;
+      meshfix(MatrixXd(V_coarse),MatrixXi(F_coarse),V_coarse,F_coarse);
+      remesh_self_intersections(V_coarse,F_coarse,params,tempV,tempF,IF,J,IM);
+      if (IF.rows()==0)
+      {
+        cout << "Meshfix succesfully removed self-intersections" << endl;  
+      }
+      else{
+        cout << "Meshfix wasn't able to remove all self-intersections. Quitting..." << endl; 
+    	  return 0;
+      }
     }
 
 	  // calculate triangle areas for initial mesh (will be used

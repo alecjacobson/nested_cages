@@ -27,7 +27,7 @@
 // Non-default cost and placement policies
 #include <CGAL/Surface_mesh_simplification/Policies/Edge_collapse/Midpoint_and_length.h> 
 typedef CGAL::Simple_cartesian<double> Kernel;
-typedef Kernel::Point_3 Point ;
+typedef Kernel::Point_3 Point_CGAL ;
 typedef CGAL::Polyhedron_3<Kernel,CGAL::Polyhedron_items_with_id_3> Surface_mesh; 
 typedef Surface_mesh::Halfedge_handle Halfedge_handle ;
 typedef Surface_mesh::Vertex_handle   Vertex_handle ;
@@ -85,7 +85,7 @@ struct My_visitor : SMS::Edge_collapse_visitor_base<Surface_mesh>
   // Called during the processing phase for each edge being collapsed.
   // If placement is absent the edge is left uncollapsed.
   void OnCollapsing(Profile const&          
-                   ,boost::optional<Point>  placement
+                   ,boost::optional<Point_CGAL>  placement
                    )
   {
     if ( !placement )
