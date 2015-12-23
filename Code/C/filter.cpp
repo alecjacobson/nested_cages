@@ -25,6 +25,122 @@
 #include <scriptinit.h>
 #include <simulation.h>
 
+// ACM
+#include <VelocityFilter.h>
+#include <Distance.h>
+
+double inflate_ACM(
+   Eigen::MatrixXd & V0, 
+  const Eigen::MatrixXi & F0, 
+  double eps_distance,
+  int numinfinite)
+{
+  using namespace Eigen;
+  using namespace std;
+
+  Matrix3Xi F0_t(3,F0.rows());
+  for (int k=0; k<F0.rows();k++){
+      F0_t(0,k) = F0(k,0);
+      F0_t(1,k) = F0(k,1);
+      F0_t(2,k) = F0(k,2);
+  }
+
+  VectorXd q(3*V0.rows());
+  for (int k=0; k<V0.rows();k++){
+      q(3*k) = V0(k,0);
+      q(3*k+1) = V0(k,1);
+      q(3*k+2) = V0(k,2);
+  }
+  VectorXd invmasses(3*V0.rows());
+  for (int k=0; k<3*numinfinite; k++){
+      invmasses(k) = 0.0;
+  }
+  for (int k=3*numinfinite; k<3*V0.rows(); k++){
+      invmasses(k) = 1.0;
+  }
+
+  set<int> fixedVerts;
+  for(int i=0; i<numinfinite; i++)
+      fixedVerts.insert(i);
+
+  double distance = Distance::meshSelfDistance(q, F0_t, fixedVerts);
+  double prev_distance = distance;
+  while(distance < eps_distance)
+  {
+      cout << "Distance is " << distance << ". Inflating... " << endl;
+      VectorXd qnew = q;
+      VelocityFilter::velocityFilter(q, qnew, F0_t, invmasses, 2.0*distance, 0.5*distance);
+      q = qnew;
+      distance = Distance::meshSelfDistance(q, F0_t, fixedVerts);
+      if (distance<prev_distance){
+          cout << "Couldn't recah prescribed distance " << eps_distance << ". Returned " << prev_distance;
+          break;
+      }
+      prev_distance = distance;
+  }
+
+  // overwrite V0
+  for (int k=0; k<V0.rows(); k++){
+      V0(k,0) = q(3*k);
+      V0(k,1) = q(3*k+1);
+      V0(k,2) = q(3*k+2);
+  }
+
+  if (distance>eps_distance) return eps_distance;
+  else return distance;
+
+}
+
+void velocity_filter_ACM(
+  const Eigen::MatrixXd & V0, 
+  Eigen::MatrixXd & V1, 
+  const Eigen::MatrixXi & F0, 
+  double outer,
+  double inner,
+  int numinfinite)
+{
+  using namespace Eigen;
+  using namespace std;
+
+  Matrix3Xi F0_t(3,F0.rows());
+  for (int k=0; k<F0.rows();k++){
+      F0_t(0,k) = F0(k,0);
+      F0_t(1,k) = F0(k,1);
+      F0_t(2,k) = F0(k,2);
+  }
+
+  VectorXd qstart(3*V0.rows());
+  VectorXd qend(3*V0.rows());
+  for (int k=0; k<V0.rows();k++){
+      qstart(3*k) = V0(k,0);
+      qstart(3*k+1) = V0(k,1);
+      qstart(3*k+2) = V0(k,2);
+  }
+  for (int k=0; k<V0.rows();k++){
+      qend(3*k) = V1(k,0);
+      qend(3*k+1) = V1(k,1);
+      qend(3*k+2) = V1(k,2);
+  }
+  VectorXd invmasses(3*V0.rows());
+  for (int k=0; k<3*numinfinite; k++){
+      invmasses(k) = 0.0;
+  }
+  for (int k=3*numinfinite; k<3*V0.rows(); k++){
+      invmasses(k) = 1.0;
+  }
+
+  int sim_status = VelocityFilter::velocityFilter(qstart, qend, F0_t, invmasses, outer, inner);
+  cout << "simultaion_status = " << sim_status << endl;
+
+  for (int k=0; k<V0.rows(); k++){
+      V1(k,0) = qend(3*k);
+      V1(k,1) = qend(3*k+1);
+      V1(k,2) = qend(3*k+2);
+  }
+
+  return;
+}
+
 void filter(
   const Eigen::MatrixXd & Vf, 
   const Eigen::MatrixXi & T, 
@@ -138,11 +254,18 @@ void filter(
       eltopo_time0.vertex_locations = V_final;
     }
     // if stepped too little, give up. To-do: call Asynchronous Contact Mechanincs
-    if (out_dt<1e-6){
+    if (out_dt<1e-3){
     	cout << "Eltopo couldn't reach final positions." << endl;
       cout << "It steped " << (1-rest_dt) << "< 1.0" << endl;
-      cout << "Have to call Asyncronous Contact Mechanics" << endl;
-    	return;
+      cout << "Calling Asyncronous Contact Mechanics (slower)" << endl;
+      double out_proximity = inflate_ACM(V0,F_all,eps_prox,Vf.rows());
+      velocity_filter_ACM(V0,V1,F_all,out_proximity,0.01*out_proximity,Vf.rows());
+      for (int k=0; k<V1.rows(); k++)
+      {
+        V_final[3*k] = V1(k,0);
+        V_final[3*k+1] = V1(k,1);
+        V_final[3*k+2] = V1(k,2);
+      } 
     }
   }
   // output corrected velocities

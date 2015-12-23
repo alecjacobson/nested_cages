@@ -36,12 +36,16 @@ Note: This is our fork of Eltopo, contains small changes specific to our project
 Please install following the instructions at http://wias-berlin.de/software/tetgen/
 
 6) Meshfix
-git clone https://github.com/alecjacobson/meshfix.git
+git clone https://github.com/evouga/collisiondetection.git
 Notes: - This repository consists of the original Meshfix by Marco Attene 
 with additional functionalities to support Eigen/libigl meshes. 
 - You need to compile and link against OpenNL and SuperLU. For Linux systems
 you should edit the Makefile to remove '-framework Accelerate' and set the 
 paths to OpenNL and SuperLU accordingly.
+
+7) Libcollisions (Implementation of Speculative Parallel Asynchronous Contact Mechanics - http://www.cs.columbia.edu/cg/spacm/spacm.html)
+git clone https://github.com/evouga/collisiondetection.git
+make
 
 ------------- Compiling Nested Cages: -------------
 

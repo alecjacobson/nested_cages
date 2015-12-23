@@ -30,6 +30,9 @@ include_directories( "${LIBTALPA_INCLUDE_DIR}" "${LIBTALPA_INCLUDE_DIR}/drivers"
 
 find_package(MESHFIX REQUIRED)
 include_directories( "${LIBMESHFIX_INCLUDE_DIR}" "${LIBMESHFIX_INCLUDE_DIR}/JMeshExt-1.0alpha_src/include" "${LIBMESHFIX_INCLUDE_DIR}/JMeshLib-1.2/include")
+
+find_package(LIBCOLLISIONS REQUIRED)
+include_directories( "${LIBCOLLISIONS_INCLUDE_DIR}" )
  
 link_directories(
   /usr/local/lib
@@ -44,6 +47,7 @@ set(LIBS
   ${CGAL_LIBRARIES}
   ${SHARED_LIBRARIES}
   ${LIBMESHFIX_LIBRARY}
+  ${LIBCOLLISIONS_LIBRARY}
   ${LIBELTOPO_LIBRARY} -llapack -lblas
   -ltet
 )
