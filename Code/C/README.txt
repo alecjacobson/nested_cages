@@ -9,7 +9,7 @@ If you have any comments or questions, please contact
 Leonardo Sacht by e-mail: leo@mtm.ufsc.br
 
 ------------- Getting Nested Cages -------------
-git clone ??
+git clone https://github.com/leokollersacht/nested_cages_demo.git
 
 ------------- Dependencies: -------------
 
@@ -52,7 +52,7 @@ make
 Once the above libraries are set (including changing their respecive cmake/findLIB file)
 our program is compiled using the following commands:
 
-cd nested_cages/
+cd nested_cages_demo/
 cmake .
 make
 
