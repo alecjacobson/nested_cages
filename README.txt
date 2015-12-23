@@ -9,9 +9,11 @@ If you have any comments or questions, please contact
 Leonardo Sacht by e-mail: leo@mtm.ufsc.br
 
 ------------- Getting Nested Cages -------------
-git clone https://github.com/leokollersacht/nested_cages_demo.git
+git clone https://github.com/alecjacobson/nested_cages.git
 
 ------------- Dependencies: -------------
+
+You have to set the following libraries and change their respecitve cmake/FindLIB files accordingly.
 
 1) libigl
 git clone https://github.com/libigl/libigl.git
@@ -49,10 +51,10 @@ make
 
 ------------- Compiling Nested Cages: -------------
 
-Once the above libraries are set (including changing their respecive cmake/findLIB file)
+Once the above libraries are set (including changing their respective cmake/findLIB file)
 our program is compiled using the following commands:
 
-cd nested_cages_demo/
+cd nested_cages/
 cmake .
 make
 
