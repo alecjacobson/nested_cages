@@ -1,3 +1,6 @@
 [submodule "eltopo"]
 	path = eltopo
 	url = https://github.com/leokollersacht/eltopo.git
+[submodule "meshfix"]
+	path = meshfix
+	url = https://github.com/alecjacobson/meshfix.git
