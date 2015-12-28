@@ -4,3 +4,6 @@
 [submodule "meshfix"]
 	path = meshfix
 	url = https://github.com/alecjacobson/meshfix.git
+[submodule "collisiondetection"]
+	path = collisiondetection
+	url = https://github.com/evouga/collisiondetection.git
