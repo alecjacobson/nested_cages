@@ -8,51 +8,37 @@ It has been tested for Linux and Mac.
 If you have any comments or questions, please contact
 Leonardo Sacht by e-mail: leo@mtm.ufsc.br
 
-------------- Getting Nested Cages -------------
-git clone https://github.com/alecjacobson/nested_cages.git
+----- Getting Nested Cages and submodules -----
+git clone --recursive https://github.com/alecjacobson/nested_cages.git
 
 ------------- Dependencies: -------------
 
-You have to set the following libraries and change their respecitve cmake/FindLIB files accordingly.
+0) Libraries that are already included in this repository: Eltopo, Tetgen, Meshfix and Libcollisions
+- Note: These libraries are submodules that are cloned and updated automatically (except for tetgen, that is included as a folder) if you clone our repository with the --recursive option. 
+Cmake will compile and link them automatically.
 
 1) libigl
 git clone https://github.com/libigl/libigl.git
-Note: This is a header library, it doesn't need to be compiled.
+Notes: 
+- This is a header library, it doesn't need to be compiled. 
+- We recommend it to be located at /usr/local/include, so Cmake can find it automatically. You can also locate it at another path and edit cmake/FindLIBIGL accordingly. 
 
 2) CGAL
 Please install following the instructions at http://www.cgal.org/
-Note: We are using CGAL 4.7 in this project, not guaranteed to be compatible with other versions.
+Notes: 
+- We are using CGAL 4.7 in this project, not guaranteed to be compatible with other versions.
+- We recommend it to be installed at /usr/local/lib/cgal, so Cmake can find it automatically. You can also locate it at another path and edit cmake/FindCGAL accordingly. 
+
 
 3) Eigen
 Download from http://eigen.tuxfamily.org/index.php?title=Main_Page
-Note: this is a header-only library. For this project we are using Eigen 3.3.
-
-4) Eltopo
-git clone https://github.com/leokollersacht/eltopo.git
-To compile, issue: 
-cd eltopo3d/
-make depend release
-Note: This is our fork of Eltopo, contains small changes specific to our project
-
-5) Tetgen
-Please install following the instructions at http://wias-berlin.de/software/tetgen/
-
-6) Meshfix
-git clone https://github.com/evouga/collisiondetection.git
-Notes: - This repository consists of the original Meshfix by Marco Attene 
-with additional functionalities to support Eigen/libigl meshes. 
-- You need to compile and link against OpenNL and SuperLU. For Linux systems
-you should edit the Makefile to remove '-framework Accelerate' and set the 
-paths to OpenNL and SuperLU accordingly.
-
-7) Libcollisions (Implementation of Speculative Parallel Asynchronous Contact Mechanics - http://www.cs.columbia.edu/cg/spacm/spacm.html)
-git clone https://github.com/evouga/collisiondetection.git
-make
+Notes: 
+- This is a header-only library. For this project we are using Eigen 3.3.
+- We recommend it to be located at /usr/local/include/eigen3, so Cmake can find it automatically. You can also locate it at another path and edit cmake/FindEIGEN accordingly. 
 
 ------------- Compiling Nested Cages: -------------
 
-Once the above libraries are set (including changing their respective cmake/findLIB file)
-our program is compiled using the following commands:
+Once the above libraries are set our program is compiled using the following commands:
 
 cd nested_cages/
 cmake .
