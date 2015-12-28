@@ -2,12 +2,6 @@ cmake_minimum_required(VERSION 2.8.6)
 
 SET(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
-# We need C++11. Put this directive after CGAL's include.
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g -Wall -Wextra -Wno-reorder -Wno-unknown-pragmas -march=native")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g -Wno-deprecated-declarations -march=native")
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
-endif() 
 
 find_package(EIGEN REQUIRED)
 #set(CGAL_BRANCH_BUILD ON)
@@ -19,6 +13,12 @@ if(APPLE)
 endif()
 find_package(CGAL REQUIRED)
 include(${CGAL_USE_FILE})
+# We need C++11. Put this directive after CGAL's include.
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g -Wall -Wextra -Wno-reorder -Wno-unknown-pragmas -march=native")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g -Wno-deprecated-declarations -march=native")
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
+endif() 
 
 add_subdirectory("${PROJECT_SOURCE_DIR}/meshfix")
 include_directories( "${EIGEN_INCLUDE_DIR}" )
