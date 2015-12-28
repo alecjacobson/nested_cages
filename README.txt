@@ -15,7 +15,7 @@ git clone --recursive https://github.com/alecjacobson/nested_cages.git
 
 0) Libraries that are already included in this repository: Eltopo, Tetgen, Meshfix and Libcollisions
 - Note: These libraries are submodules that are cloned and updated automatically (except for tetgen, that is included as a folder) if you clone our repository with the --recursive option. 
-Cmake will compile and link them automatically.
+TO-DO: Cmake will compile and link them automatically.
 
 1) libigl
 git clone https://github.com/libigl/libigl.git
