@@ -12,18 +12,10 @@
 // el topo
 #include <collisionpipeline.h>
 #include <eltopo.h>
-#include <iomesh.h>
 #include <meshrenderer.h>
 #include <runstats.h>
 #include <surftrack.h>
 #include <trianglequality.h>
-
-// talpa
-#include <framestepper.h>
-#include <meancurvature.h>
-#include <meshdriver.h>
-#include <scriptinit.h>
-#include <simulation.h>
 
 // ACM
 #include <VelocityFilter.h>
