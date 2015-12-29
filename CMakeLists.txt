@@ -3,7 +3,6 @@ cmake_minimum_required(VERSION 2.8.6)
 SET(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
 
-find_package(EIGEN REQUIRED)
 #set(CGAL_BRANCH_BUILD ON)
 #add_subdirectory("${PROJECT_SOURCE_DIR}/cgal/Installation")
 find_library(BLAS REQUIRED)
@@ -21,7 +20,7 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
 endif() 
 
 add_subdirectory("${PROJECT_SOURCE_DIR}/meshfix")
-include_directories( "${EIGEN_INCLUDE_DIR}" )
+include_directories( "${PROJECT_SOURCE_DIR}/eigen/" )
 include_directories( "${PROJECT_SOURCE_DIR}/libigl/include/" )
 include_directories( "${PROJECT_SOURCE_DIR}/cgal/../")
 include_directories( "${PROJECT_SOURCE_DIR}/collisiondetection/include" )
