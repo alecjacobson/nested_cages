@@ -17,7 +17,7 @@ git clone --recursive https://github.com/alecjacobson/nested_cages.git
 This code has been tested on Linux and Mac OS X. In theory this should also
 work on Windows.
 
-To compile, first _install CGAL_, then issue:
+To compile, first _**install CGAL**_, then issue:
 
 ```bash
 mkdir build
