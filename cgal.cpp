@@ -40,13 +40,21 @@ void decimate_CGAL(
     int r = SMS::edge_collapse
       (*surface_mesh
       ,stop
+#if CGAL_VERSION_NR >= 1040700000
+      ,CGAL::parameters::visitor      (vis)
+#else
       ,CGAL::visitor      (vis)
+#endif
       );
   } else {
   int r = SMS::edge_collapse
     (*surface_mesh
     ,stop
+#if CGAL_VERSION_NR >= 1040700000
+    ,CGAL::parameters::get_cost     (SMS::Edge_length_cost  <Surface_mesh>())
+#else
     ,CGAL::get_cost     (SMS::Edge_length_cost  <Surface_mesh>())
+#endif
     .get_placement(SMS::Midpoint_placement<Surface_mesh>())
     .visitor      (vis)
     );

@@ -17,7 +17,7 @@ git clone --recursive https://github.com/alecjacobson/nested_cages.git
 This code has been tested on Linux and Mac OS X. In theory this should also
 work on Windows.
 
-To compile issue:
+To compile, first _install CGAL_, then issue:
 
 ```bash
 mkdir build
@@ -26,16 +26,15 @@ cmake -DCMAKE_BUILD_TYPE=Release  ..
 make
 ```
 
-This will build all dependencies and the `nested_cages` executable.
+This will build all remaining dependencies and the `nested_cages` executable.
 
 ### Dependencies
 
-All dependencies are included, either explicitly or as [git
+_Except CGAL_, all dependencies are included, either explicitly or as [git
 submodules](https://git-scm.com/docs/git-submodule). If you clone this repo
 using `git clone --recursive` then the dependency layout should be:
 
     nested_cages/
-      cgal/
       collisiondetection/
       eltopo/
       eigen/

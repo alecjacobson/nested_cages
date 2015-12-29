@@ -1,17 +1,31 @@
 cmake_minimum_required(VERSION 2.8.6)
+include(/usr/local/share/cmake/Modules/ExternalProject.cmake)
+
 
 SET(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
 
-#set(CGAL_BRANCH_BUILD ON)
-#add_subdirectory("${PROJECT_SOURCE_DIR}/cgal/Installation")
 find_library(BLAS REQUIRED)
 if(APPLE)
   set(CMAKE_CXX_LINK_FLAGS "-framework Accelerate")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
 endif()
+
 find_package(CGAL REQUIRED)
 include(${CGAL_USE_FILE})
+#set(CGAL_INSTALL_DIR "${CMAKE_CURRENT_BINARY_DIR}/cgal/")
+#set(CGAL_BUILD_TYPE ${CMAKE_BUILD_TYPE})
+#ExternalProject_Add(cgal
+#  SOURCE_DIR ${PROJECT_SOURCE_DIR}/cgal
+#  INSTALL_DIR ${CGAL_INSTALL_DIR}
+#  CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=${CGAL_INSTALL_DIR}
+#  UPDATE_COMMAND ""
+#)
+#set(CGAL_DIR "${CMAKE_CURRENT_BINARY_DIR}/cgal/")
+#link_directories("${CGAL_DIR}/lib/")
+#set(CGAL_LIBRARIES "CGAL" "CGAL_Core" "CGAL_ImageIO")
+#include_directories("${CGAL_DIR}/include/")
+
 # We need C++11. Put this directive after CGAL's include.
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g -Wall -Wextra -Wno-reorder -Wno-unknown-pragmas -march=native")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g -Wno-deprecated-declarations -march=native")
@@ -57,6 +71,7 @@ add_executable(nested_cages
   ${TETGEN_SRCFILES}
   ${COLLISIONDETECTION_SRCFILES}
   ${ELTOPO_SRCFILES})
+
 target_link_libraries(
   nested_cages 
   meshfix 
@@ -64,5 +79,6 @@ target_link_libraries(
   jmeshext 
   nl 
   superlu
+  ${CGAL_LIBRARIES} 
   ${BLAS_LIBRARIES} 
   )

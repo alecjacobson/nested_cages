@@ -20,3 +20,5 @@ TeX/nested.fls
 *.mexa64
 *~
 build*
+*.swp
+*.swo
