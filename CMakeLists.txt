@@ -37,12 +37,6 @@ include_directories("${JMESH_DIR}/include")
 include_directories("${PROJECT_SOURCE_DIR}/tetgen")
 add_definitions(-DTETLIBRARY)
 
-link_directories(
-  /usr/local/lib
-  /opt/local/lib
-  {EIGEN_DIRS}
-)
-
 file(GLOB SRCFILES                    "${PROJECT_SOURCE_DIR}/*.cpp")
 
 # Tetgen, CollisionDetection, and Eltopo don't use CMAKE, so add their source
