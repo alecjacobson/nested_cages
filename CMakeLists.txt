@@ -48,14 +48,15 @@ set(JMESH_DIR "${JMESHEXT_DIR}/JMeshLib-1.2/")
 include_directories("${MESHFIX_DIR}")
 include_directories("${JMESHEXT_DIR}/include")
 include_directories("${JMESH_DIR}/include")
-include_directories("${PROJECT_SOURCE_DIR}/tetgen")
+set(TETGEN_DIR "${PROJECT_SOURCE_DIR}/libigl/external/tetgen")
+include_directories("${TETGEN_DIR}")
 add_definitions(-DTETLIBRARY)
 
 file(GLOB SRCFILES                    "${PROJECT_SOURCE_DIR}/*.cpp")
 
 # Tetgen, CollisionDetection, and Eltopo don't use CMAKE, so add their source
 # files directly
-file(GLOB TETGEN_SRCFILES             "${PROJECT_SOURCE_DIR}/tetgen/*.cxx")
+file(GLOB TETGEN_SRCFILES             "${TETGEN_DIR}/*.cxx")
 file(GLOB COLLISIONDETECTION_SRCFILES "${PROJECT_SOURCE_DIR}/collisiondetection/src/*.cpp")
 file(GLOB ELTOPO_SRCFILES             "${PROJECT_SOURCE_DIR}/eltopo/eltopo3d/*.cpp"
                                       "${PROJECT_SOURCE_DIR}/eltopo/common/*.cpp"

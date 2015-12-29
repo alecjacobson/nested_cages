@@ -34,21 +34,26 @@ int main(int argc, char * argv[])
 {
   using namespace igl::copyleft::cgal;
 
-  if (argc==1){
-    cout << "Usage: ./nested_cages input.off q L(1) L(2) ... L(k) EnergyExpansion EnergyFinal output.off" << endl;
-    cout << "" << endl;
-    cout << "  q is the quadrature order for the shrinking flow" << endl;
-    cout << "" << endl;
-    cout << "  L(1) > L(2) > ... > L(k) is the number of faces for each cage" << endl;
-    cout << "  If L(k) is followed by 'r' the initial decimation for this cage will be regular (adaptive if no 'r')" << endl;
-    cout << "  Each L(k) can be replace by a filed with an input decimation " << endl;
-    cout << "" << endl;
-    cout << "  EnergyExpansion is the energy to be minimized for the re-inflation" << endl;
-    cout << "  Energies implemented: None, DispStep, DispInitial, Volume, SurfARAP, VolARAP " << endl;
-        cout << "" << endl;
-    cout << "  EnergyFinal is the energy to be minimized after the re-inflation (additional processing)" << endl;
-    cout << "  Energies implemented: None, DispStep, DispInitial, Volume, SurfARAP, VolARAP " << endl;
-    return 0;
+  if (argc==1)
+  {
+    cout << R"(Usage: 
+
+    ./nested_cages input.off q L(1) L(2) ... L(k) EnergyExpansion EnergyFinal output.off
+
+q is the quadrature order for the shrinking flow
+
+L(1) > L(2) > ... > L(k) is the number of faces for each cage.
+If L(k) is followed by 'r' the initial decimation for this cage will be regular
+(adaptive if no 'r').
+Each L(k) can be replace by a filed with an input decimation.
+
+EnergyExpansion is the energy to be minimized for the re-inflation
+Energies implemented: None, DispStep, DispInitial, Volume, SurfARAP, VolARAP 
+
+EnergyFinal is the energy to be minimized after the re-inflation (additional processing)
+Energies implemented: None, DispStep, DispInitial, Volume, SurfARAP, VolARAP
+)";
+    return EXIT_FAILURE;
   }
   
   // number of layers
