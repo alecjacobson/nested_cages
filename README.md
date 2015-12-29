@@ -39,12 +39,13 @@ using `git clone --recursive` then the dependency layout should be:
       eltopo/
       eigen/
       libigl/
+        external/
+          tetgen/
       meshfix/
         JMeshExt-1.0alpha_src/
           JMeshLib-1.2/
           OpenNL3.2.1/
             SuperLU/
-      tetgen/
 
 
 ## Example usages
