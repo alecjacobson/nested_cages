@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8.6)
-include(/usr/local/share/cmake/Modules/ExternalProject.cmake)
-
+include(/usr/local/share/cmake/Modules/ExternalProject.cmake OPTIONAL)
+include(/usr/share/cmake-2.8/Modules/ExternalProject.cmake OPTIONAL)
 
 SET(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
