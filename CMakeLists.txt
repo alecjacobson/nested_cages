@@ -3,8 +3,8 @@ cmake_minimum_required(VERSION 2.8.6)
 SET(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
 
-find_library(BLAS REQUIRED)
-find_library(LAPACK REQUIRED)
+find_package(BLAS REQUIRED)
+find_package(LAPACK REQUIRED)
 if(APPLE)
   set(CMAKE_CXX_LINK_FLAGS "-framework Accelerate")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
