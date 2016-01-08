@@ -283,7 +283,7 @@ void flow_one_step(
 
 
 // shrink until inside function
-void flow_fine_inside_coarse(
+bool flow_fine_inside_coarse(
   const Eigen::MatrixXd & V0, 
   const Eigen::MatrixXi & F0, 
   const Eigen::MatrixXd & V_coarse, 
@@ -321,5 +321,8 @@ void flow_fine_inside_coarse(
     // input inside MatrixXd to force compiler to make a copy in this case.
     winding_number(V_coarse,F_coarse,V.row(0),W);
     H.push(V);
+    // Quit after 1000 steps of the flow and return false
+    if (step>1000) return false; 
   }
+  return true;
 }

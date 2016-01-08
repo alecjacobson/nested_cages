@@ -164,7 +164,11 @@ Energies implemented: None, DispStep, DispInitial, Volume, SurfARAP, VolARAP
     gradQ_to_gradV(V, F, area_0, quad_order, A_qv);
   	// Flow M inside M_hat and save the result to a stack M of flow meshes
     stack<MatrixXd> H;
-    flow_fine_inside_coarse(V,F,V_coarse,F_coarse,A_qv,H);
+    if (!flow_fine_inside_coarse(V,F,V_coarse,F_coarse,A_qv,H))
+    {
+      cout << "Flow failed to take fine mesh inside coarse mesh after 1000 iterations. Quitting" << endl;
+      return 0;
+    }
 
     // Reinflate and output to cage to C
     MatrixXd C;
