@@ -56,20 +56,21 @@ Help information
 
     ./nested_cages
 
-Obtain 2 volume minimizing nested cages for `fertility.off`: one regular with
-8000 faces and the other regular with 1000 faces. Output resulting cages to
-`test_1.off` and `test_2.off`
+Obtain 2 volume minimizing nested cages for `../gargo.off`: one regular with
+1000 faces and the other regular with 500 faces. Output resulting cages to
+`../test_1.off` and `../test_2.off`
 
-    ./nested_cages fertility.off 2 8000r 1000r None Volume test
+    ./nested_cages ../gargo.off 2 1000r 500r None Volume ../test
 
 The same as above, but outputs adaptive decimations (instead of regular)
 
-    ./nested_cages fertility.off 2 8000 1000 None Volume test
+    ./nested_cages ../gargo.off 2 1000 500 None Volume ../test
 
-Obtain 2 nested cages for fertility.off that minimize surface ARAP energy,
-using as input decimations `fertilitiy_8000.off` and `fertilitiy_1000.off`
+Obtain 2 nested cages for `../gargo.off` that minimize surface ARAP energy,
+using as input decimations `../gargo_1000.off` and `gargo_500.off`
 
-    ./nested_cages fertility.off 2 fertilitiy_8000.off fertilitiy_1000.off SurfARAP None test
+    ./nested_cages ../gargo.off 2 ../gargo_1000.off ../gargo_500.off SurfARAP None ../test
+
 
 ## Contact
 
