@@ -61,7 +61,9 @@ void reinflate(
       F = F+Uf;
       // Update coarse mesh with filtered velocities
       C = C+Uc;
-      cout << "Reinflation step " << step << "/" << total_steps << ": Energy = None (feasible state only)" << endl;
+      #ifdef VERBOSE_DEBUG
+        cout << "Reinflation step " << step << "/" << total_steps << ": Energy = None (feasible state only)" << endl;
+      #endif
     }
     // If energy for re-inflation is prescribed, minimize it
     else if (strcmp(EnergyInflation,"None")!=0)
@@ -81,7 +83,9 @@ void reinflate(
       // Stepping and projecting
       while (true)
       {
-        cout << "Reinflation step " << step << "/" << total_steps << ": Energy = " << EnergyInflation  << endl;
+        #ifdef VERBOSE_DEBUG
+          cout << "Reinflation step " << step << "/" << total_steps << ": Energy = " << EnergyInflation  << endl;
+        #endif
         MatrixXd grad;
         // for Volumetric ARAP, calculate gradient after finding optimal 
         // deformed tet mesh (with local-globe solver)
@@ -135,11 +139,15 @@ void reinflate(
         if (new_energy>current_energy)
         {
           beta = 0.5*beta;
-          cout << "energy increased, descreasing beta to " << beta << endl;
+          #ifdef VERBOSE_DEBUG
+            cout << "energy increased, descreasing beta to " << beta << endl;
+          #endif
           // If step size is too small, then it has converged. Break
           if (beta<1e-3)
           {
-            cout << "beta too small. Quitting line search loop " << endl;
+            #ifdef VERBOSE_DEBUG
+              cout << "beta too small. Quitting line search loop " << endl;
+            #endif
             break;
           }
         }
@@ -149,12 +157,16 @@ void reinflate(
           C = C+Uc;
           current_energy = new_energy;
           beta = 1.1*beta;
-          cout << "energy decreased to " << current_energy << ", increasing beta to " << beta << endl;
+          #ifdef VERBOSE_DEBUG
+            cout << "energy decreased to " << current_energy << ", increasing beta to " << beta << endl;
+          #endif
         }
         // If tiny step, then it has converged. Break
         if (((Uc).rowwise().norm()).maxCoeff()<1e-5) 
         {
-          cout << "Max change in postion = " << ((Uc).rowwise().norm()).maxCoeff() << " too small. Quitting line search loop " << endl;
+          #ifdef VERBOSE_DEBUG
+            cout << "Max change in postion = " << ((Uc).rowwise().norm()).maxCoeff() << " too small. Quitting line search loop " << endl;
+          #endif
           break;
         }
       }
@@ -192,7 +204,9 @@ void reinflate(
     // Stepping and projecting
     while (true)
       {
-        cout << "Final optimization. Energy = " << EnergyFinal  << endl;
+        #ifdef VERBOSE_DEBUG
+          cout << "Final optimization. Energy = " << EnergyFinal  << endl;
+        #endif
         MatrixXd grad;
         // for Volumetric ARAP, calculate gradient after finding optimal 
         // deformed tet mesh (with local-globe solver)
@@ -238,11 +252,15 @@ void reinflate(
         if (new_energy>current_energy)
         {
           beta = 0.5*beta;
-          cout << "energy increased, descreasing beta to " << beta << endl;
+          #ifdef VERBOSE_DEBUG
+            cout << "energy increased, descreasing beta to " << beta << endl;
+          #endif
           // If step size is too small, then it has converged. Break
           if (beta<1e-3)
           {
-            cout << "beta too small. Quitting line search loop " << endl;
+            #ifdef VERBOSE_DEBUG
+              cout << "beta too small. Quitting line search loop " << endl;
+            #endif
             break;
           }
         }
@@ -252,7 +270,9 @@ void reinflate(
           C = C+Uc;
           current_energy = new_energy;
           beta = 1.1*beta;
-          cout << "energy decreased to " << current_energy << ", increasing beta to " << beta << endl;
+          #ifdef VERBOSE_DEBUG
+            cout << "energy decreased to " << current_energy << ", increasing beta to " << beta << endl;
+          #endif
         }
         // If tiny step, then it has converged. Break
         if (((Uc).rowwise().norm()).norm()<1e-5) break;

@@ -63,7 +63,9 @@ Energies implemented: None, DispStep, DispInitial, Volume, SurfARAP, VolARAP
   
   // number of layers
   int k = argc-6;
-  cout << "number of layers = " << k << endl;
+  #ifdef VERBOSE_DEBUG
+    cout << "number of layers = " << k << endl;
+  #endif
 
   // quadrature order
   int quad_order = atoi(argv[2]);
@@ -148,15 +150,23 @@ Energies implemented: None, DispStep, DispInitial, Volume, SurfARAP, VolARAP
     remesh_self_intersections(V_coarse,F_coarse,params,tempV,tempF,IF,J,IM);
     // If input coarse mesh self-intersect, remove self-intersections with Meshfix (to-do)
     if (IF.rows()>0){
-    	cout << i+1 << "-th input decimation self-intersects. Fixing with Meshfix " << endl;
+      #ifdef VERBOSE_DEBUG
+    	  cout << i+1 << "-th input decimation self-intersects. Fixing with Meshfix " << endl;
+      #endif
+      cout << "Polishing M" << i+1 << "..." << endl;
       meshfix(MatrixXd(V_coarse),MatrixXi(F_coarse),V_coarse,F_coarse);
+      cout << "Success!" << endl;
       remesh_self_intersections(V_coarse,F_coarse,params,tempV,tempF,IF,J,IM);
       if (IF.rows()==0)
       {
-        cout << "Meshfix succesfully removed self-intersections" << endl;  
+        #ifdef VERBOSE_DEBUG
+          cout << "Meshfix succesfully removed self-intersections" << endl;  
+        #endif
       }
       else{
-        cout << "Meshfix wasn't able to remove all self-intersections. Quitting..." << endl; 
+        #ifdef VERBOSE_DEBUG
+          cout << "Meshfix wasn't able to remove all self-intersections. Quitting..." << endl; 
+        #endif
     	  return 0;
       }
     }
@@ -171,15 +181,19 @@ Energies implemented: None, DispStep, DispInitial, Volume, SurfARAP, VolARAP
     gradQ_to_gradV(V, F, area_0, quad_order, A_qv);
   	// Flow M inside M_hat and save the result to a stack M of flow meshes
     stack<MatrixXd> H;
+    cout << "Flowing M" << i << " inside M" << i+1 << "..." << endl;
     if (!flow_fine_inside_coarse(V,F,V_coarse,F_coarse,A_qv,H))
     {
       cout << "Flow failed to take fine mesh inside coarse mesh after 1000 iterations. Quitting" << endl;
       return 0;
     }
+    cout << "Success!" << endl;
 
     // Reinflate and output to cage to C
     MatrixXd C;
+    cout << "Reinflating M" << i << ", pushing M" << i+1 << "..." << endl;
     reinflate(H,F,V_coarse,F_coarse,argv[argc-3],argv[argc-2],C);
+    cout << "Success!" << endl;
 
     // sanity check: cage should never self-intersect at this stage
     remesh_self_intersections(C,F_coarse,params,tempV,tempF,IF,J,IM);

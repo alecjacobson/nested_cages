@@ -38,6 +38,11 @@ set(TETGEN_DIR "${PROJECT_SOURCE_DIR}/libigl/external/tetgen")
 include_directories("${TETGEN_DIR}")
 add_definitions(-DTETLIBRARY)
 
+option(VERBOSE_DEBUG "VERBOSE_DEBUG" OFF)
+if (VERBOSE_DEBUG)
+  add_definitions(-DVERBOSE_DEBUG)
+endif ()
+
 file(GLOB SRCFILES                    "${PROJECT_SOURCE_DIR}/*.cpp")
 
 # Tetgen, CollisionDetection, and Eltopo don't use CMAKE, so add their source
