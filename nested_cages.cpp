@@ -11,6 +11,7 @@
 // libigl includes
 #include <igl/doublearea.h>
 #include <igl/writeOFF.h>
+#include <igl/read_triangle_mesh.h>
 #include <igl/copyleft/cgal/remesh_self_intersections.h>
 #include <igl/copyleft/cgal/polyhedron_to_mesh.h>
 #include <igl/copyleft/cgal/mesh_to_polyhedron.h>
@@ -38,7 +39,11 @@ int main(int argc, char * argv[])
   {
     cout << R"(Usage: 
 
-    ./nested_cages input.off q L(1) L(2) ... L(k) EnergyExpansion EnergyFinal output.off
+    ./nested_cages input.off q L(1) L(2) ... L(k) EnergyExpansion EnergyFinal output
+
+input: the program accepts files in the following formats: .off, .obj, .ply, .stl, .wrl .mesh
+
+output: cages will be saved as output_1.off, output_2.off, ..., output_k.off
 
 q is the quadrature order for the shrinking flow
 
@@ -65,7 +70,17 @@ Energies implemented: None, DispStep, DispInitial, Volume, SurfARAP, VolARAP
 
   // read input mesh
   Surface_mesh M; 
-  std::ifstream is(argv[1]) ; is >> M ;
+  MatrixXd V0;
+  MatrixXi F0;
+  if (!read_triangle_mesh(argv[1],V0,F0)){
+    cout << "unable to read input file"  << endl;
+    return 0;
+  }
+  // convert to CGAL format
+  mesh_to_polyhedron(V0,F0,M);
+
+  // std::ifstream is(argv[1]) ; is >> M ;
+
 
   // output input mesh as level output_0.off
   char* filename; 
@@ -77,10 +92,10 @@ Energies implemented: None, DispStep, DispInitial, Volume, SurfARAP, VolARAP
     return 0;
   }
 
-  // Converto CGAL's M to LibiIGL/Eigen (V,F) format
-  MatrixXd V0;
-  MatrixXi F0;
-  polyhedron_to_mesh(M,V0,F0); 
+  // // Converto CGAL's M to LibiIGL/Eigen (V,F) format
+  // MatrixXd V0;
+  // MatrixXi F0;
+  // polyhedron_to_mesh(M,V0,F0); 
 
   // First fine mesh is the input mesh
   MatrixXd V = V0;
