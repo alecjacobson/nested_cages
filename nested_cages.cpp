@@ -79,9 +79,6 @@ Energies implemented: None, DispStep, DispInitial, Volume, SurfARAP, VolARAP
   // convert to CGAL format
   mesh_to_polyhedron(V0,F0,M);
 
-  // std::ifstream is(argv[1]) ; is >> M ;
-
-
   // output input mesh as level output_0.off
   char* filename; 
   char *suffix;
@@ -91,11 +88,6 @@ Energies implemented: None, DispStep, DispInitial, Volume, SurfARAP, VolARAP
     cout << "unable to allocate space for output file name"  << endl;
     return 0;
   }
-
-  // // Converto CGAL's M to LibiIGL/Eigen (V,F) format
-  // MatrixXd V0;
-  // MatrixXi F0;
-  // polyhedron_to_mesh(M,V0,F0); 
 
   // First fine mesh is the input mesh
   MatrixXd V = V0;
