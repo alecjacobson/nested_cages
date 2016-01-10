@@ -49,9 +49,6 @@ void signed_distance_direction(
   const Eigen::MatrixXi & F, 
   Eigen::MatrixXd & D);
 
-// **Alec: I don't actually understand what this ones computing... Why is the
-// output a vector and not a matrix?**
-//
 // Inputs:
 //   V  #V by 3 list of fine mesh positions
 //   F  #F by 3 list of fine mesh triangle indices into V
@@ -62,7 +59,7 @@ void signed_distance_direction(
 //     For quad_order=1,2,3 then #A_qv=#F,3*#F,4*#F
 //   M   mass matrix of the input fine matrix
 // Outputs:
-//   grad  ?
+//   grad  #V by 3 list of gradient coordinates
 void grad_energy(
   const Eigen::MatrixXd & V, 
   const Eigen::MatrixXi & F, 
@@ -71,6 +68,18 @@ void grad_energy(
   const Eigen::SparseMatrix<double> & A_qv, 
   const Eigen::SparseMatrix<double> & M_inv, 
   Eigen::MatrixXd & grad);
+
+// Calculates the diameter of the uninon of the vertex positions
+// into V and V_coarse.
+//
+// Inputs:
+//   V  #V by 3 list of fine mesh positions
+//   V_coarse  #V_coarse by 3 list of coarse mesh positions
+// Outputs:
+//   diameter  
+double diameter(
+  const Eigen::MatrixXd & V, 
+  const Eigen::MatrixXd & V_coarse);
 
 // Move the shrinking fine mesh one step along its flow inside the coarse mesh
 // using a specified quadrature order.

@@ -281,8 +281,34 @@ void flow_one_step(
   V_new = V - delta_t*grad;
 }
 
+double diameter(
+  const Eigen::MatrixXd & V0, 
+  const Eigen::MatrixXd & V_coarse)
+{
 
-// shrink until inside function
+  using namespace Eigen;
+  using namespace std;
+
+  double min_x, min_y, min_z, max_x, max_y, max_z;
+
+  VectorXd min_V0 = V0.colwise().minCoeff();
+  VectorXd min_V_coarse = V_coarse.colwise().minCoeff();
+  min_x = fmin(min_V0(0),min_V_coarse(0));
+  min_y = fmin(min_V0(1),min_V_coarse(1));
+  min_z = fmin(min_V0(2),min_V_coarse(2));
+
+  VectorXd max_V0 = V0.colwise().maxCoeff();
+  VectorXd max_V_coarse = V_coarse.colwise().maxCoeff();
+  max_x = fmax(max_V0(0),max_V_coarse(0));
+  max_y = fmax(max_V0(1),max_V_coarse(1));
+  max_z = fmax(max_V0(2),max_V_coarse(2));
+
+  float diam = fmax(max_x-min_x,max_y-min_y);
+  diam = fmax(diam,max_z-min_z);
+
+  return diam;
+}
+
 bool flow_fine_inside_coarse(
   const Eigen::MatrixXd & V0, 
   const Eigen::MatrixXi & F0, 
@@ -304,7 +330,9 @@ bool flow_fine_inside_coarse(
 
   MatrixXd V = V0;
   H.push(V);
-  double delta_t = 1e-3;
+  // calculate diameter of the meshes to scale step size
+  double diam = diameter(V0,V_coarse);
+  double delta_t = diam*1e-3;
   MatrixXi IF;
   intersect_other(V,F0,V_coarse,F_coarse,true,IF);
   VectorXd W(1); // winding number of the first point

@@ -2,6 +2,7 @@
 #include "filter.h"
 #include "gradient.h"
 #include "energy.h"
+#include "flow.h"
 #include <igl/arap.h>
 #include <stdio.h>
 
@@ -50,13 +51,16 @@ void reinflate(
     // Fine mesh velocity
     MatrixXd Uf = H.top()-F;
     H.pop();
+
+    // calculate diameter to scale spearation between meshes
+    double diam = diameter(F,C);
     
     // If no energy presecribed, find only a feasible state (by filtering Uc=0)
     if (strcmp(EnergyInflation,"None")==0)
     {
     	MatrixXd Uc = MatrixXd::Zero(C_hat.rows(), 3);
       // this eps=5e-3 is chosen so that there is space for the final optimization
-      filter(F,T,Uf,C,F_hat,5e-3,Uc);
+      filter(F,T,Uf,C,F_hat,diam*5e-3,Uc);
       // Update fine mesh
       F = F+Uf;
       // Update coarse mesh with filtered velocities
@@ -115,7 +119,7 @@ void reinflate(
         // multiply gradient by current step size
         MatrixXd Uc = -beta*grad;
         // filter coarse mesh velocities
-        filter(F,T,Uf,C,F_hat,1e-3,Uc);
+        filter(F,T,Uf,C,F_hat,diam*1e-3,Uc);
 
         // update fine mesh (it has to be bone here, because
         // otherwise the collision solver will check intersections 
@@ -162,7 +166,7 @@ void reinflate(
           #endif
         }
         // If tiny step, then it has converged. Break
-        if (((Uc).rowwise().norm()).maxCoeff()<1e-5) 
+        if (((Uc).rowwise().norm()).maxCoeff()<diam*1e-5) 
         {
           #ifdef VERBOSE_DEBUG
             cout << "Max change in postion = " << ((Uc).rowwise().norm()).maxCoeff() << " too small. Quitting line search loop " << endl;
@@ -189,6 +193,9 @@ void reinflate(
     double current_energy = std::numeric_limits<double>::infinity();
     // Intial step size
     double beta = 1e-2;
+
+    // calculate diameter to scale spearation between meshes
+    double diam = diameter(F,C);
 
     // At this moment the fine mesh is back to its original
     // (input) positions, so its velocity should be zero
@@ -236,7 +243,7 @@ void reinflate(
         MatrixXd Uc = -beta*grad;
         // filter coarse mesh velocities
         // this eps=5e-4 is chosen so that tere's is space for final optimizarion
-        filter(F,T,Uf,C,F_hat,5e-4,Uc); 
+        filter(F,T,Uf,C,F_hat,diam*5e-4,Uc); 
 
         // update energy value
         double new_energy;
@@ -275,7 +282,7 @@ void reinflate(
           #endif
         }
         // If tiny step, then it has converged. Break
-        if (((Uc).rowwise().norm()).norm()<1e-5) break;
+        if (((Uc).rowwise().norm()).norm()<diam*1e-5) break;
       }
 
   }
