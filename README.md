@@ -12,6 +12,8 @@ Leonardo Sacht, Etienne Vouga and Alec Jacobson
 git clone --recursive https://github.com/alecjacobson/nested_cages.git
 ```
 
+[![Bunny teaser from "Nested Cages"](http://www.cs.columbia.edu/cg/nested-cages/bunny-shelf-teaser.jpg)](http://www.cs.columbia.edu/cg/nested-cages/)
+
 ## Compilation
 
 This code has been tested on Linux and Mac OS X. In theory this should also
@@ -19,7 +21,9 @@ work on Windows.
 
 To compile, 
 
- 1. _**Install CGAL**_. This project requires at least version 4.7 of CGAL (newer versions might work also); note that the CGAL Debian package may not be sufficiently new. Then 
+ 1. _**Install CGAL**_. This project requires at least version 4.7 of CGAL
+    (newer versions might work also); note that the CGAL Debian package may not
+    be sufficiently new. Then 
  2. Issue:
 ```bash
 mkdir build
