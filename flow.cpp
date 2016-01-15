@@ -335,6 +335,7 @@ bool flow_fine_inside_coarse(
   double delta_t = diam*1e-3;
   MatrixXi IF;
   intersect_other(V,F0,V_coarse,F_coarse,true,IF);
+
   VectorXd W(1); // winding number of the first point
   winding_number(V_coarse,F_coarse,V.row(0),W);
 

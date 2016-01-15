@@ -168,7 +168,7 @@ void filter(
 
   // set vertex masses (= infty for fine mesh vertices 
   // and =1.0 for the last ones)
-  double masses[V0.rows()];
+  double *masses = new double[V0.rows()];
   for (int i=0; i<Vf.rows(); i++){
       masses[i] = std::numeric_limits<double>::infinity();
   }
@@ -177,7 +177,7 @@ void filter(
   }
 
   // Convert V0 from Eigen matrix to array
-  double V0a[3*V0.rows()];
+  double *V0a = new double[3*V0.rows()];
   for (int k=0; k<V0.rows(); k++)
   {
     V0a[3*k] = V0(k,0);
@@ -186,7 +186,7 @@ void filter(
   } 
 
   // Convert F_all from Eigen matrix to array
-  int F_alla[3*F_all.rows()];
+  int *F_alla = new int[3*F_all.rows()];
   for (int k=0; k<F_all.rows(); k++)
   {
     F_alla[3*k] = F_all(k,0);
@@ -203,7 +203,7 @@ void filter(
   eltopo_time0.vertex_masses = masses;
 
   // Convert V1 from Eigen matrix to array
-  double V1a[3*V1.rows()];
+  double *V1a = new double[3*V1.rows()];
   for (int k=0; k<V1.rows(); k++)
   {
     V1a[3*k] = V1(k,0);
@@ -268,5 +268,9 @@ void filter(
     Uc(k,2) = V_final[3*Vf.rows()+3*k+2]-C(k,2); 
   }
 
+  delete[] masses;
+  delete[] V0a;
+  delete[] V1a;
+  delete[] F_alla;
   
 }
