@@ -99,8 +99,11 @@ Energies implemented: None, DispStep, DispInitial, Volume, SurfARAP, VolARAP
   int L[k];
   // standard CGAL decimation is adaptive
   bool adaptive = true;
+
   // declare input decimation
   Surface_mesh M_hat;
+  MatrixXd V_coarse;
+  MatrixXi F_coarse;
 
   // Loop over levels
   for(int i = 0;i<k;i++){
@@ -108,7 +111,12 @@ Energies implemented: None, DispStep, DispInitial, Volume, SurfARAP, VolARAP
     std::ifstream is_file(argv[i+3]);
     if (is_file)
     {
-      is_file >> M_hat;
+      if (!read_triangle_mesh(argv[i+3],V_coarse,F_coarse)){
+        cout << "error: input decimation is an existing file, but couldn't be read"  << endl;
+        return 0;
+      }
+      // convert to CGAL format
+      mesh_to_polyhedron(V_coarse,F_coarse,M_hat);
     } 
     // otherwise the input decimation is computed by decimating the previous layer
     // with CGAL decimation (regular or adaptive)
@@ -117,7 +125,7 @@ Energies implemented: None, DispStep, DispInitial, Volume, SurfARAP, VolARAP
       // first check if last charcater of argv[i+2] is r. If it is, drop the 'r' and adaptive = false
       adaptive = remove_all_chars_and_count(argv[i+3], 'r')==0;
       // check if argv[i+2] is a valid integer (throw an error if it is not)
-      if (!legal_int(argv[i+2])){
+      if (!legal_int(argv[i+3])){
         cout << "you have to pass integer values or valid input deimatations"  << endl;
         cout << "the invalid argument you have passed is " << argv[i+3] << endl;
         return 0;
@@ -132,10 +140,6 @@ Energies implemented: None, DispStep, DispInitial, Volume, SurfARAP, VolARAP
       decimate_CGAL(&M_hat,ratio,adaptive);
     }
 
-    // Check if decimations self-intersect. If they do, throw an error and quit 
-    // (replace by Meshfix in the future)
-	  MatrixXd V_coarse;
-    MatrixXi F_coarse;
     // Convert decimation to LibIGL/Eigen format
     polyhedron_to_mesh(M_hat,V_coarse,F_coarse); 
     // Parameters to call function to check for decimation's self-intersections
