@@ -14,14 +14,16 @@ find_package(CGAL REQUIRED)
 include(${CGAL_USE_FILE})
 
 # We need C++11. Put this directive after CGAL's include.
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g -Wno-deprecated-declarations -march=native -fabi-version=0")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g -Wno-deprecated-declarations -march=native")
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
 endif() 
 
+SET(MESHFIX_WITH_LIBIGL OFF CACHE BOOL "Use some expat option")
 add_subdirectory("${PROJECT_SOURCE_DIR}/meshfix")
-include_directories( "${PROJECT_SOURCE_DIR}/eigen/" )
+#include_directories( "${PROJECT_SOURCE_DIR}/eigen/" )
 include_directories( "${PROJECT_SOURCE_DIR}/libigl/include/" )
+include_directories( "${PROJECT_SOURCE_DIR}/libigl/external/nanogui/ext/eigen/" )
 include_directories( "${PROJECT_SOURCE_DIR}/cgal/../")
 include_directories( "${PROJECT_SOURCE_DIR}/collisiondetection/include" )
 include_directories( "${PROJECT_SOURCE_DIR}/eltopo/common/" )
