@@ -10,7 +10,7 @@
 
 // libigl includes
 #include <igl/doublearea.h>
-#include <igl/writeOFF.h>
+#include <igl/writeOBJ.h>
 #include <igl/read_triangle_mesh.h>
 #include <igl/copyleft/cgal/remesh_self_intersections.h>
 #include <igl/copyleft/cgal/polyhedron_to_mesh.h>
@@ -43,7 +43,7 @@ int main(int argc, char * argv[])
 
 input: the program accepts files in the following formats: .off, .obj, .ply, .stl, .wrl .mesh
 
-output: cages will be saved as output_1.off, output_2.off, ..., output_k.off
+output: cages will be saved as output_1.obj, output_2.obj, ..., output_k.obj
 
 q is the quadrature order for the shrinking flow
 
@@ -84,8 +84,8 @@ Energies implemented: None, DispStep, DispInitial, Volume, SurfARAP, VolARAP
   // output input mesh as level output_0.off
   char* filename; 
   char *suffix;
-  if (asprintf(&filename, "%s%s", argv[argc-1], "_0.off")!=-1){
-    std::ofstream os( filename ) ; os << M;
+  if (asprintf(&filename, "%s%s", argv[argc-1], "_0.obj")!=-1){
+    writeOBJ(filename,V0,F0);
   } else {
     cout << "unable to allocate space for output file name"  << endl;
     return 0;
@@ -219,9 +219,9 @@ Energies implemented: None, DispStep, DispInitial, Volume, SurfARAP, VolARAP
     V = C;
     F = F_coarse;
 
-    // Output cage to file output_i.off
-    if ((asprintf(&suffix,"_%d.off",i+1)!=-1) && (asprintf(&filename, "%s%s", argv[argc-1], suffix)!=-1)){
-      writeOFF(filename,C,F_coarse);
+    // Output cage to file output_i.obj
+    if ((asprintf(&suffix,"_%d.obj",i+1)!=-1) && (asprintf(&filename, "%s%s", argv[argc-1], suffix)!=-1)){
+      writeOBJ(filename,C,F_coarse);
     } else {
       cout << "unable to allocate space for output file name"  << endl;
       return 0;
