@@ -1,6 +1,8 @@
 // Meshfix include
-#define MESHFIX_WITH_EIGEN
+#if WITH_MESHFIX
 #include <meshfix.h>
+#include <meshfix_eigen.h>
+#endif
 
 // Our header files
 #include "io.h"
@@ -12,6 +14,7 @@
 #include <igl/doublearea.h>
 #include <igl/writeOBJ.h>
 #include <igl/read_triangle_mesh.h>
+#include <igl/write_triangle_mesh.h>
 #include <igl/copyleft/cgal/remesh_self_intersections.h>
 #include <igl/copyleft/cgal/polyhedron_to_mesh.h>
 #include <igl/copyleft/cgal/mesh_to_polyhedron.h>
@@ -29,6 +32,25 @@ int at(
   const int j)
 {
   return M(i,j);
+}
+
+// mesh-in, mesh-out wrapper
+void meshfix(
+  const Eigen::MatrixXd & Vin,
+  const Eigen::MatrixXi & Fin,
+  Eigen::MatrixXd & Vout,
+  Eigen::MatrixXi & Fout)
+{
+  /////////////////////////////////////////////////////////////////////////
+  // Convert to meshfix type, call meshfix, convert back from meshfix type
+  T_MESH::TMesh::init(); // This is mandatory // Alec: or is it?
+  T_MESH::Basic_TMesh tin;
+  //igl::write_triangle_mesh("meshfix-input.obj",Vin,Fin);
+  meshfix_from_eigen_matrices(Vin,Fin,tin);
+  meshfix(false,tin);
+  meshfix_to_eigen_matrices(tin,Vout,Fout);
+  //igl::write_triangle_mesh("meshfix-output.obj",Vout,Fout);
+  /////////////////////////////////////////////////////////////////////////
 }
 
 int main(int argc, char * argv[])
@@ -153,13 +175,18 @@ Energies implemented: None, DispStep, DispInitial, Volume, SurfARAP, VolARAP
     VectorXi IM;
     remesh_self_intersections(V_coarse,F_coarse,params,tempV,tempF,IF,J,IM);
     // If input coarse mesh self-intersect, remove self-intersections with Meshfix (to-do)
-    if (IF.rows()>0){
+    if (IF.rows()>0)
+    {
       #ifdef VERBOSE_DEBUG
     	  cout << i+1 << "-th input decimation self-intersects. Fixing with Meshfix " << endl;
       #endif
+#if WITH_MESHFIX
       cout << "Polishing M" << i+1 << "..." << endl;
       meshfix(MatrixXd(V_coarse),MatrixXi(F_coarse),V_coarse,F_coarse);
       cout << "Success!" << endl;
+#else
+      cout << "[WITH_MESHFIX not defined] Skipping polishing of M" << i+1 << "..." << endl;
+#endif
       remesh_self_intersections(V_coarse,F_coarse,params,tempV,tempF,IF,J,IM);
       if (IF.rows()==0)
       {
@@ -168,9 +195,7 @@ Energies implemented: None, DispStep, DispInitial, Volume, SurfARAP, VolARAP
         #endif
       }
       else{
-        #ifdef VERBOSE_DEBUG
-          cout << "Meshfix wasn't able to remove all self-intersections. Quitting..." << endl; 
-        #endif
+          cout << "Wasn't able to remove all input self-intersections. Quitting..." << endl; 
     	  return 0;
       }
     }
