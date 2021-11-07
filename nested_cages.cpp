@@ -1,6 +1,9 @@
 // Meshfix include
+#if WITH_MESHFIX
 #define MESHFIX_WITH_EIGEN
 #include <meshfix.h>
+#else
+#endif
 
 // Our header files
 #include "io.h"
@@ -153,13 +156,18 @@ Energies implemented: None, DispStep, DispInitial, Volume, SurfARAP, VolARAP
     VectorXi IM;
     remesh_self_intersections(V_coarse,F_coarse,params,tempV,tempF,IF,J,IM);
     // If input coarse mesh self-intersect, remove self-intersections with Meshfix (to-do)
-    if (IF.rows()>0){
+    if (IF.rows()>0)
+    {
       #ifdef VERBOSE_DEBUG
     	  cout << i+1 << "-th input decimation self-intersects. Fixing with Meshfix " << endl;
       #endif
+#if WITH_MESHFIX
       cout << "Polishing M" << i+1 << "..." << endl;
       meshfix(MatrixXd(V_coarse),MatrixXi(F_coarse),V_coarse,F_coarse);
       cout << "Success!" << endl;
+#else
+      cout << "[WITH_MESHFIX not defined] Skipping polishing of M" << i+1 << "..." << endl;
+#endif
       remesh_self_intersections(V_coarse,F_coarse,params,tempV,tempF,IF,J,IM);
       if (IF.rows()==0)
       {
@@ -168,9 +176,7 @@ Energies implemented: None, DispStep, DispInitial, Volume, SurfARAP, VolARAP
         #endif
       }
       else{
-        #ifdef VERBOSE_DEBUG
-          cout << "Meshfix wasn't able to remove all self-intersections. Quitting..." << endl; 
-        #endif
+          cout << "Wasn't able to remove all input self-intersections. Quitting..." << endl; 
     	  return 0;
       }
     }

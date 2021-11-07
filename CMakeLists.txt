@@ -20,9 +20,8 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
 endif() 
 
-SET(MESHFIX_WITH_LIBIGL OFF CACHE BOOL "Use some expat option")
-add_subdirectory("${PROJECT_SOURCE_DIR}/meshfix")
-#include_directories( "${PROJECT_SOURCE_DIR}/eigen/" )
+option(WITH_MESHFIX "Use meshfix" OFF)
+
 include_directories( "${PROJECT_SOURCE_DIR}/libigl/include/" )
 include_directories( "${PROJECT_SOURCE_DIR}/libigl/external/nanogui/ext/eigen/" )
 include_directories( "${PROJECT_SOURCE_DIR}/cgal/../")
@@ -31,12 +30,19 @@ include_directories( "${PROJECT_SOURCE_DIR}/eltopo/common/" )
 include_directories( "${PROJECT_SOURCE_DIR}/eltopo/common/tunicate" )
 include_directories( "${PROJECT_SOURCE_DIR}/eltopo/common/newsparse" )
 include_directories( "${PROJECT_SOURCE_DIR}/eltopo/eltopo3d/" )
+
+if(WITH_MESHFIX)
+SET(MESHFIX_WITH_LIBIGL OFF CACHE BOOL "Use some expat option")
+add_subdirectory("${PROJECT_SOURCE_DIR}/meshfix")
+#include_directories( "${PROJECT_SOURCE_DIR}/eigen/" )
 set(MESHFIX_DIR "${PROJECT_SOURCE_DIR}/meshfix/" )
 set(JMESHEXT_DIR "${MESHFIX_DIR}/JMeshExt-1.0alpha_src/")
 set(JMESH_DIR "${JMESHEXT_DIR}/JMeshLib-1.2/")
 include_directories("${MESHFIX_DIR}")
 include_directories("${JMESHEXT_DIR}/include")
 include_directories("${JMESH_DIR}/include")
+endif()
+
 set(TETGEN_DIR "${PROJECT_SOURCE_DIR}/libigl/external/tetgen")
 include_directories("${TETGEN_DIR}")
 add_definitions(-DTETLIBRARY)
@@ -69,12 +75,19 @@ add_executable(nested_cages
 
 target_link_libraries(
   nested_cages 
+  ${CGAL_LIBRARIES} 
+  )
+
+if(WITH_MESHFIX)
+  target_compile_definitions(nested_cages PUBLIC "WITH_MESHFIX")
+target_link_libraries(
+  nested_cages 
   meshfix 
   jmesh 
   jmeshext 
   nl 
   superlu
-  ${CGAL_LIBRARIES} 
   ${BLAS_LIBRARIES} 
   ${LAPACK_LIBRARIES} 
   )
+endif()
