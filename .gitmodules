@@ -4,3 +4,9 @@
 [submodule "eltopo"]
 	path = eltopo
 	url = https://github.com/leokollersacht/eltopo.git
+[submodule "libigl"]
+	path = libigl
+	url = https://github.com/libigl/libigl
+[submodule "MeshFix-v2.1"]
+	path = MeshFix-v2.1
+	url = https://github.com/alecjacobson/MeshFix-v2.1
