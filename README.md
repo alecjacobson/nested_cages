@@ -21,10 +21,6 @@ work on Windows.
 
 To compile, 
 
- 1. _**Install CGAL**_. This project requires at least version 4.7 of CGAL
-    (newer versions might work also); note that the CGAL Debian package may not
-    be sufficiently new. Then 
- 2. Issue:
 ```bash
 mkdir build
 cd build
