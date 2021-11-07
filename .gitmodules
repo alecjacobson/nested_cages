@@ -1,7 +1,3 @@
-[submodule "meshfix"]
-	path = meshfix
-	url = https://github.com/alecjacobson/meshfix.git
-        fetchRecursiveSubmodules = true
 [submodule "collisiondetection"]
 	path = collisiondetection
 	url = https://github.com/evouga/collisiondetection.git
