@@ -1,9 +1,6 @@
 [submodule "collisiondetection"]
 	path = collisiondetection
 	url = https://github.com/evouga/collisiondetection.git
-[submodule "libigl"]
-	path = libigl
-	url = https://github.com/libigl/libigl-legacy.git
 [submodule "eltopo"]
 	path = eltopo
 	url = https://github.com/leokollersacht/eltopo.git
