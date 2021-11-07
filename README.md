@@ -36,7 +36,7 @@ This will build all remaining dependencies and the `nested_cages` executable.
 
 ### Dependencies
 
-_Except CGAL_, all dependencies are included, either explicitly or as [git
+The main dependencies libigl, eltopo and collisiondetection are included as  [git
 submodules](https://git-scm.com/docs/git-submodule). If you clone this repo
 using `git clone --recursive` then the dependency layout should be:
 
@@ -45,13 +45,9 @@ using `git clone --recursive` then the dependency layout should be:
       eltopo/
       eigen/
       libigl/
-        external/
-          tetgen/
-      meshfix/
-        JMeshExt-1.0alpha_src/
-          JMeshLib-1.2/
-          OpenNL3.2.1/
-            SuperLU/
+
+The cmake build of libigl will further download cgal and tetgen as external
+dependencies.
 
 
 ## Example usages
