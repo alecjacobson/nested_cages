@@ -50,6 +50,10 @@ target_link_libraries(collisiondetection igl::core)
 
 file(GLOB SRCFILES "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")
 add_executable(${PROJECT_NAME} ${SRCFILES})
+option(VERBOSE_DEBUG "VERBOSE_DEBUG" OFF)
+if (VERBOSE_DEBUG)
+  target_compile_definitions(${PROJECT_NAME} PUBLIC "VERBOSE_DEBUG")
+endif ()
 
 if(WITH_MESHFIX)
   target_link_libraries(${PROJECT_NAME} MeshFix)
