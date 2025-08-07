@@ -72,7 +72,7 @@ q is the quadrature order for the shrinking flow
 L(1) > L(2) > ... > L(k) is the number of faces for each cage.
 If L(k) is followed by 'r' the initial decimation for this cage will be regular
 (adaptive if no 'r').
-Each L(k) can be replace by a filed with an input decimation.
+Each L(k) can be replace by a file with an input decimation.
 
 EnergyExpansion is the energy to be minimized for the re-inflation
 Energies implemented: None, DispStep, DispInitial, Volume, SurfARAP, VolARAP 
