@@ -71,6 +71,10 @@ foreach(module_name IN LISTS modules)
   endif()
 endforeach()
 
+option(VERBOSE_DEBUG "VERBOSE_DEBUG" OFF)
+if (VERBOSE_DEBUG)
+  target_compile_definitions(${PROJECT_NAME} PRIVATE -DVERBOSE_DEBUG)
+endif ()
 
 #cmake_minimum_required(VERSION 2.8.6)
 #
