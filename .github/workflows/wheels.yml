@@ -1,0 +1,87 @@
+name: Wheels
+
+# Build redistributable wheels (and an sdist) with cibuildwheel, and optionally
+# publish them to PyPI when a GitHub Release is published.
+#
+# Notes:
+#  * The C++ build fetches all dependencies (libigl, CGAL, Eigen, eltopo,
+#    collisiondetection, MeshFix, reference BLAS/LAPACK, nanobind), so each wheel
+#    is a full from-source build and takes several minutes.
+#  * Windows is not built: eltopo links a Fortran BLAS/LAPACK, for which there is
+#    no turn-key CI toolchain (see pyproject's [tool.cibuildwheel]).
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  build_wheels:
+    name: Wheels ${{ matrix.label }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: ubuntu-latest,    label: "linux-x86_64" }
+          - { os: ubuntu-24.04-arm, label: "linux-aarch64" }
+          - { os: macos-13,         label: "macos-x86_64",  target: "10.15" }
+          - { os: macos-14,         label: "macos-arm64",   target: "11.0" }
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v2.23.4
+        env:
+          MACOSX_DEPLOYMENT_TARGET: ${{ matrix.target }}
+          # Full CPython matrix only for releases/tags/manual runs; on PRs and
+          # ordinary pushes build a single version for fast feedback (each wheel
+          # is a full from-source build of all dependencies).
+          CIBW_BUILD: >-
+            ${{ (github.event_name == 'release'
+                 || github.event_name == 'workflow_dispatch'
+                 || startsWith(github.ref, 'refs/tags/'))
+                && '' || 'cp312-*' }}
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheels-${{ matrix.label }}
+          path: ./wheelhouse/*.whl
+
+  make_sdist:
+    name: Source distribution
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build sdist
+        run: pipx run build --sdist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sdist
+          path: dist/*.tar.gz
+
+  upload_pypi:
+    name: Publish to PyPI
+    needs: [build_wheels, make_sdist]
+    runs-on: ubuntu-latest
+    # Only publish on a published GitHub Release.
+    if: github.event_name == 'release' && github.event.action == 'published'
+    environment:
+      name: pypi
+      url: https://pypi.org/p/nested_cages
+    permissions:
+      id-token: write  # trusted publishing (OIDC) — no API token needed
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - uses: pypa/gh-action-pypi-publish@release/v1

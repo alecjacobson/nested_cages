@@ -24,9 +24,35 @@ Source = "https://github.com/alecjacobson/nested_cages"
 minimum-version = "0.10"
 build-dir = "build/{wheel_tag}"
 # The bindings are installed into the `nested_cages` package by the CMake
-# install() rules in python/CMakeLists.txt.
-sdist.include = ["python", "*.cpp", "*.h", "CMakeLists.txt", "cmake"]
+# install() rules in python/CMakeLists.txt. scikit-build-core includes all
+# git-tracked files in the sdist by default, which already covers the sources,
+# CMakeLists.txt, python/ and cmake/. Keep the sdist lean by dropping the large
+# example meshes and paper sources, which are not needed to build the wheel.
+sdist.exclude = ["*.off", "TeX", "*.pdf"]
 
 [tool.scikit-build.cmake.define]
 NESTED_CAGES_BUILD_PYTHON = "ON"
 NESTED_CAGES_BUILD_CLI = "OFF"
+
+# ---------------------------------------------------------------------------
+# cibuildwheel: build redistributable wheels in CI (see
+# .github/workflows/wheels.yml). Windows is intentionally not built: eltopo
+# links a Fortran BLAS/LAPACK, for which there is no turn-key CI toolchain.
+# ---------------------------------------------------------------------------
+[tool.cibuildwheel]
+build-frontend = "build"
+# PyPy lacks the heavy C++ toolchain story; musllinux/32-bit lack easy
+# gfortran + Boost; Windows lacks a Fortran BLAS toolchain.
+skip = ["pp*", "*-musllinux*", "*_i686", "*-win32", "*-win_amd64"]
+build-verbosity = 1
+test-command = "python -c \"import nested_cages; assert hasattr(nested_cages, 'nested_cages')\""
+
+[tool.cibuildwheel.linux]
+# manylinux_2_28 ships a recent GCC (with gfortran) and boost-devel in its repos.
+manylinux-x86_64-image = "manylinux_2_28"
+manylinux-aarch64-image = "manylinux_2_28"
+before-all = "dnf install -y gcc-gfortran boost-devel || yum install -y gcc-gfortran boost-devel"
+
+[tool.cibuildwheel.macos]
+# Homebrew's gcc provides gfortran; boost provides the CGAL headers' dependency.
+before-all = "brew install gcc boost"
