@@ -33,14 +33,19 @@ jobs:
         include:
           - { os: ubuntu-latest,    label: "linux-x86_64" }
           - { os: ubuntu-24.04-arm, label: "linux-aarch64" }
-          - { os: macos-13,         label: "macos-x86_64",  target: "10.15" }
-          - { os: macos-14,         label: "macos-arm64",   target: "11.0" }
+          # Intel macOS runners (macos-13) are being retired, so build both
+          # macOS architectures on the arm64 runner: arm64 natively (and tested)
+          # and x86_64 via cross-compilation (built but not import-tested, since
+          # x86_64 binaries can't run on the arm64 runner).
+          - { os: macos-14, label: "macos", archs: "x86_64 arm64", target: "11.0" }
     steps:
       - uses: actions/checkout@v4
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.23.4
         env:
+          # empty on linux -> cibuildwheel builds the native host architecture
+          CIBW_ARCHS: ${{ matrix.archs }}
           MACOSX_DEPLOYMENT_TARGET: ${{ matrix.target }}
           # Full CPython matrix only for releases/tags/manual runs; on PRs and
           # ordinary pushes build a single version for fast feedback (each wheel
