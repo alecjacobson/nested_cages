@@ -22,3 +22,13 @@ TeX/nested.fls
 build*
 *.swp
 *.swo
+
+# Python / packaging
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+wheelhouse/
+*.so
+.venv/
+venv/

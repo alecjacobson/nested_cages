@@ -9,8 +9,10 @@ Leonardo Sacht, Etienne Vouga and Alec Jacobson
 > Get started with:
 >
 ```bash
-git clone --recursive https://github.com/alecjacobson/nested_cages.git
+git clone https://github.com/alecjacobson/nested_cages.git
 ```
+
+(No `--recursive` needed — all dependencies are fetched by CMake.)
 
 [![Bunny teaser from "Nested Cages"](http://www.cs.columbia.edu/cg/nested-cages/bunny-shelf-teaser.jpg)](http://www.cs.columbia.edu/cg/nested-cages/)
 
@@ -19,31 +21,94 @@ git clone --recursive https://github.com/alecjacobson/nested_cages.git
 This code has been tested on Linux and Mac OS X. In theory this should also
 work on Windows.
 
-To compile, 
+To compile the command-line tool:
 
 ```bash
-mkdir build
-cd build
-cmake -DCMAKE_BUILD_TYPE=Release  ..
-make
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build -j
 ```
 
-This will build all remaining dependencies and the `nested_cages` executable.
+This will fetch and build all dependencies and produce the `nested_cages`
+executable in `build/`.
 
 ### Dependencies
 
-The main dependencies libigl, eltopo and collisiondetection are included as  [git
-submodules](https://git-scm.com/docs/git-submodule). If you clone this repo
-using `git clone --recursive` then the dependency layout should be:
+All third-party libraries are fetched automatically by CMake (via
+`FetchContent`/`ExternalProject`) — there are no git submodules to initialize:
 
-    nested_cages/
-      collisiondetection/
-      eltopo/
-      eigen/
-      libigl/
+  * [libigl](https://github.com/libigl/libigl) `v2.6.0` (which in turn fetches
+    CGAL and tetgen),
+  * [Eigen](https://gitlab.com/libeigen/eigen) `3.4.0`,
+  * [eltopo](https://github.com/leokollersacht/eltopo),
+  * [collisiondetection](https://github.com/evouga/collisiondetection),
+  * [MeshFix](https://github.com/alecjacobson/MeshFix-v2.1),
+  * reference BLAS/LAPACK (built in isolation for eltopo), and
+  * [nanobind](https://github.com/wjakob/nanobind) `v2.7.0` for the Python bindings.
 
-The cmake build of libigl will further download cgal and tetgen as external
-dependencies.
+The only system prerequisites are a C++17 compiler, a Fortran compiler
+(for BLAS/LAPACK), CMake ≥ 3.16, and the Boost headers (used by CGAL). On
+Debian/Ubuntu:
+
+```bash
+sudo apt-get install build-essential gfortran cmake libboost-dev
+```
+
+(GMP/MPFR are *not* required: libigl v2.6.0 builds CGAL in its GMP-free
+`CGAL_DISABLE_GMP` configuration.)
+
+By default the build fetches and compiles reference BLAS/LAPACK. To instead use
+a system BLAS/LAPACK (e.g. OpenBLAS) for speed, configure with
+`-DNESTED_CAGES_FETCH_BLAS=OFF`.
+
+## Python bindings
+
+The pipeline is also exposed as a Python module built with
+[nanobind](https://github.com/wjakob/nanobind), mirroring the layout of the
+[libigl Python bindings](https://github.com/libigl/libigl-python-bindings).
+Installing with pip compiles the C++ code (and fetches all dependencies) via
+scikit-build-core, so it needs the same system prerequisites listed above
+(C++17 + Fortran compilers, CMake, Boost headers).
+
+Install directly from GitHub — no need to clone first:
+
+```bash
+# latest on the default branch
+pip install "git+https://github.com/alecjacobson/nested_cages.git"
+
+# or pin a branch / tag / commit with the usual `@ref` suffix
+pip install "git+https://github.com/alecjacobson/nested_cages.git@modernize-deps-and-python-bindings"
+```
+
+Or, from a local checkout of this repository:
+
+```bash
+pip install .            # regular install
+pip install -e .         # editable/development install
+```
+
+The first build fetches and compiles all dependencies, so it can take several
+minutes.
+
+Then, from Python:
+
+```python
+import numpy as np
+import nested_cages
+
+# V: (#V,3) float64 vertices, F: (#F,3) int faces of the fine mesh
+cages = nested_cages.nested_cages(
+    V, F,
+    num_faces=[1000, 500],      # one target face count per cage level
+    quad_order=2,
+    energy_expansion="None",
+    energy_final="Volume",
+    regular=[True, True],        # regular (vs adaptive) decimation per level
+)
+# cages is a list of (V_i, F_i) numpy arrays, one nested cage per level.
+```
+
+See `tests/regression.py` for a check that the Python bindings and the CLI
+produce identical cages.
 
 
 ## Example usages

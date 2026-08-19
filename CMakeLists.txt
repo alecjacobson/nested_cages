@@ -1,164 +1,212 @@
-cmake_minimum_required(VERSION 3.1)
-project(nested_cages)
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+cmake_minimum_required(VERSION 3.16)
 
-# libigl + cgal + tetgen
-option(LIBIGL_USE_PREBUILT_LIBRARIES "Use prebuilt libraries"       OFF)
-option(LIBIGL_USE_STATIC_LIBRARY     "Use libigl as static library" ${LIBIGL_USE_PREBUILT_LIBRARIES})
-option(LIBIGL_WITH_CGAL              "Use CGAL"                     ON)
-option(LIBIGL_WITH_TETGEN            "Use Tetgen"                   ON)
-find_package(LIBIGL REQUIRED QUIET)
-
-# MeshFix
-option(WITH_MESHFIX "Use meshfix" ON)
-if(WITH_MESHFIX)
-  set(MESHFIX_LIBRARY ON CACHE BOOL "Build MeshFix as library" FORCE)
-  set(MESHFIX_DIR "${CMAKE_CURRENT_SOURCE_DIR}/MeshFix-v2.1")
-  add_subdirectory("${MESHFIX_DIR}")
+# Some of the fetched third-party projects (e.g. MeshFix) still declare an old
+# cmake_minimum_required(VERSION < 3.5). CMake >= 3.31/4.x refuses those by
+# default; this lets them configure without editing their sources.
+if(NOT DEFINED CMAKE_POLICY_VERSION_MINIMUM)
+  set(CMAKE_POLICY_VERSION_MINIMUM 3.5 CACHE STRING
+      "Minimum policy version for old third-party CMake projects")
 endif()
 
-# build eltopo library
-set(ELTOPO_DIR "${PROJECT_SOURCE_DIR}/eltopo")
-file(GLOB ELTOPO_SRCFILES             "${ELTOPO_DIR}/eltopo3d/*.cpp"
-                                      "${ELTOPO_DIR}/common/*.cpp"
-                                      "${ELTOPO_DIR}/common/newsparse/*.cpp"
-                                      "${ELTOPO_DIR}/tunicate/*.cpp")
-# Don't build the eltopo viewers that depends on OpenGL and GLUT
+project(nested_cages LANGUAGES C CXX)
+
+# ---------------------------------------------------------------------------
+# Global settings
+# ---------------------------------------------------------------------------
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS ON)      # nested_cages.cpp / eltopo rely on GNU extensions
+# Build a PIC core library so it can be reused by the Python extension module.
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+  message(STATUS "No build type selected, defaulting to Release")
+  set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
+endif()
+
+include(FetchContent)
+
+# ---------------------------------------------------------------------------
+# Options
+# ---------------------------------------------------------------------------
+option(NESTED_CAGES_BUILD_CLI    "Build the nested_cages command-line tool"      ON)
+option(NESTED_CAGES_BUILD_PYTHON "Build the nanobind Python module"              OFF)
+option(NESTED_CAGES_FETCH_BLAS   "Fetch & build OpenBLAS instead of find_package" ON)
+option(WITH_MESHFIX  "Repair self-intersecting decimations with MeshFix" ON)
+option(VERBOSE_DEBUG "Verbose debug output" OFF)
+
+# ---------------------------------------------------------------------------
+# Eigen (declared *before* libigl so this version wins the FetchContent race)
+# ---------------------------------------------------------------------------
+set(EIGEN_BUILD_DOC OFF CACHE BOOL "" FORCE)
+set(EIGEN_BUILD_PKGCONFIG OFF CACHE BOOL "" FORCE)
+FetchContent_Declare(eigen
+  GIT_REPOSITORY https://gitlab.com/libeigen/eigen.git
+  GIT_TAG 3.4.0
+  GIT_SHALLOW TRUE)
+FetchContent_MakeAvailable(eigen)
+
+# ---------------------------------------------------------------------------
+# libigl v2.6.0 (transitively fetches CGAL and tetgen)
+# ---------------------------------------------------------------------------
+set(LIBIGL_INSTALL         OFF CACHE BOOL "" FORCE)
+set(LIBIGL_COPYLEFT_CGAL   ON  CACHE BOOL "" FORCE)
+set(LIBIGL_COPYLEFT_TETGEN ON  CACHE BOOL "" FORCE)
+FetchContent_Declare(libigl
+  GIT_REPOSITORY https://github.com/libigl/libigl.git
+  GIT_TAG v2.6.0)
+FetchContent_MakeAvailable(libigl)
+
+# ---------------------------------------------------------------------------
+# BLAS / LAPACK for eltopo (USE_FORTRAN_BLAS).  Fetch reference BLAS/LAPACK by
+# default so we do not depend on a system-wide install; fall back to
+# find_package on request or on Apple (Accelerate).  Reference LAPACK builds the
+# standard Fortran `blas` and `lapack` targets that eltopo links against; a
+# system OpenBLAS can be substituted via NESTED_CAGES_FETCH_BLAS=OFF for speed.
+# ---------------------------------------------------------------------------
+if(APPLE)
+  set(NESTED_CAGES_BLAS_LIBS "-framework Accelerate")
+elseif(NESTED_CAGES_FETCH_BLAS)
+  # Build reference BLAS/LAPACK in a fully isolated ExternalProject.  This is
+  # deliberately *not* FetchContent/add_subdirectory: Eigen unconditionally
+  # defines its own `blas`/`lapack` targets, which would collide.  The isolated
+  # build also guarantees the full set of LAPACK routines eltopo needs
+  # (dgelsd_, dgesdd_, dsyev_, dgetri_, ...).
+  include(ExternalProject)
+  set(_lapack_prefix "${CMAKE_BINARY_DIR}/lapack-install")
+  set(_lapack_lib "${_lapack_prefix}/lib/liblapack.a")
+  set(_blas_lib   "${_lapack_prefix}/lib/libblas.a")
+  ExternalProject_Add(reference_lapack
+    GIT_REPOSITORY https://github.com/Reference-LAPACK/lapack.git
+    GIT_TAG v3.12.0
+    GIT_SHALLOW TRUE
+    CMAKE_ARGS
+      -DCMAKE_BUILD_TYPE=Release
+      -DBUILD_TESTING=OFF
+      -DCBLAS=OFF
+      -DLAPACKE=OFF
+      -DBUILD_SHARED_LIBS=OFF
+      -DCMAKE_POSITION_INDEPENDENT_CODE=ON
+      -DCMAKE_INSTALL_PREFIX=${_lapack_prefix}
+      -DCMAKE_INSTALL_LIBDIR=lib
+    BUILD_BYPRODUCTS ${_lapack_lib} ${_blas_lib})
+  file(MAKE_DIRECTORY "${_lapack_prefix}/lib")
+  add_library(nc_lapack STATIC IMPORTED GLOBAL)
+  set_target_properties(nc_lapack PROPERTIES IMPORTED_LOCATION "${_lapack_lib}")
+  add_library(nc_blas STATIC IMPORTED GLOBAL)
+  set_target_properties(nc_blas PROPERTIES IMPORTED_LOCATION "${_blas_lib}")
+  # LAPACK/BLAS are Fortran; link the gfortran runtime.
+  set(NESTED_CAGES_BLAS_LIBS nc_lapack nc_blas gfortran)
+else()
+  find_package(BLAS REQUIRED)
+  find_package(LAPACK REQUIRED)
+  set(NESTED_CAGES_BLAS_LIBS ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES})
+endif()
+
+# ---------------------------------------------------------------------------
+# eltopo & collisiondetection (formerly git submodules, no CMake of their own)
+# ---------------------------------------------------------------------------
+FetchContent_Declare(eltopo
+  GIT_REPOSITORY https://github.com/leokollersacht/eltopo.git
+  GIT_TAG b2f1dc0667b23f9764cdb8df81d2007a1da7fff1)
+FetchContent_Declare(collisiondetection
+  GIT_REPOSITORY https://github.com/evouga/collisiondetection.git
+  GIT_TAG d7122d61a137984ae12cfd24520c4feb65328449)
+FetchContent_MakeAvailable(eltopo collisiondetection)
+
+# --- build eltopo ---
+set(ELTOPO_DIR "${eltopo_SOURCE_DIR}")
+file(GLOB ELTOPO_SRCFILES "${ELTOPO_DIR}/eltopo3d/*.cpp"
+                          "${ELTOPO_DIR}/common/*.cpp"
+                          "${ELTOPO_DIR}/common/newsparse/*.cpp"
+                          "${ELTOPO_DIR}/tunicate/*.cpp")
+# Don't build the eltopo viewers that depend on OpenGL and GLUT
 list(REMOVE_ITEM ELTOPO_SRCFILES "${ELTOPO_DIR}/common/gluvi.cpp")
 list(REMOVE_ITEM ELTOPO_SRCFILES "${ELTOPO_DIR}/eltopo3d/meshrenderer.cpp")
-add_library(eltopo ${ELTOPO_SRCFILES})
-target_compile_definitions(eltopo PUBLIC -D__LITTLE_ENDIAN__ -DUSE_FORTRAN_BLAS -DNO_GUI -DGRID_100 -DEXTRA_PASSES -DREMOVE_RIZ)
-set_property(TARGET eltopo PROPERTY POSITION_INDEPENDENT_CODE ON)
+add_library(eltopo STATIC ${ELTOPO_SRCFILES})
+target_compile_definitions(eltopo PUBLIC
+  -D__LITTLE_ENDIAN__ -DUSE_FORTRAN_BLAS -DNO_GUI -DGRID_100 -DEXTRA_PASSES -DREMOVE_RIZ)
 # eltopo uses #include <myfile.h> instead of #include "myfile.h"
-target_include_directories(eltopo PUBLIC "${ELTOPO_DIR}/common/" )
-target_include_directories(eltopo PUBLIC "${ELTOPO_DIR}/common/tunicate" )
-target_include_directories(eltopo PUBLIC "${ELTOPO_DIR}/common/newsparse" )
-target_include_directories(eltopo PUBLIC "${ELTOPO_DIR}/eltopo3d/" )
-find_package(BLAS REQUIRED)
-find_package(LAPACK REQUIRED)
-if(APPLE)
-  set(CMAKE_CXX_LINK_FLAGS "-framework Accelerate")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
+target_include_directories(eltopo PUBLIC
+  "${ELTOPO_DIR}/common/"
+  "${ELTOPO_DIR}/common/tunicate"
+  "${ELTOPO_DIR}/common/newsparse"
+  "${ELTOPO_DIR}/eltopo3d/")
+target_link_libraries(eltopo PUBLIC ${NESTED_CAGES_BLAS_LIBS})
+if(TARGET reference_lapack)
+  # ensure the ExternalProject BLAS/LAPACK is built before anything links it
+  add_dependencies(eltopo reference_lapack)
 endif()
 
-# Build collisiondetection library
-set(COLLISIONDETECTION_DIR "${PROJECT_SOURCE_DIR}/collisiondetection")
+# --- build collisiondetection ---
+set(COLLISIONDETECTION_DIR "${collisiondetection_SOURCE_DIR}")
 file(GLOB COLLISIONDETECTION_SRCFILES "${COLLISIONDETECTION_DIR}/src/*.cpp")
-add_library(collisiondetection ${COLLISIONDETECTION_SRCFILES})
-target_include_directories(collisiondetection PUBLIC "${COLLISIONDETECTION_DIR}/include" )
-target_link_libraries(collisiondetection igl::core)
+add_library(collisiondetection STATIC ${COLLISIONDETECTION_SRCFILES})
+target_include_directories(collisiondetection PUBLIC "${COLLISIONDETECTION_DIR}/include")
+target_link_libraries(collisiondetection PUBLIC igl::core)
 
-file(GLOB SRCFILES "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")
-add_executable(${PROJECT_NAME} ${SRCFILES})
-option(VERBOSE_DEBUG "VERBOSE_DEBUG" OFF)
-if (VERBOSE_DEBUG)
-  target_compile_definitions(${PROJECT_NAME} PUBLIC "VERBOSE_DEBUG")
-endif ()
+# ---------------------------------------------------------------------------
+# MeshFix (has its own CMakeLists -> target `MeshFix`)
+# ---------------------------------------------------------------------------
+if(WITH_MESHFIX)
+  set(MESHFIX_LIBRARY ON CACHE BOOL "Build MeshFix as library" FORCE)
+  FetchContent_Declare(meshfix
+    GIT_REPOSITORY https://github.com/alecjacobson/MeshFix-v2.1.git
+    GIT_TAG 2538b17cd6070835f33d1c8bb834d85a38161596
+    # guard closeLoadingSession()'s fclose(NULL) crash (see cmake/patch_meshfix.cmake)
+    PATCH_COMMAND ${CMAKE_COMMAND} -DMESHFIX_IO_CPP=src/TMesh/io.cpp
+                  -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/patch_meshfix.cmake")
+  FetchContent_MakeAvailable(meshfix)
+  if(TARGET MeshFix)
+    # MeshFix is old C/C++ that relies on type punning; -fno-strict-aliasing
+    # keeps modern GCC from miscompiling it (segfaults at -O3 otherwise).
+    target_compile_options(MeshFix PRIVATE -fno-strict-aliasing)
+  endif()
+endif()
+
+# ---------------------------------------------------------------------------
+# nested_cages core library (algorithm) shared by the CLI and the Python module
+# ---------------------------------------------------------------------------
+set(NESTED_CAGES_CORE_SRC
+  "${CMAKE_CURRENT_SOURCE_DIR}/cgal.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/energy.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/filter.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/flow.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/gradient.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/io.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/reinflate.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/nested_cages_lib.cpp")
+add_library(nested_cages_core STATIC ${NESTED_CAGES_CORE_SRC})
+target_include_directories(nested_cages_core PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
+target_link_libraries(nested_cages_core PUBLIC
+  igl::core
+  igl_copyleft::cgal
+  igl_copyleft::tetgen
+  eltopo
+  collisiondetection)
 
 if(WITH_MESHFIX)
-  target_link_libraries(${PROJECT_NAME} MeshFix)
-  target_compile_definitions(${PROJECT_NAME} PUBLIC "WITH_MESHFIX")
+  target_link_libraries(nested_cages_core PUBLIC MeshFix)
+  target_compile_definitions(nested_cages_core PUBLIC WITH_MESHFIX)
   # for meshfix_eigen.h
-  target_include_directories(${PROJECT_NAME} PUBLIC "${MESHFIX_DIR}/examples")
+  target_include_directories(nested_cages_core PUBLIC "${meshfix_SOURCE_DIR}/examples")
 endif()
-target_link_libraries(${PROJECT_NAME} eltopo)
-target_link_libraries(${PROJECT_NAME} lapack blas)
-target_link_libraries(${PROJECT_NAME} collisiondetection)
-# For each libigl module, link to target (and flip definition flag)
-target_link_libraries(${PROJECT_NAME} igl::core)
-list(APPEND modules "cgal" "comiso" "cork" "embree" "matlab" "mosek" "opengl" "opengl_glfw" "opengl_glfw_imgui" "png" "tetgen" "triangle" "predicates" "xml")
-foreach(module_name IN LISTS modules)
-  string(TOUPPER "LIBIGL_WITH_${module_name}" option_string)
-  set(option_variable ${${option_string}})
-  if(option_variable)
-    target_compile_definitions(${PROJECT_NAME} PRIVATE -D${option_string})
-    target_link_libraries(${PROJECT_NAME} "igl::${module_name}")
-  endif()
-endforeach()
 
-option(VERBOSE_DEBUG "VERBOSE_DEBUG" OFF)
-if (VERBOSE_DEBUG)
-  target_compile_definitions(${PROJECT_NAME} PRIVATE -DVERBOSE_DEBUG)
-endif ()
+if(VERBOSE_DEBUG)
+  target_compile_definitions(nested_cages_core PUBLIC VERBOSE_DEBUG)
+endif()
 
-#cmake_minimum_required(VERSION 2.8.6)
-#
-#SET(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
-#
-#
-#find_package(BLAS REQUIRED)
-#find_package(LAPACK REQUIRED)
-#if(APPLE)
-#  set(CMAKE_CXX_LINK_FLAGS "-framework Accelerate")
-#  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
-#endif()
-#
-#set(CGAL_DONT_OVERRIDE_CMAKE_FLAGS TRUE CACHE BOOL "CGAL's CMAKE Setup is super annoying ")
-#find_package(CGAL REQUIRED)
-#include(${CGAL_USE_FILE})
-#
-## We need C++11. Put this directive after CGAL's include.
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g -Wno-deprecated-declarations -march=native")
-#if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-#  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
-#endif() 
-#
-#option(WITH_MESHFIX "Use meshfix" ON)
-#
-#include_directories( "${PROJECT_SOURCE_DIR}/libigl/include/" )
-#include_directories( "${PROJECT_SOURCE_DIR}/libigl/external/nanogui/ext/eigen/" )
-#include_directories( "${PROJECT_SOURCE_DIR}/cgal/../")
-#include_directories( "${PROJECT_SOURCE_DIR}/collisiondetection/include" )
-#include_directories( "${PROJECT_SOURCE_DIR}/eltopo/common/" )
-#include_directories( "${PROJECT_SOURCE_DIR}/eltopo/common/tunicate" )
-#include_directories( "${PROJECT_SOURCE_DIR}/eltopo/common/newsparse" )
-#include_directories( "${PROJECT_SOURCE_DIR}/eltopo/eltopo3d/" )
-#
-#if(WITH_MESHFIX)
-#  add_subdirectory("${PROJECT_SOURCE_DIR}/MeshFix-v2.1")
-#endif()
-#
-#option(VERBOSE_DEBUG "VERBOSE_DEBUG" OFF)
-#if (VERBOSE_DEBUG)
-#  add_definitions(-DVERBOSE_DEBUG)
-#endif ()
-#
-#file(GLOB SRCFILES                    "${PROJECT_SOURCE_DIR}/*.cpp")
-#
-## Tetgen, CollisionDetection, and Eltopo don't use CMAKE, so add their source
-## files directly
-#file(GLOB TETGEN_SRCFILES             "${TETGEN_DIR}/*.cxx")
-#file(GLOB COLLISIONDETECTION_SRCFILES "${PROJECT_SOURCE_DIR}/collisiondetection/src/*.cpp")
-#file(GLOB ELTOPO_SRCFILES             "${PROJECT_SOURCE_DIR}/eltopo/eltopo3d/*.cpp"
-#                                      "${PROJECT_SOURCE_DIR}/eltopo/common/*.cpp"
-#                                      "${PROJECT_SOURCE_DIR}/eltopo/common/newsparse/*.cpp"
-#                                      "${PROJECT_SOURCE_DIR}/eltopo/tunicate/*.cpp")
-## Don't build the eltopo viewers that depends on OpenGL and GLUT
-#list(REMOVE_ITEM ELTOPO_SRCFILES "${PROJECT_SOURCE_DIR}/eltopo/common/gluvi.cpp")
-#list(REMOVE_ITEM ELTOPO_SRCFILES "${PROJECT_SOURCE_DIR}/eltopo/eltopo3d/meshrenderer.cpp")
-#add_definitions(-D__LITTLE_ENDIAN__ -DUSE_FORTRAN_BLAS -DNO_GUI -DGRID_100 -DEXTRA_PASSES -DREMOVE_RIZ -fPIC)
-#
-#add_executable(nested_cages 
-#  ${SRCFILES} 
-#  ${TETGEN_SRCFILES}
-#  ${COLLISIONDETECTION_SRCFILES}
-#  ${ELTOPO_SRCFILES})
-#
-#target_link_libraries(
-#  nested_cages 
-#  ${CGAL_LIBRARIES} 
-#  )
-#
-#if(WITH_MESHFIX)
-#  target_compile_definitions(nested_cages PUBLIC "WITH_MESHFIX")
-#target_link_libraries(
-#  nested_cages 
-#  meshfix 
-#  jmesh 
-#  jmeshext 
-#  nl 
-#  superlu
-#  ${BLAS_LIBRARIES} 
-#  ${LAPACK_LIBRARIES} 
-#  )
-#endif()
+# ---------------------------------------------------------------------------
+# Command-line tool
+# ---------------------------------------------------------------------------
+if(NESTED_CAGES_BUILD_CLI)
+  add_executable(nested_cages "${CMAKE_CURRENT_SOURCE_DIR}/nested_cages.cpp")
+  target_link_libraries(nested_cages PRIVATE nested_cages_core)
+endif()
+
+# ---------------------------------------------------------------------------
+# Python bindings
+# ---------------------------------------------------------------------------
+if(NESTED_CAGES_BUILD_PYTHON)
+  add_subdirectory(python)
+endif()

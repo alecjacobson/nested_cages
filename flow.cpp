@@ -5,7 +5,6 @@
 #include <igl/per_vertex_normals.h>
 #include <igl/per_edge_normals.h>
 #include <igl/per_face_normals.h>
-#include <igl/normalize_row_lengths.h>
 #include <igl/massmatrix.h>
 #include <igl/invert_diag.h>
 #include <igl/copyleft/cgal/intersect_other.h>
@@ -120,7 +119,12 @@ void signed_distance_direction(
   VectorXd S;
   igl::signed_distance(P,V,F,igl::SIGNED_DISTANCE_TYPE_PSEUDONORMAL,S,I,C,N);
   MatrixXd dif = C-P;
-  igl::normalize_row_lengths(dif,D);
+  // normalize each row of `dif` to unit length (igl::normalize_row_lengths was
+  // removed from libigl; this reproduces its exact, unguarded behavior).
+  D.resize(dif.rows(),dif.cols());
+  for(int k=0;k<dif.rows();k++){
+    D.row(k) = dif.row(k)/dif.row(k).norm();
+  }
   for (int k=0; k<S.rows(); k++){
     if (S(k)<=-1e-5){
       D.row(k) = -D.row(k);
