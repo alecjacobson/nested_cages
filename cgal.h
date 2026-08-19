@@ -11,6 +11,7 @@
 
 // BEGIN of CGAL includes
 #include <fstream>
+#include <optional>
 #include <CGAL/Simple_cartesian.h>
 #include <CGAL/Polyhedron_3.h>
 #include <CGAL/IO/Polyhedron_iostream.h>
@@ -66,7 +67,7 @@ struct My_visitor : SMS::Edge_collapse_visitor_base<Surface_mesh>
   My_visitor( Stats* s) : stats(s){} 
 
   // Called during the collecting phase for each edge collected.
-  void OnCollected( Profile const&, boost::optional<double> const& )
+  void OnCollected( Profile const&, std::optional<double> const& )
   {
     ++ stats->collected ;
     // std::cerr << "\rEdges collected: " << stats->collected << std::flush ;
@@ -75,7 +76,7 @@ struct My_visitor : SMS::Edge_collapse_visitor_base<Surface_mesh>
   // Called during the processing phase for each edge selected.
   // If cost is absent the edge won't be collapsed.
   void OnSelected(Profile const&          
-                 ,boost::optional<double> cost
+                 ,std::optional<double> cost
                  ,std::size_t             initial
                  ,std::size_t             current
                  )
@@ -88,7 +89,7 @@ struct My_visitor : SMS::Edge_collapse_visitor_base<Surface_mesh>
   // Called during the processing phase for each edge being collapsed.
   // If placement is absent the edge is left uncollapsed.
   void OnCollapsing(Profile const&          
-                   ,boost::optional<Point_CGAL>  placement
+                   ,std::optional<Point_CGAL>  placement
                    )
   {
     if ( !placement )

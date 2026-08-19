@@ -1,0 +1,32 @@
+[build-system]
+requires = ["scikit-build-core>=0.10", "nanobind>=2.7"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "nested_cages"
+version = "0.1.0"
+description = "Nested, non-self-intersecting cages for triangle meshes (Sacht et al. 2015)"
+readme = "README.md"
+requires-python = ">=3.8"
+license = { file = "LICENSE.GPL" }
+dependencies = ["numpy"]
+classifiers = [
+  "Programming Language :: C++",
+  "Programming Language :: Python :: 3",
+  "Topic :: Scientific/Engineering :: Mathematics",
+]
+
+[project.urls]
+Homepage = "http://www.cs.columbia.edu/cg/nested-cages/"
+Source = "https://github.com/alecjacobson/nested_cages"
+
+[tool.scikit-build]
+minimum-version = "0.10"
+build-dir = "build/{wheel_tag}"
+# The bindings are installed into the `nested_cages` package by the CMake
+# install() rules in python/CMakeLists.txt.
+sdist.include = ["python", "*.cpp", "*.h", "CMakeLists.txt", "cmake"]
+
+[tool.scikit-build.cmake.define]
+NESTED_CAGES_BUILD_PYTHON = "ON"
+NESTED_CAGES_BUILD_CLI = "OFF"
