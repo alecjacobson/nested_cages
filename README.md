@@ -65,11 +65,29 @@ a system BLAS/LAPACK (e.g. OpenBLAS) for speed, configure with
 The pipeline is also exposed as a Python module built with
 [nanobind](https://github.com/wjakob/nanobind), mirroring the layout of the
 [libigl Python bindings](https://github.com/libigl/libigl-python-bindings).
-Install it with pip (this compiles the C++ code via scikit-build-core):
+Installing with pip compiles the C++ code (and fetches all dependencies) via
+scikit-build-core, so it needs the same system prerequisites listed above
+(C++17 + Fortran compilers, CMake, Boost headers).
+
+Install directly from GitHub — no need to clone first:
 
 ```bash
-pip install .
+# latest on the default branch
+pip install "git+https://github.com/alecjacobson/nested_cages.git"
+
+# or pin a branch / tag / commit with the usual `@ref` suffix
+pip install "git+https://github.com/alecjacobson/nested_cages.git@modernize-deps-and-python-bindings"
 ```
+
+Or, from a local checkout of this repository:
+
+```bash
+pip install .            # regular install
+pip install -e .         # editable/development install
+```
+
+The first build fetches and compiles all dependencies, so it can take several
+minutes.
 
 Then, from Python:
 
