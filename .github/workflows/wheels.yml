@@ -44,8 +44,8 @@ jobs:
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.23.4
         env:
-          # empty on linux -> cibuildwheel builds the native host architecture
-          CIBW_ARCHS: ${{ matrix.archs }}
+          # linux entries omit matrix.archs -> "auto" (native host architecture)
+          CIBW_ARCHS: ${{ matrix.archs || 'auto' }}
           MACOSX_DEPLOYMENT_TARGET: ${{ matrix.target }}
           # Full CPython matrix only for releases/tags/manual runs; on PRs and
           # ordinary pushes build a single version for fast feedback (each wheel
