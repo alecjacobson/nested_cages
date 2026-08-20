@@ -44,7 +44,10 @@ NESTED_CAGES_BUILD_CLI = "OFF"
 build-frontend = "build"
 # PyPy lacks the heavy C++ toolchain story; musllinux/32-bit lack easy
 # gfortran + Boost; Windows lacks a Fortran BLAS toolchain.
-skip = ["pp*", "*-musllinux*", "*_i686", "*-win32", "*-win_amd64"]
+# pp*: PyPy; musllinux/i686/win: no easy Fortran+Boost; cp38-macosx_arm64:
+# there is no native arm64 CPython 3.8, so it cross-builds an arm64 module with
+# an x86_64 interpreter and nanobind's stub step can't import it.
+skip = ["pp*", "*-musllinux*", "*_i686", "*-win32", "*-win_amd64", "cp38-macosx_arm64"]
 build-verbosity = 1
 test-command = "python -c \"import nested_cages; assert hasattr(nested_cages, 'nested_cages')\""
 
