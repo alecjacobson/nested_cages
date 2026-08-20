@@ -51,11 +51,13 @@ jobs:
           # Full CPython matrix only for releases/tags/manual runs; on PRs and
           # ordinary pushes build a single version for fast feedback (each wheel
           # is a full from-source build of all dependencies).
+          # NOTE: the "true" branch must be a truthy (non-empty) value, or the
+          # `&& '' || ...` idiom collapses to the fallback. '*' = build all.
           CIBW_BUILD: >-
             ${{ (github.event_name == 'release'
                  || github.event_name == 'workflow_dispatch'
                  || startsWith(github.ref, 'refs/tags/'))
-                && '' || 'cp312-*' }}
+                && '*' || 'cp312-*' }}
 
       - uses: actions/upload-artifact@v4
         with:
@@ -91,3 +93,6 @@ jobs:
           path: dist
           merge-multiple: true
       - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          # tolerate re-publishing a release: skip files already on PyPI
+          skip-existing: true
