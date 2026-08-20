@@ -110,6 +110,29 @@ cages = nested_cages.nested_cages(
 See `tests/regression.py` for a check that the Python bindings and the CLI
 produce identical cages.
 
+### Wheels / publishing to PyPI
+
+`.github/workflows/wheels.yml` builds redistributable wheels with
+[cibuildwheel](https://cibuildwheel.pypa.io) for Linux (`x86_64`, `aarch64`) and
+macOS (`x86_64`, `arm64`), CPython 3.8–3.13, plus an sdist. It runs the full
+matrix on tags/releases/manual dispatch and a single-version smoke build on
+pushes and PRs. Each macOS arch is built natively (`macos-15-intel` for x86_64,
+`macos-14` for arm64), because eltopo's Fortran BLAS/LAPACK cannot be
+cross-compiled (Homebrew's `gfortran` only targets the host arch).
+
+Note: Apple has retired the Intel architecture, and GitHub will drop macOS
+`x86_64` runners after `macos-15-intel` is retired (~Fall 2027); at that point
+Intel-Mac users would install from the sdist.
+
+**Windows** is not built (eltopo links a Fortran BLAS/LAPACK, for which there is
+no turn-key CI toolchain); Windows users install from the sdist.
+
+Publishing to PyPI happens automatically when a GitHub Release is *published*,
+via [trusted publishing](https://docs.pypi.org/trusted-publishers/) (OIDC, no
+API token). To enable it once: on PyPI, add a trusted publisher for this project
+pointing at `alecjacobson/nested_cages`, workflow `wheels.yml`, environment
+`pypi`.
+
 
 ## Example usages
 

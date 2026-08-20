@@ -126,6 +126,9 @@ list(REMOVE_ITEM ELTOPO_SRCFILES "${ELTOPO_DIR}/eltopo3d/meshrenderer.cpp")
 add_library(eltopo STATIC ${ELTOPO_SRCFILES})
 target_compile_definitions(eltopo PUBLIC
   -D__LITTLE_ENDIAN__ -DUSE_FORTRAN_BLAS -DNO_GUI -DGRID_100 -DEXTRA_PASSES -DREMOVE_RIZ)
+# This legacy code was written assuming a signed `char` (the x86 default); force
+# it so behavior/compilation matches on platforms where char is unsigned (arm64).
+target_compile_options(eltopo PRIVATE -fsigned-char)
 # eltopo uses #include <myfile.h> instead of #include "myfile.h"
 target_include_directories(eltopo PUBLIC
   "${ELTOPO_DIR}/common/"
@@ -143,6 +146,7 @@ set(COLLISIONDETECTION_DIR "${collisiondetection_SOURCE_DIR}")
 file(GLOB COLLISIONDETECTION_SRCFILES "${COLLISIONDETECTION_DIR}/src/*.cpp")
 add_library(collisiondetection STATIC ${COLLISIONDETECTION_SRCFILES})
 target_include_directories(collisiondetection PUBLIC "${COLLISIONDETECTION_DIR}/include")
+target_compile_options(collisiondetection PRIVATE -fsigned-char)  # see eltopo note above
 target_link_libraries(collisiondetection PUBLIC igl::core)
 
 # ---------------------------------------------------------------------------
@@ -158,9 +162,12 @@ if(WITH_MESHFIX)
                   -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/patch_meshfix.cmake")
   FetchContent_MakeAvailable(meshfix)
   if(TARGET MeshFix)
-    # MeshFix is old C/C++ that relies on type punning; -fno-strict-aliasing
-    # keeps modern GCC from miscompiling it (segfaults at -O3 otherwise).
-    target_compile_options(MeshFix PRIVATE -fno-strict-aliasing)
+    # MeshFix is old C/C++ that relies on type punning and a signed `char`:
+    #  -fno-strict-aliasing keeps modern GCC from miscompiling it (segfaults at
+    #   -O3 otherwise);
+    #  -fsigned-char fixes a `-1`->char narrowing error where char is unsigned
+    #   (arm64), matching the x86 assumption the code was written under.
+    target_compile_options(MeshFix PRIVATE -fno-strict-aliasing -fsigned-char)
   endif()
 endif()
 
