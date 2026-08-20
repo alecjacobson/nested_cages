@@ -3,7 +3,8 @@ requires = ["scikit-build-core>=0.10", "nanobind>=2.7"]
 build-backend = "scikit_build_core.build"
 
 [project]
-name = "nested_cages"
+# Distribution name on PyPI (hyphen). The importable package is `nested_cages`.
+name = "nested-cages"
 version = "0.1.0"
 description = "Nested, non-self-intersecting cages for triangle meshes (Sacht et al. 2015)"
 readme = "README.md"

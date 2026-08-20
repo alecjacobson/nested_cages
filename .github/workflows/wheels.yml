@@ -82,7 +82,7 @@ jobs:
     if: github.event_name == 'release' && github.event.action == 'published'
     environment:
       name: pypi
-      url: https://pypi.org/p/nested_cages
+      url: https://pypi.org/p/nested-cages
     permissions:
       id-token: write  # trusted publishing (OIDC) — no API token needed
     steps:
