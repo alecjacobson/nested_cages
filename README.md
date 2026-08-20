@@ -114,15 +114,18 @@ produce identical cages.
 
 `.github/workflows/wheels.yml` builds redistributable wheels with
 [cibuildwheel](https://cibuildwheel.pypa.io) for Linux (`x86_64`, `aarch64`) and
-macOS (`arm64`), CPython 3.8–3.13, plus an sdist. It runs the full matrix on
-tags/releases/manual dispatch and a single-version smoke build on pushes and
-PRs.
+macOS (`x86_64`, `arm64`), CPython 3.8–3.13, plus an sdist. It runs the full
+matrix on tags/releases/manual dispatch and a single-version smoke build on
+pushes and PRs. Each macOS arch is built natively (`macos-15-intel` for x86_64,
+`macos-14` for arm64), because eltopo's Fortran BLAS/LAPACK cannot be
+cross-compiled (Homebrew's `gfortran` only targets the host arch).
 
-Not built (these platforms install from the sdist): **Windows**, and
-**Intel macOS** (`x86_64`). Both come down to eltopo's Fortran BLAS/LAPACK:
-Windows has no turn-key Fortran-BLAS CI toolchain, and Intel-macOS wheels can no
-longer be produced in CI now that GitHub is retiring the Intel runners (and
-`gfortran` cannot cross-compile from the arm64 runners).
+Note: Apple has retired the Intel architecture, and GitHub will drop macOS
+`x86_64` runners after `macos-15-intel` is retired (~Fall 2027); at that point
+Intel-Mac users would install from the sdist.
+
+**Windows** is not built (eltopo links a Fortran BLAS/LAPACK, for which there is
+no turn-key CI toolchain); Windows users install from the sdist.
 
 Publishing to PyPI happens automatically when a GitHub Release is *published*,
 via [trusted publishing](https://docs.pypi.org/trusted-publishers/) (OIDC, no

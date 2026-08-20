@@ -33,11 +33,12 @@ jobs:
         include:
           - { os: ubuntu-latest,    label: "linux-x86_64" }
           - { os: ubuntu-24.04-arm, label: "linux-aarch64" }
-          # macOS is arm64-only: the Intel runner (macos-13) is being retired,
-          # and eltopo's Fortran BLAS/LAPACK can't be cross-compiled to x86_64
-          # (Homebrew's gfortran only targets the host arch). Intel-Mac users
-          # install from the sdist.
-          - { os: macos-14, label: "macos-arm64", target: "11.0" }
+          # Build each macOS arch natively (eltopo's Fortran BLAS/LAPACK can't be
+          # cross-compiled: Homebrew's gfortran only targets the host arch).
+          # macos-13 (Intel) is retiring Dec 2025; macos-15-intel is its
+          # supported x86_64 successor (available through ~Fall 2027).
+          - { os: macos-15-intel, label: "macos-x86_64", target: "10.15" }
+          - { os: macos-14,       label: "macos-arm64",  target: "11.0" }
     steps:
       - uses: actions/checkout@v4
 
