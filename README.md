@@ -114,10 +114,15 @@ produce identical cages.
 
 `.github/workflows/wheels.yml` builds redistributable wheels with
 [cibuildwheel](https://cibuildwheel.pypa.io) for Linux (`x86_64`, `aarch64`) and
-macOS (`x86_64`, `arm64`), CPython 3.8–3.13, plus an sdist. It runs the full
-matrix on tags/releases/manual dispatch and a single-version smoke build on
-pushes and PRs. (Windows is not built: eltopo links a Fortran BLAS/LAPACK, for
-which there is no turn-key CI toolchain.)
+macOS (`arm64`), CPython 3.8–3.13, plus an sdist. It runs the full matrix on
+tags/releases/manual dispatch and a single-version smoke build on pushes and
+PRs.
+
+Not built (these platforms install from the sdist): **Windows**, and
+**Intel macOS** (`x86_64`). Both come down to eltopo's Fortran BLAS/LAPACK:
+Windows has no turn-key Fortran-BLAS CI toolchain, and Intel-macOS wheels can no
+longer be produced in CI now that GitHub is retiring the Intel runners (and
+`gfortran` cannot cross-compile from the arm64 runners).
 
 Publishing to PyPI happens automatically when a GitHub Release is *published*,
 via [trusted publishing](https://docs.pypi.org/trusted-publishers/) (OIDC, no
